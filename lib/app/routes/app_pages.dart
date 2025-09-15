@@ -6,6 +6,28 @@ import '../modules/checkout_address/bindings/checkout_address_binding.dart';
 import '../modules/checkout_address/views/checkout_address_view.dart';
 import '../modules/checkout_payment/bindings/checkout_payment_binding.dart';
 import '../modules/checkout_payment/views/checkout_payment_view.dart';
+import '../modules/clinic_ai_scan/bindings/clinic_ai_scan_binding.dart';
+import '../modules/clinic_ai_scan/views/clinic_ai_scan_view.dart';
+import '../modules/clinic_digital_library/bindings/clinic_digital_library_binding.dart';
+import '../modules/clinic_digital_library/views/clinic_digital_library_view.dart';
+import '../modules/clinic_expert_list/bindings/clinic_expert_list_binding.dart';
+import '../modules/clinic_expert_list/views/clinic_expert_list_view.dart';
+import '../modules/clinic_expert_profile/bindings/clinic_expert_profile_binding.dart';
+import '../modules/clinic_expert_profile/views/clinic_expert_profile_view.dart';
+import '../modules/clinic_home/bindings/clinic_home_binding.dart';
+import '../modules/clinic_home/views/clinic_home_view.dart';
+import '../modules/clinic_library_reader/bindings/clinic_library_reader_binding.dart';
+import '../modules/clinic_library_reader/views/clinic_library_reader_view.dart';
+import '../modules/consultation_chat_room/bindings/consultation_chat_room_binding.dart';
+import '../modules/consultation_chat_room/views/consultation_chat_room_view.dart';
+import '../modules/consultation_video_call/bindings/consultation_video_call_binding.dart';
+import '../modules/consultation_video_call/views/consultation_video_call_view.dart';
+import '../modules/expert_availability_settings/bindings/expert_availability_settings_binding.dart';
+import '../modules/expert_availability_settings/views/expert_availability_settings_view.dart';
+import '../modules/expert_dashboard/bindings/expert_dashboard_binding.dart';
+import '../modules/expert_dashboard/views/expert_dashboard_view.dart';
+import '../modules/expert_payout/bindings/expert_payout_binding.dart';
+import '../modules/expert_payout/views/expert_payout_view.dart';
 import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
 import '../modules/home/bindings/home_binding.dart';
@@ -169,6 +191,61 @@ class AppPages {
       name: _Paths.ORDER_TRACKING_DETAIL,
       page: () => const OrderTrackingDetailView(),
       binding: OrderTrackingDetailBinding(),
+    ),
+    GetPage(
+      name: _Paths.CLINIC_HOME,
+      page: () => const ClinicHomeView(),
+      binding: ClinicHomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.CLINIC_EXPERT_LIST,
+      page: () => const ClinicExpertListView(),
+      binding: ClinicExpertListBinding(),
+    ),
+    GetPage(
+      name: _Paths.CLINIC_EXPERT_PROFILE,
+      page: () => const ClinicExpertProfileView(),
+      binding: ClinicExpertProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.CONSULTATION_CHAT_ROOM,
+      page: () => const ConsultationChatRoomView(),
+      binding: ConsultationChatRoomBinding(),
+    ),
+    GetPage(
+      name: _Paths.CONSULTATION_VIDEO_CALL,
+      page: () => const ConsultationVideoCallView(),
+      binding: ConsultationVideoCallBinding(),
+    ),
+    GetPage(
+      name: _Paths.EXPERT_DASHBOARD,
+      page: () => const ExpertDashboardView(),
+      binding: ExpertDashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.EXPERT_AVAILABILITY_SETTINGS,
+      page: () => const ExpertAvailabilitySettingsView(),
+      binding: ExpertAvailabilitySettingsBinding(),
+    ),
+    GetPage(
+      name: _Paths.EXPERT_PAYOUT,
+      page: () => const ExpertPayoutView(),
+      binding: ExpertPayoutBinding(),
+    ),
+    GetPage(
+      name: _Paths.CLINIC_AI_SCAN,
+      page: () => const ClinicAiScanView(),
+      binding: ClinicAiScanBinding(),
+    ),
+    GetPage(
+      name: _Paths.CLINIC_DIGITAL_LIBRARY,
+      page: () => const ClinicDigitalLibraryView(),
+      binding: ClinicDigitalLibraryBinding(),
+    ),
+    GetPage(
+      name: _Paths.CLINIC_LIBRARY_READER,
+      page: () => const ClinicLibraryReaderView(),
+      binding: ClinicLibraryReaderBinding(),
     ),
   ];
 }

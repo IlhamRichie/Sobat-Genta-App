@@ -26,6 +26,18 @@ abstract class Routes {
   static const ORDER_CONFIRMATION = _Paths.ORDER_CONFIRMATION;
   static const ORDER_HISTORY = _Paths.ORDER_HISTORY;
   static const ORDER_TRACKING_DETAIL = _Paths.ORDER_TRACKING_DETAIL;
+  static const CLINIC_HOME = _Paths.CLINIC_HOME;
+  static const CLINIC_EXPERT_LIST = _Paths.CLINIC_EXPERT_LIST;
+  static const CLINIC_EXPERT_PROFILE = _Paths.CLINIC_EXPERT_PROFILE;
+  static const CONSULTATION_CHAT_ROOM = _Paths.CONSULTATION_CHAT_ROOM;
+  static const CONSULTATION_VIDEO_CALL = _Paths.CONSULTATION_VIDEO_CALL;
+  static const EXPERT_DASHBOARD = _Paths.EXPERT_DASHBOARD;
+  static const EXPERT_AVAILABILITY_SETTINGS =
+      _Paths.EXPERT_AVAILABILITY_SETTINGS;
+  static const EXPERT_PAYOUT = _Paths.EXPERT_PAYOUT;
+  static const CLINIC_AI_SCAN = _Paths.CLINIC_AI_SCAN;
+  static const CLINIC_DIGITAL_LIBRARY = _Paths.CLINIC_DIGITAL_LIBRARY;
+  static const CLINIC_LIBRARY_READER = _Paths.CLINIC_LIBRARY_READER;
 }
 
 abstract class _Paths {
@@ -53,4 +65,15 @@ abstract class _Paths {
   static const ORDER_CONFIRMATION = '/order-confirmation';
   static const ORDER_HISTORY = '/order-history';
   static const ORDER_TRACKING_DETAIL = '/order-tracking-detail';
+  static const CLINIC_HOME = '/clinic-home';
+  static const CLINIC_EXPERT_LIST = '/clinic-expert-list';
+  static const CLINIC_EXPERT_PROFILE = '/clinic-expert-profile';
+  static const CONSULTATION_CHAT_ROOM = '/consultation-chat-room';
+  static const CONSULTATION_VIDEO_CALL = '/consultation-video-call';
+  static const EXPERT_DASHBOARD = '/expert-dashboard';
+  static const EXPERT_AVAILABILITY_SETTINGS = '/expert-availability-settings';
+  static const EXPERT_PAYOUT = '/expert-payout';
+  static const CLINIC_AI_SCAN = '/clinic-ai-scan';
+  static const CLINIC_DIGITAL_LIBRARY = '/clinic-digital-library';
+  static const CLINIC_LIBRARY_READER = '/clinic-library-reader';
 }
