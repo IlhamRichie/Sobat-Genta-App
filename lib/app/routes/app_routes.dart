@@ -15,6 +15,8 @@ abstract class Routes {
   static const REGISTER_EXPERT = _Paths.REGISTER_EXPERT;
   static const MAIN_NAVIGATION = _Paths.MAIN_NAVIGATION;
   static const HOME_DASHBOARD = _Paths.HOME_DASHBOARD;
+  static const KYC_FORM = _Paths.KYC_FORM;
+  static const STORE_HOME = _Paths.STORE_HOME;
 }
 
 abstract class _Paths {
@@ -31,4 +33,6 @@ abstract class _Paths {
   static const REGISTER_EXPERT = '/register-expert';
   static const MAIN_NAVIGATION = '/main-navigation';
   static const HOME_DASHBOARD = '/home-dashboard';
+  static const KYC_FORM = '/kyc-form';
+  static const STORE_HOME = '/store-home';
 }

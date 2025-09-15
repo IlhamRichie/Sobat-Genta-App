@@ -6,6 +6,8 @@ import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/home_dashboard/bindings/home_dashboard_binding.dart';
 import '../modules/home_dashboard/views/home_dashboard_view.dart';
+import '../modules/kyc_form/bindings/kyc_form_binding.dart';
+import '../modules/kyc_form/views/kyc_form_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/main_navigation/bindings/main_navigation_binding.dart';
@@ -24,6 +26,8 @@ import '../modules/register_role_chooser/bindings/register_role_chooser_binding.
 import '../modules/register_role_chooser/views/register_role_chooser_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
+import '../modules/store_home/bindings/store_home_binding.dart';
+import '../modules/store_home/views/store_home_view.dart';
 
 part 'app_routes.dart';
 
@@ -92,6 +96,16 @@ class AppPages {
       name: _Paths.HOME_DASHBOARD,
       page: () => const HomeDashboardView(),
       binding: HomeDashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.KYC_FORM,
+      page: () => const KycFormView(),
+      binding: KycFormBinding(),
+    ),
+    GetPage(
+      name: _Paths.STORE_HOME,
+      page: () => const StoreHomeView(),
+      binding: StoreHomeBinding(),
     ),
   ];
 }
