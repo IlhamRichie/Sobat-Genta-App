@@ -38,6 +38,29 @@ abstract class Routes {
   static const CLINIC_AI_SCAN = _Paths.CLINIC_AI_SCAN;
   static const CLINIC_DIGITAL_LIBRARY = _Paths.CLINIC_DIGITAL_LIBRARY;
   static const CLINIC_LIBRARY_READER = _Paths.CLINIC_LIBRARY_READER;
+  static const TENDER_MARKETPLACE = _Paths.TENDER_MARKETPLACE;
+  static const TENDER_CREATE_REQUEST = _Paths.TENDER_CREATE_REQUEST;
+  static const TENDER_DETAIL = _Paths.TENDER_DETAIL;
+  static const TENDER_SUBMIT_OFFER = _Paths.TENDER_SUBMIT_OFFER;
+  static const TENDER_MY_OFFERS_LIST = _Paths.TENDER_MY_OFFERS_LIST;
+  static const PROFILE_MAIN = _Paths.PROFILE_MAIN;
+  static const WALLET_MAIN = _Paths.WALLET_MAIN;
+  static const WALLET_HISTORY = _Paths.WALLET_HISTORY;
+  static const WALLET_TOP_UP = _Paths.WALLET_TOP_UP;
+  static const WALLET_WITHDRAW = _Paths.WALLET_WITHDRAW;
+  static const MANAGE_BANK_ACCOUNTS = _Paths.MANAGE_BANK_ACCOUNTS;
+  static const CHANGE_PASSWORD = _Paths.CHANGE_PASSWORD;
+  static const FARMER_MANAGE_ASSETS = _Paths.FARMER_MANAGE_ASSETS;
+  static const FARMER_ADD_ASSET_FORM = _Paths.FARMER_ADD_ASSET_FORM;
+  static const FARMER_ASSET_DETAIL = _Paths.FARMER_ASSET_DETAIL;
+  static const FARMER_APPLY_FUNDING_FORM = _Paths.FARMER_APPLY_FUNDING_FORM;
+  static const FARMER_MY_PROJECTS_LIST = _Paths.FARMER_MY_PROJECTS_LIST;
+  static const INVESTOR_FUNDING_MARKETPLACE =
+      _Paths.INVESTOR_FUNDING_MARKETPLACE;
+  static const INVESTOR_PROJECT_DETAIL = _Paths.INVESTOR_PROJECT_DETAIL;
+  static const INVESTOR_INVEST_FORM = _Paths.INVESTOR_INVEST_FORM;
+  static const INVESTOR_PORTFOLIO = _Paths.INVESTOR_PORTFOLIO;
+  static const INVESTOR_PORTFOLIO_DETAIL = _Paths.INVESTOR_PORTFOLIO_DETAIL;
 }
 
 abstract class _Paths {
@@ -76,4 +99,26 @@ abstract class _Paths {
   static const CLINIC_AI_SCAN = '/clinic-ai-scan';
   static const CLINIC_DIGITAL_LIBRARY = '/clinic-digital-library';
   static const CLINIC_LIBRARY_READER = '/clinic-library-reader';
+  static const TENDER_MARKETPLACE = '/tender-marketplace';
+  static const TENDER_CREATE_REQUEST = '/tender-create-request';
+  static const TENDER_DETAIL = '/tender-detail';
+  static const TENDER_SUBMIT_OFFER = '/tender-submit-offer';
+  static const TENDER_MY_OFFERS_LIST = '/tender-my-offers-list';
+  static const PROFILE_MAIN = '/profile-main';
+  static const WALLET_MAIN = '/wallet-main';
+  static const WALLET_HISTORY = '/wallet-history';
+  static const WALLET_TOP_UP = '/wallet-top-up';
+  static const WALLET_WITHDRAW = '/wallet-withdraw';
+  static const MANAGE_BANK_ACCOUNTS = '/manage-bank-accounts';
+  static const CHANGE_PASSWORD = '/change-password';
+  static const FARMER_MANAGE_ASSETS = '/farmer-manage-assets';
+  static const FARMER_ADD_ASSET_FORM = '/farmer-add-asset-form';
+  static const FARMER_ASSET_DETAIL = '/farmer-asset-detail';
+  static const FARMER_APPLY_FUNDING_FORM = '/farmer-apply-funding-form';
+  static const FARMER_MY_PROJECTS_LIST = '/farmer-my-projects-list';
+  static const INVESTOR_FUNDING_MARKETPLACE = '/investor-funding-marketplace';
+  static const INVESTOR_PROJECT_DETAIL = '/investor-project-detail';
+  static const INVESTOR_INVEST_FORM = '/investor-invest-form';
+  static const INVESTOR_PORTFOLIO = '/investor-portfolio';
+  static const INVESTOR_PORTFOLIO_DETAIL = '/investor-portfolio-detail';
 }
