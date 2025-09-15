@@ -17,6 +17,15 @@ abstract class Routes {
   static const HOME_DASHBOARD = _Paths.HOME_DASHBOARD;
   static const KYC_FORM = _Paths.KYC_FORM;
   static const STORE_HOME = _Paths.STORE_HOME;
+  static const PRODUCT_SEARCH = _Paths.PRODUCT_SEARCH;
+  static const PRODUCT_DETAIL = _Paths.PRODUCT_DETAIL;
+  static const PRODUCT_REVIEWS = _Paths.PRODUCT_REVIEWS;
+  static const CART = _Paths.CART;
+  static const CHECKOUT_ADDRESS = _Paths.CHECKOUT_ADDRESS;
+  static const CHECKOUT_PAYMENT = _Paths.CHECKOUT_PAYMENT;
+  static const ORDER_CONFIRMATION = _Paths.ORDER_CONFIRMATION;
+  static const ORDER_HISTORY = _Paths.ORDER_HISTORY;
+  static const ORDER_TRACKING_DETAIL = _Paths.ORDER_TRACKING_DETAIL;
 }
 
 abstract class _Paths {
@@ -35,4 +44,13 @@ abstract class _Paths {
   static const HOME_DASHBOARD = '/home-dashboard';
   static const KYC_FORM = '/kyc-form';
   static const STORE_HOME = '/store-home';
+  static const PRODUCT_SEARCH = '/product-search';
+  static const PRODUCT_DETAIL = '/product-detail';
+  static const PRODUCT_REVIEWS = '/product-reviews';
+  static const CART = '/cart';
+  static const CHECKOUT_ADDRESS = '/checkout-address';
+  static const CHECKOUT_PAYMENT = '/checkout-payment';
+  static const ORDER_CONFIRMATION = '/order-confirmation';
+  static const ORDER_HISTORY = '/order-history';
+  static const ORDER_TRACKING_DETAIL = '/order-tracking-detail';
 }
