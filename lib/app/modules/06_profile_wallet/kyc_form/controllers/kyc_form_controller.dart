@@ -42,8 +42,9 @@ class KycFormController extends GetxController {
 
   // --- [UPDATE] Aksi Stepper sekarang juga mengontrol PageView ---
   
-  void onStepContinue() {
-    BuildContext context = Get.context!; 
+  void onStepContinue(BuildContext context) { 
+    // HAPUS baris ini: BuildContext context = Get.context!; (Jika ada)
+    
     bool isStepValid = false;
 
     switch (currentStep.value) {
@@ -52,7 +53,9 @@ class KycFormController extends GetxController {
         break;
       case 1:
         if (ktpImage.value == null) {
-          showTopSnackBar(Overlay.of(context),
+          // Sekarang 'context' ini VALID karena dikirim dari View
+          showTopSnackBar( 
+            Overlay.of(context), // Ini tidak akan error lagi
             const CustomSnackBar.error(message: 'Foto KTP tidak boleh kosong'),
           );
           isStepValid = false;
@@ -62,7 +65,9 @@ class KycFormController extends GetxController {
         break;
       case 2:
         if (selfieImage.value == null) {
-          showTopSnackBar(Overlay.of(context),
+          // Sekarang 'context' ini VALID
+          showTopSnackBar(
+            Overlay.of(context), // Ini tidak akan error lagi
             const CustomSnackBar.error(message: 'Foto selfie tidak boleh kosong'),
           );
           isStepValid = false;
@@ -75,13 +80,13 @@ class KycFormController extends GetxController {
     if (isStepValid) {
       if (currentStep.value < (totalSteps - 1)) {
         currentStep.value += 1;
-        // Pindahkan PageView
         pageController.animateToPage(
           currentStep.value,
           duration: 300.ms,
           curve: Curves.easeInOut,
         );
       } else {
+        // Fungsi submitKycData sudah benar menerima context
         submitKycData(context);
       }
     }

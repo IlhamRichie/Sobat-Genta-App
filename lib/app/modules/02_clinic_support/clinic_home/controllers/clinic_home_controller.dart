@@ -1,23 +1,21 @@
 import 'package:get/get.dart';
+import '../../../../routes/app_pages.dart';
 
 class ClinicHomeController extends GetxController {
-  //TODO: Implement ClinicHomeController
-
-  final count = 0.obs;
-  @override
-  void onInit() {
-    super.onInit();
+  
+  // Aksi untuk 3 tombol fitur
+  void goToTelekonsultasi() {
+    // (Akan mengarah ke halaman daftar pakar)
+    Get.toNamed(Routes.CLINIC_EXPERT_LIST);
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  void goToAiScan() {
+    // (Akan mengarah ke halaman scan)
+    Get.toNamed(Routes.CLINIC_AI_SCAN);
   }
 
-  @override
-  void onClose() {
-    super.onClose();
+  void goToPustakaDigital() {
+    // (Akan mengarah ke perpustakaan)
+    Get.toNamed(Routes.CLINIC_DIGITAL_LIBRARY);
   }
-
-  void increment() => count.value++;
 }

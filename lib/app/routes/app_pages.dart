@@ -114,6 +114,10 @@ import '../modules/06_profile_wallet/wallet_withdraw/bindings/wallet_withdraw_bi
 import '../modules/06_profile_wallet/wallet_withdraw/views/wallet_withdraw_view.dart';
 import '../modules/create_new_password/bindings/create_new_password_binding.dart';
 import '../modules/create_new_password/views/create_new_password_view.dart';
+import '../modules/payment_instructions/bindings/payment_instructions_binding.dart';
+import '../modules/payment_instructions/views/payment_instructions_view.dart';
+import '../modules/payment_summary/bindings/payment_summary_binding.dart';
+import '../modules/payment_summary/views/payment_summary_view.dart';
 
 part 'app_routes.dart';
 
@@ -407,6 +411,16 @@ class AppPages {
       name: _Paths.CREATE_NEW_PASSWORD,
       page: () => const CreateNewPasswordView(),
       binding: CreateNewPasswordBinding(),
+    ),
+    GetPage(
+      name: _Paths.PAYMENT_SUMMARY,
+      page: () => const PaymentSummaryView(),
+      binding: PaymentSummaryBinding(),
+    ),
+    GetPage(
+      name: _Paths.PAYMENT_INSTRUCTIONS,
+      page: () => const PaymentInstructionsView(),
+      binding: PaymentInstructionsBinding(),
     ),
   ];
 }

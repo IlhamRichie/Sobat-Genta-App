@@ -62,6 +62,8 @@ abstract class Routes {
   static const INVESTOR_PORTFOLIO = _Paths.INVESTOR_PORTFOLIO;
   static const INVESTOR_PORTFOLIO_DETAIL = _Paths.INVESTOR_PORTFOLIO_DETAIL;
   static const CREATE_NEW_PASSWORD = _Paths.CREATE_NEW_PASSWORD;
+  static const PAYMENT_SUMMARY = _Paths.PAYMENT_SUMMARY;
+  static const PAYMENT_INSTRUCTIONS = _Paths.PAYMENT_INSTRUCTIONS;
 }
 
 abstract class _Paths {
@@ -123,4 +125,6 @@ abstract class _Paths {
   static const INVESTOR_PORTFOLIO = '/investor-portfolio';
   static const INVESTOR_PORTFOLIO_DETAIL = '/investor-portfolio-detail';
   static const CREATE_NEW_PASSWORD = '/create-new-password';
+  static const PAYMENT_SUMMARY = '/payment-summary';
+  static const PAYMENT_INSTRUCTIONS = '/payment-instructions';
 }

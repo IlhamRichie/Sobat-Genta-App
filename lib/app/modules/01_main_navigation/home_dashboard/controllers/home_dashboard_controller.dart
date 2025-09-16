@@ -30,13 +30,25 @@ class HomeDashboardController extends GetxController {
 
   // Aksi yang dipanggil jika pengguna mengklik fitur yang terkunci
   void showKycSnackbar(BuildContext context) {
+    // Cek status KYC dari controller induk
+    final kycStatus = mainNavController.kycStatus.value;
+
+    String message = "Fitur terkunci. Harap lengkapi verifikasi KYC Anda.";
+
+    // [LOGIC BARU] Sesuaikan pesan snackbar
+    if (kycStatus == UserKycStatus.inReview) {
+      message = "Fitur terkunci. Data KYC Anda sedang ditinjau oleh Admin.";
+    }
+
     showTopSnackBar(
       Overlay.of(context),
-      const CustomSnackBar.error(
-        message: "Fitur terkunci. Harap lengkapi verifikasi KYC Anda terlebih dahulu.",
+      CustomSnackBar.error(
+        message: message,
       ),
+      displayDuration: 2.seconds,
     );
   }
+
 
   // --- Navigasi Aksi Cepat ---
   // (Nanti, ini akan pindah ke tab yang sesuai)

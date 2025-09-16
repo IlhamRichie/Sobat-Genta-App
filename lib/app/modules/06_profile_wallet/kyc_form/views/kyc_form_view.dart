@@ -18,7 +18,7 @@ class KycFormView extends GetView<KycFormController> {
   const KycFormView({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+    Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -56,7 +56,7 @@ class KycFormView extends GetView<KycFormController> {
           ),
 
           // --- 3. Tombol Navigasi Kustom ---
-          _buildNavigationButtons(),
+          _buildNavigationButtons(context), 
         ],
       ),
     );
@@ -210,7 +210,7 @@ class KycFormView extends GetView<KycFormController> {
   }
 
   // 3. TOMBOL NAVIGASI BAWAH (BARU)
-  Widget _buildNavigationButtons() {
+  Widget _buildNavigationButtons(BuildContext context) { 
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
@@ -234,7 +234,10 @@ class KycFormView extends GetView<KycFormController> {
 
             // Tombol Lanjut / Kirim
             ElevatedButton(
-              onPressed: controller.onStepContinue,
+              // [PERBAIKAN DI SINI]
+              // Gunakan 'context' yang baru saja kita terima
+              onPressed: () => controller.onStepContinue(context),
+              
               style: ElevatedButton.styleFrom(
                 backgroundColor: kPrimaryDarkGreen,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -242,10 +245,7 @@ class KycFormView extends GetView<KycFormController> {
               ),
               child: Text(
                 isLastStep ? 'KIRIM DATA' : 'LANJUT',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white, // <-- Ubah warna teks jadi putih
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ).animate().fadeIn(),
           ],
