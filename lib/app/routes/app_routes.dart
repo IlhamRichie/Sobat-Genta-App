@@ -64,6 +64,7 @@ abstract class Routes {
   static const CREATE_NEW_PASSWORD = _Paths.CREATE_NEW_PASSWORD;
   static const PAYMENT_SUMMARY = _Paths.PAYMENT_SUMMARY;
   static const PAYMENT_INSTRUCTIONS = _Paths.PAYMENT_INSTRUCTIONS;
+  static const PAYMENT_SUCCESS = _Paths.PAYMENT_SUCCESS;
 }
 
 abstract class _Paths {
@@ -127,4 +128,5 @@ abstract class _Paths {
   static const CREATE_NEW_PASSWORD = '/create-new-password';
   static const PAYMENT_SUMMARY = '/payment-summary';
   static const PAYMENT_INSTRUCTIONS = '/payment-instructions';
+  static const PAYMENT_SUCCESS = '/payment-success';
 }

@@ -112,12 +112,14 @@ import '../modules/06_profile_wallet/wallet_top_up/bindings/wallet_top_up_bindin
 import '../modules/06_profile_wallet/wallet_top_up/views/wallet_top_up_view.dart';
 import '../modules/06_profile_wallet/wallet_withdraw/bindings/wallet_withdraw_binding.dart';
 import '../modules/06_profile_wallet/wallet_withdraw/views/wallet_withdraw_view.dart';
-import '../modules/create_new_password/bindings/create_new_password_binding.dart';
-import '../modules/create_new_password/views/create_new_password_view.dart';
-import '../modules/payment_instructions/bindings/payment_instructions_binding.dart';
-import '../modules/payment_instructions/views/payment_instructions_view.dart';
-import '../modules/payment_summary/bindings/payment_summary_binding.dart';
-import '../modules/payment_summary/views/payment_summary_view.dart';
+import '../modules/00_core_auth/create_new_password/bindings/create_new_password_binding.dart';
+import '../modules/00_core_auth/create_new_password/views/create_new_password_view.dart';
+import '../modules/02_clinic_support/payment_instructions/bindings/payment_instructions_binding.dart';
+import '../modules/02_clinic_support/payment_instructions/views/payment_instructions_view.dart';
+import '../modules/02_clinic_support/payment_success/bindings/payment_success_binding.dart';
+import '../modules/02_clinic_support/payment_success/views/payment_success_view.dart';
+import '../modules/02_clinic_support/payment_summary/bindings/payment_summary_binding.dart';
+import '../modules/02_clinic_support/payment_summary/views/payment_summary_view.dart';
 
 part 'app_routes.dart';
 
@@ -421,6 +423,11 @@ class AppPages {
       name: _Paths.PAYMENT_INSTRUCTIONS,
       page: () => const PaymentInstructionsView(),
       binding: PaymentInstructionsBinding(),
+    ),
+    GetPage(
+      name: _Paths.PAYMENT_SUCCESS,
+      page: () => const PaymentSuccessView(),
+      binding: PaymentSuccessBinding(),
     ),
   ];
 }

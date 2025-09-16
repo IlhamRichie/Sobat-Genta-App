@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import '../../../routes/app_pages.dart'; // Pastikan Routes-nya ada
+import '../../../../routes/app_pages.dart'; // Pastikan Routes-nya ada
 
 class CreateNewPasswordController extends GetxController {
   

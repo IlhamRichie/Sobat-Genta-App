@@ -55,6 +55,19 @@ class ConsultationChatRoomView extends StatelessWidget {
                 ),
               ],
             ),
+              actions: [
+            IconButton(
+              onPressed: () {
+                // (TODO: Tambahkan logic untuk Audio Call nanti)
+              },
+              icon: const Icon(Icons.phone_outlined, color: kPrimaryDarkGreen),
+            ),
+            IconButton(
+              onPressed: () => controller.goToVideoCallPage(), // Panggil controller
+              icon: const Icon(Icons.videocam_outlined, color: kPrimaryDarkGreen),
+            ),
+            const SizedBox(width: 10),
+          ],
           ),
           // --- [FIX] Widget Chat sekarang di dalam GetBuilder ---
           body: Chat(

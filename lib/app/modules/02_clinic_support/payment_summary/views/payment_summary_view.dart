@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import '../../../data/models/expert_model.dart';
+import '../../../../data/models/expert_model.dart';
 import '../controllers/payment_summary_controller.dart';
 
 // (Konstanta warna tema konsisten)
@@ -58,7 +58,7 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
         ),
       ),
       // --- Tombol Sticky di Bawah ---
-      bottomNavigationBar: _buildStickyCheckoutButton(),
+      bottomNavigationBar: _buildStickyCheckoutButton(context),
     );
   }
 
@@ -208,15 +208,16 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
   }
 
   // 4. Tombol Bawah (Sticky)
-  Widget _buildStickyCheckoutButton() {
+  Widget _buildStickyCheckoutButton(BuildContext context) { 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15)],
-      ),
+      // ... (style container sama)
       child: ElevatedButton(
-        onPressed: controller.onChoosePaymentPressed, // Aksi utama
+        
+        // [PERBAIKAN DI SINI]
+        // Gunakan 'context' yang baru saja kita terima
+        onPressed: () => controller.onChoosePaymentPressed(context),
+        
         style: ElevatedButton.styleFrom(
           backgroundColor: kPrimaryDarkGreen,
           foregroundColor: Colors.white,
@@ -225,7 +226,7 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
             borderRadius: BorderRadius.circular(16),
           ),
         ),
-        child: Obx(() { // Obx agar teks tombol reaktif
+        child: Obx(() {
           return Text(
             'Bayar Sekarang (Rp ${controller.total.value.toStringAsFixed(0)})',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

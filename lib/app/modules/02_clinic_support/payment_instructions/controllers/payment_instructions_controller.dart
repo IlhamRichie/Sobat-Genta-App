@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import untuk Clipboard
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import '../../../data/models/payment_method_model.dart'; // Import model
-import '../controllers/clinic_expert_list_controller.dart'; // Import ExpertModel
-import '../../../routes/app_pages.dart'; // Import routes
+import '../../../../data/models/expert_model.dart';
+import '../../../../data/models/payment_method_model.dart'; // Import model
+import '../../../../routes/app_pages.dart'; // Import routes
 
 class PaymentInstructionsController extends GetxController {
   
@@ -42,9 +43,9 @@ class PaymentInstructionsController extends GetxController {
 
   // --- Logic Timer ---
   void startTimer() {
-    _timer = Timer.periodic(1.seconds, (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (countdown.value.inSeconds > 0) {
-        countdown.value = countdown.value - 1.seconds;
+        countdown.value = countdown.value - Duration(seconds: 1);
       } else {
         timer.cancel();
         // (Nanti di sini ada logic 'transaksi expired')
@@ -69,7 +70,7 @@ class PaymentInstructionsController extends GetxController {
       const CustomSnackBar.success(
         message: "Nomor Virtual Account berhasil disalin!",
       ),
-      displayDuration: 1.seconds,
+      displayDuration: Duration(seconds: 1),
     );
   }
 

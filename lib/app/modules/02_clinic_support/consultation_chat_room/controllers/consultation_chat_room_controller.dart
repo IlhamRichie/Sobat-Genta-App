@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import '../../../../data/models/expert_model.dart';
+import '../../../../routes/app_pages.dart';
 
 class ConsultationChatRoomController extends GetxController {
   
@@ -71,4 +72,13 @@ class ConsultationChatRoomController extends GetxController {
       _addMessage(replyMessage); // Ini juga akan memanggil update()
     });
   }
+
+  void goToVideoCallPage() {
+    // Arahkan ke halaman Video Call, kirim data Pakar juga
+    Get.toNamed(
+      Routes.CONSULTATION_VIDEO_CALL,
+      arguments: expertData,
+    );
+  }
+  
 }

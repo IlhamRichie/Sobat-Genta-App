@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../data/models/expert_model.dart';
-import '../../../data/models/payment_method_model.dart'; // Import model baru
-import '../../../routes/app_pages.dart'; // Import routes
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import '../../../../data/models/expert_model.dart';
+import '../../../../data/models/payment_method_model.dart';
+import '../../../../routes/app_pages.dart';
 
 // (Konstanta warna tema konsisten)
 const kPrimaryDarkGreen = Color(0xFF3A8A40);
@@ -49,19 +51,21 @@ class PaymentSummaryController extends GetxController {
   // --- Aksi Utama ---
   
   // 1. Dipanggil saat tombol "Pilih Pembayaran" (bawah) ditekan
-  void onChoosePaymentPressed() {
+  void onChoosePaymentPressed(BuildContext context) {
     if (selectedMethod.value == null) {
-      Get.snackbar("Pilih Pembayaran", "Silakan pilih metode pembayaran terlebih dahulu.",
-        snackPosition: SnackPosition.BOTTOM,
+      // [UPDATE] Menggunakan TopSnackBar
+      showTopSnackBar(
+        Overlay.of(context),
+        const CustomSnackBar.error(
+          message: "Silakan pilih metode pembayaran terlebih dahulu.",
+        ),
       );
-      return;
+      return; // Hentikan fungsi
     }
     
-    // (LOGIC API NANTI DI SINI: Buat 'charge' ke payment gateway)
-    
-    // (UI SEMENTARA) Navigasi ke halaman instruksi
+    // (Logic navigasi ke halaman instruksi sudah benar)
     Get.toNamed(
-      Routes.PAYMENT_INSTRUCTIONS, // <-- Rute BARU yang akan kita buat
+      Routes.PAYMENT_INSTRUCTIONS,
       arguments: {
         'expert': expertData,
         'payment': selectedMethod.value,
@@ -69,6 +73,7 @@ class PaymentSummaryController extends GetxController {
       },
     );
   }
+
 
   // 2. Dipanggil saat "Metode Pembayaran" di-tap
   // Ini akan membuka bottom sheet (sesuai image_8fc710.png)
