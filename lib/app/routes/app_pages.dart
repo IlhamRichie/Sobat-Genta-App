@@ -1,13 +1,29 @@
 import 'package:get/get.dart';
 
-import '../modules/03_store_ecommerce/cart/bindings/cart_binding.dart';
-import '../modules/03_store_ecommerce/cart/views/cart_view.dart';
-import '../modules/06_profile_wallet/change_password/bindings/change_password_binding.dart';
-import '../modules/06_profile_wallet/change_password/views/change_password_view.dart';
-import '../modules/03_store_ecommerce/checkout_address/bindings/checkout_address_binding.dart';
-import '../modules/03_store_ecommerce/checkout_address/views/checkout_address_view.dart';
-import '../modules/03_store_ecommerce/checkout_payment/bindings/checkout_payment_binding.dart';
-import '../modules/03_store_ecommerce/checkout_payment/views/checkout_payment_view.dart';
+import '../modules/00_core_auth/forgot_password/bindings/forgot_password_binding.dart';
+import '../modules/00_core_auth/forgot_password/views/forgot_password_view.dart';
+import '../modules/00_core_auth/login/bindings/login_binding.dart';
+import '../modules/00_core_auth/login/views/login_view.dart';
+import '../modules/00_core_auth/onboarding/bindings/onboarding_binding.dart';
+import '../modules/00_core_auth/onboarding/views/onboarding_view.dart';
+import '../modules/00_core_auth/otp_verification/bindings/otp_verification_binding.dart';
+import '../modules/00_core_auth/otp_verification/views/otp_verification_view.dart';
+import '../modules/00_core_auth/register_expert/bindings/register_expert_binding.dart';
+import '../modules/00_core_auth/register_expert/views/register_expert_view.dart';
+import '../modules/00_core_auth/register_farmer/bindings/register_farmer_binding.dart';
+import '../modules/00_core_auth/register_farmer/views/register_farmer_view.dart';
+import '../modules/00_core_auth/register_investor/bindings/register_investor_binding.dart';
+import '../modules/00_core_auth/register_investor/views/register_investor_view.dart';
+import '../modules/00_core_auth/register_role_chooser/bindings/register_role_chooser_binding.dart';
+import '../modules/00_core_auth/register_role_chooser/views/register_role_chooser_view.dart';
+import '../modules/00_core_auth/splash/bindings/splash_binding.dart';
+import '../modules/00_core_auth/splash/views/splash_view.dart';
+import '../modules/01_main_navigation/home/bindings/home_binding.dart';
+import '../modules/01_main_navigation/home/views/home_view.dart';
+import '../modules/01_main_navigation/home_dashboard/bindings/home_dashboard_binding.dart';
+import '../modules/01_main_navigation/home_dashboard/views/home_dashboard_view.dart';
+import '../modules/01_main_navigation/main_navigation/bindings/main_navigation_binding.dart';
+import '../modules/01_main_navigation/main_navigation/views/main_navigation_view.dart';
 import '../modules/02_clinic_support/clinic_ai_scan/bindings/clinic_ai_scan_binding.dart';
 import '../modules/02_clinic_support/clinic_ai_scan/views/clinic_ai_scan_view.dart';
 import '../modules/02_clinic_support/clinic_digital_library/bindings/clinic_digital_library_binding.dart';
@@ -30,68 +46,24 @@ import '../modules/02_clinic_support/expert_dashboard/bindings/expert_dashboard_
 import '../modules/02_clinic_support/expert_dashboard/views/expert_dashboard_view.dart';
 import '../modules/02_clinic_support/expert_payout/bindings/expert_payout_binding.dart';
 import '../modules/02_clinic_support/expert_payout/views/expert_payout_view.dart';
-import '../modules/05_funding_investment/farmer_add_asset_form/bindings/farmer_add_asset_form_binding.dart';
-import '../modules/05_funding_investment/farmer_add_asset_form/views/farmer_add_asset_form_view.dart';
-import '../modules/05_funding_investment/farmer_apply_funding_form/bindings/farmer_apply_funding_form_binding.dart';
-import '../modules/05_funding_investment/farmer_apply_funding_form/views/farmer_apply_funding_form_view.dart';
-import '../modules/05_funding_investment/farmer_asset_detail/bindings/farmer_asset_detail_binding.dart';
-import '../modules/05_funding_investment/farmer_asset_detail/views/farmer_asset_detail_view.dart';
-import '../modules/05_funding_investment/farmer_manage_assets/bindings/farmer_manage_assets_binding.dart';
-import '../modules/05_funding_investment/farmer_manage_assets/views/farmer_manage_assets_view.dart';
-import '../modules/05_funding_investment/farmer_my_projects_list/bindings/farmer_my_projects_list_binding.dart';
-import '../modules/05_funding_investment/farmer_my_projects_list/views/farmer_my_projects_list_view.dart';
-import '../modules/00_core_auth/forgot_password/bindings/forgot_password_binding.dart';
-import '../modules/00_core_auth/forgot_password/views/forgot_password_view.dart';
-import '../modules/01_main_navigation/home/bindings/home_binding.dart';
-import '../modules/01_main_navigation/home/views/home_view.dart';
-import '../modules/01_main_navigation/home_dashboard/bindings/home_dashboard_binding.dart';
-import '../modules/01_main_navigation/home_dashboard/views/home_dashboard_view.dart';
-import '../modules/05_funding_investment/investor_funding_marketplace/bindings/investor_funding_marketplace_binding.dart';
-import '../modules/05_funding_investment/investor_funding_marketplace/views/investor_funding_marketplace_view.dart';
-import '../modules/05_funding_investment/investor_invest_form/bindings/investor_invest_form_binding.dart';
-import '../modules/05_funding_investment/investor_invest_form/views/investor_invest_form_view.dart';
-import '../modules/05_funding_investment/investor_portfolio/bindings/investor_portfolio_binding.dart';
-import '../modules/05_funding_investment/investor_portfolio/views/investor_portfolio_view.dart';
-import '../modules/05_funding_investment/investor_portfolio_detail/bindings/investor_portfolio_detail_binding.dart';
-import '../modules/05_funding_investment/investor_portfolio_detail/views/investor_portfolio_detail_view.dart';
-import '../modules/05_funding_investment/investor_project_detail/bindings/investor_project_detail_binding.dart';
-import '../modules/05_funding_investment/investor_project_detail/views/investor_project_detail_view.dart';
-import '../modules/06_profile_wallet/kyc_form/bindings/kyc_form_binding.dart';
-import '../modules/06_profile_wallet/kyc_form/views/kyc_form_view.dart';
-import '../modules/00_core_auth/login/bindings/login_binding.dart';
-import '../modules/00_core_auth/login/views/login_view.dart';
-import '../modules/01_main_navigation/main_navigation/bindings/main_navigation_binding.dart';
-import '../modules/01_main_navigation/main_navigation/views/main_navigation_view.dart';
-import '../modules/06_profile_wallet/manage_bank_accounts/bindings/manage_bank_accounts_binding.dart';
-import '../modules/06_profile_wallet/manage_bank_accounts/views/manage_bank_accounts_view.dart';
-import '../modules/00_core_auth/onboarding/bindings/onboarding_binding.dart';
-import '../modules/00_core_auth/onboarding/views/onboarding_view.dart';
+import '../modules/03_store_ecommerce/cart/bindings/cart_binding.dart';
+import '../modules/03_store_ecommerce/cart/views/cart_view.dart';
+import '../modules/03_store_ecommerce/checkout_address/bindings/checkout_address_binding.dart';
+import '../modules/03_store_ecommerce/checkout_address/views/checkout_address_view.dart';
+import '../modules/03_store_ecommerce/checkout_payment/bindings/checkout_payment_binding.dart';
+import '../modules/03_store_ecommerce/checkout_payment/views/checkout_payment_view.dart';
 import '../modules/03_store_ecommerce/order_confirmation/bindings/order_confirmation_binding.dart';
 import '../modules/03_store_ecommerce/order_confirmation/views/order_confirmation_view.dart';
 import '../modules/03_store_ecommerce/order_history/bindings/order_history_binding.dart';
 import '../modules/03_store_ecommerce/order_history/views/order_history_view.dart';
 import '../modules/03_store_ecommerce/order_tracking_detail/bindings/order_tracking_detail_binding.dart';
 import '../modules/03_store_ecommerce/order_tracking_detail/views/order_tracking_detail_view.dart';
-import '../modules/00_core_auth/otp_verification/bindings/otp_verification_binding.dart';
-import '../modules/00_core_auth/otp_verification/views/otp_verification_view.dart';
 import '../modules/03_store_ecommerce/product_detail/bindings/product_detail_binding.dart';
 import '../modules/03_store_ecommerce/product_detail/views/product_detail_view.dart';
 import '../modules/03_store_ecommerce/product_reviews/bindings/product_reviews_binding.dart';
 import '../modules/03_store_ecommerce/product_reviews/views/product_reviews_view.dart';
 import '../modules/03_store_ecommerce/product_search/bindings/product_search_binding.dart';
 import '../modules/03_store_ecommerce/product_search/views/product_search_view.dart';
-import '../modules/06_profile_wallet/profile_main/bindings/profile_main_binding.dart';
-import '../modules/06_profile_wallet/profile_main/views/profile_main_view.dart';
-import '../modules/00_core_auth/register_expert/bindings/register_expert_binding.dart';
-import '../modules/00_core_auth/register_expert/views/register_expert_view.dart';
-import '../modules/00_core_auth/register_farmer/bindings/register_farmer_binding.dart';
-import '../modules/00_core_auth/register_farmer/views/register_farmer_view.dart';
-import '../modules/00_core_auth/register_investor/bindings/register_investor_binding.dart';
-import '../modules/00_core_auth/register_investor/views/register_investor_view.dart';
-import '../modules/00_core_auth/register_role_chooser/bindings/register_role_chooser_binding.dart';
-import '../modules/00_core_auth/register_role_chooser/views/register_role_chooser_view.dart';
-import '../modules/00_core_auth/splash/bindings/splash_binding.dart';
-import '../modules/00_core_auth/splash/views/splash_view.dart';
 import '../modules/03_store_ecommerce/store_home/bindings/store_home_binding.dart';
 import '../modules/03_store_ecommerce/store_home/views/store_home_view.dart';
 import '../modules/04_tender_needs/tender_create_request/bindings/tender_create_request_binding.dart';
@@ -104,6 +76,34 @@ import '../modules/04_tender_needs/tender_my_offers_list/bindings/tender_my_offe
 import '../modules/04_tender_needs/tender_my_offers_list/views/tender_my_offers_list_view.dart';
 import '../modules/04_tender_needs/tender_submit_offer/bindings/tender_submit_offer_binding.dart';
 import '../modules/04_tender_needs/tender_submit_offer/views/tender_submit_offer_view.dart';
+import '../modules/05_funding_investment/farmer_add_asset_form/bindings/farmer_add_asset_form_binding.dart';
+import '../modules/05_funding_investment/farmer_add_asset_form/views/farmer_add_asset_form_view.dart';
+import '../modules/05_funding_investment/farmer_apply_funding_form/bindings/farmer_apply_funding_form_binding.dart';
+import '../modules/05_funding_investment/farmer_apply_funding_form/views/farmer_apply_funding_form_view.dart';
+import '../modules/05_funding_investment/farmer_asset_detail/bindings/farmer_asset_detail_binding.dart';
+import '../modules/05_funding_investment/farmer_asset_detail/views/farmer_asset_detail_view.dart';
+import '../modules/05_funding_investment/farmer_manage_assets/bindings/farmer_manage_assets_binding.dart';
+import '../modules/05_funding_investment/farmer_manage_assets/views/farmer_manage_assets_view.dart';
+import '../modules/05_funding_investment/farmer_my_projects_list/bindings/farmer_my_projects_list_binding.dart';
+import '../modules/05_funding_investment/farmer_my_projects_list/views/farmer_my_projects_list_view.dart';
+import '../modules/05_funding_investment/investor_funding_marketplace/bindings/investor_funding_marketplace_binding.dart';
+import '../modules/05_funding_investment/investor_funding_marketplace/views/investor_funding_marketplace_view.dart';
+import '../modules/05_funding_investment/investor_invest_form/bindings/investor_invest_form_binding.dart';
+import '../modules/05_funding_investment/investor_invest_form/views/investor_invest_form_view.dart';
+import '../modules/05_funding_investment/investor_portfolio/bindings/investor_portfolio_binding.dart';
+import '../modules/05_funding_investment/investor_portfolio/views/investor_portfolio_view.dart';
+import '../modules/05_funding_investment/investor_portfolio_detail/bindings/investor_portfolio_detail_binding.dart';
+import '../modules/05_funding_investment/investor_portfolio_detail/views/investor_portfolio_detail_view.dart';
+import '../modules/05_funding_investment/investor_project_detail/bindings/investor_project_detail_binding.dart';
+import '../modules/05_funding_investment/investor_project_detail/views/investor_project_detail_view.dart';
+import '../modules/06_profile_wallet/change_password/bindings/change_password_binding.dart';
+import '../modules/06_profile_wallet/change_password/views/change_password_view.dart';
+import '../modules/06_profile_wallet/kyc_form/bindings/kyc_form_binding.dart';
+import '../modules/06_profile_wallet/kyc_form/views/kyc_form_view.dart';
+import '../modules/06_profile_wallet/manage_bank_accounts/bindings/manage_bank_accounts_binding.dart';
+import '../modules/06_profile_wallet/manage_bank_accounts/views/manage_bank_accounts_view.dart';
+import '../modules/06_profile_wallet/profile_main/bindings/profile_main_binding.dart';
+import '../modules/06_profile_wallet/profile_main/views/profile_main_view.dart';
 import '../modules/06_profile_wallet/wallet_history/bindings/wallet_history_binding.dart';
 import '../modules/06_profile_wallet/wallet_history/views/wallet_history_view.dart';
 import '../modules/06_profile_wallet/wallet_main/bindings/wallet_main_binding.dart';
@@ -112,13 +112,15 @@ import '../modules/06_profile_wallet/wallet_top_up/bindings/wallet_top_up_bindin
 import '../modules/06_profile_wallet/wallet_top_up/views/wallet_top_up_view.dart';
 import '../modules/06_profile_wallet/wallet_withdraw/bindings/wallet_withdraw_binding.dart';
 import '../modules/06_profile_wallet/wallet_withdraw/views/wallet_withdraw_view.dart';
+import '../modules/create_new_password/bindings/create_new_password_binding.dart';
+import '../modules/create_new_password/views/create_new_password_view.dart';
 
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.HOME;
+  static const INITIAL = Routes.ONBOARDING;
 
   static final routes = [
     GetPage(
@@ -138,7 +140,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.ONBOARDING,
-      page: () => const OnboardingView(),
+      page: () => OnboardingView(),
       binding: OnboardingBinding(),
     ),
     GetPage(
@@ -400,6 +402,11 @@ class AppPages {
       name: _Paths.INVESTOR_PORTFOLIO_DETAIL,
       page: () => const InvestorPortfolioDetailView(),
       binding: InvestorPortfolioDetailBinding(),
+    ),
+    GetPage(
+      name: _Paths.CREATE_NEW_PASSWORD,
+      page: () => const CreateNewPasswordView(),
+      binding: CreateNewPasswordBinding(),
     ),
   ];
 }

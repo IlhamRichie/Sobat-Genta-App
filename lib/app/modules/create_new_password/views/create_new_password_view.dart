@@ -2,24 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import '../controllers/forgot_password_controller.dart';
+import '../controllers/create_new_password_controller.dart';
 
-// (Best Practice: Idealnya, semua konstanta ini ada di lib/app/theme/...)
-// Kita definisikan di sini untuk menjaga konsistensi visual dengan Login
+// (Best Practice: Pindahkan ini ke lib/app/theme/app_colors.dart)
 const kPrimaryDarkGreen = Color(0xFF3A8A40);
 const kLightGreenBlob = Color(0xFFEAF4EB);
 const kTextFieldBorder = Color(0xFFD9D9D9);
 const kDarkTextColor = Color(0xFF1B2C1E);
 const kBodyTextColor = Color(0xFF5A6A5C);
 
-class ForgotPasswordView extends GetView<ForgotPasswordController> {
-  const ForgotPasswordView({Key? key}) : super(key: key);
+class CreateNewPasswordView extends GetView<CreateNewPasswordController> {
+  const CreateNewPasswordView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // AppBar custom yang bersih
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -30,10 +28,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
       ),
       body: Stack(
         children: [
-          // 1. Elemen Dekorasi Background (Konsisten dengan Login)
-          _buildBackgroundBlobs(),
-
-          // 2. Konten Utama
+          _buildBackgroundBlobs(), // Konsistensi UI
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -44,34 +39,40 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                   children: [
                     SizedBox(height: Get.height * 0.05),
                     
-                    // --- Ilustrasi ---
                     _buildIllustration()
                         .animate()
-                        .fadeIn(delay: 300.ms, duration: 500.ms)
+                        .fadeIn(delay: 300.ms)
                         .scale(begin: const Offset(0.8, 0.8)),
-
+                    
                     SizedBox(height: Get.height * 0.05),
                     
-                    // --- Header ---
                     _buildHeader()
                         .animate()
-                        .fadeIn(delay: 500.ms, duration: 500.ms)
+                        .fadeIn(delay: 500.ms)
                         .slideY(begin: 0.2, end: 0),
                     
                     const SizedBox(height: 32),
                     
-                    // --- Form Email ---
-                    _buildEmailField()
+                    // --- Form Password Baru ---
+                    _buildNewPasswordField()
                         .animate()
-                        .fadeIn(delay: 600.ms, duration: 500.ms)
+                        .fadeIn(delay: 600.ms)
                         .slideX(begin: -0.2, end: 0),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // --- Form Konfirmasi Password ---
+                    _buildConfirmPasswordField()
+                        .animate()
+                        .fadeIn(delay: 700.ms)
+                        .slideX(begin: 0.2, end: 0),
                     
                     SizedBox(height: Get.height * 0.1),
                     
-                    // --- Tombol Kirim ---
-                    _buildSendButton(context)
+                    // --- Tombol Simpan ---
+                    _buildResetButton(context)
                         .animate()
-                        .fadeIn(delay: 700.ms, duration: 500.ms),
+                        .fadeIn(delay: 800.ms),
                   ],
                 ),
               ),
@@ -85,22 +86,17 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
   // --- Helper Widgets (Best Practice) ---
 
   Widget _buildBackgroundBlobs() {
-    // (Helper ini sama dengan di LoginPage untuk konsistensi)
-    return Stack(
-      children: [
-        Positioned(
-          top: -100,
-          left: -100,
-          child: Container(
-            width: 300,
-            height: 300,
-            decoration: const BoxDecoration(
-              color: kLightGreenBlob,
-              shape: BoxShape.circle,
-            ),
-          ),
+    return Positioned(
+      bottom: -150,
+      left: -150,
+      child: Container(
+        width: 300,
+        height: 300,
+        decoration: const BoxDecoration(
+          color: kLightGreenBlob,
+          shape: BoxShape.circle,
         ),
-      ],
+      ),
     );
   }
 
@@ -115,7 +111,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
           shape: BoxShape.circle,
         ),
         child: FaIcon(
-          FontAwesomeIcons.envelopeOpenText,
+          FontAwesomeIcons.key, // Icon ganti password
           size: Get.height * 0.1,
           color: kPrimaryDarkGreen,
         ),
@@ -128,7 +124,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Lupa Password?',
+          'Buat Password Baru',
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.bold,
@@ -137,7 +133,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
         ),
         SizedBox(height: 8),
         Text(
-          'Jangan khawatir! Masukkan email terdaftar Anda untuk menerima kode verifikasi.',
+          'Password baru Anda harus berbeda dari password yang pernah digunakan sebelumnya.',
           style: TextStyle(
             fontSize: 17,
             color: kBodyTextColor,
@@ -148,12 +144,17 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
     );
   }
 
-  // Dekorasi Input Form (SAMA PERSIS dengan LoginPage)
-  InputDecoration _inputDecoration(String hintText, IconData prefixIcon) {
+  // (Best Practice: Helper ini sudah di-refactor agar bisa menerima suffixIcon)
+  InputDecoration _inputDecoration(
+    String hintText,
+    IconData prefixIcon, {
+    Widget? suffixIcon,
+  }) {
     return InputDecoration(
       hintText: hintText,
       hintStyle: const TextStyle(color: kBodyTextColor),
       prefixIcon: Icon(prefixIcon, color: kBodyTextColor),
+      suffixIcon: suffixIcon, // Tambahkan suffixIcon di sini
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
@@ -172,28 +173,65 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
     );
   }
 
-  Widget _buildEmailField() {
-    return TextFormField(
-      controller: controller.emailController,
-      validator: controller.validateEmail,
-      keyboardType: TextInputType.emailAddress,
-      decoration: _inputDecoration('Email', Icons.mail_outline),
-    );
+  Widget _buildNewPasswordField() {
+    return Obx(() {
+      return TextFormField(
+        controller: controller.newPasswordController,
+        validator: controller.validatePassword,
+        obscureText: controller.isPasswordHidden.value,
+        decoration: _inputDecoration(
+          'Password Baru',
+          Icons.lock_outline,
+          suffixIcon: IconButton(
+            icon: Icon(
+              controller.isPasswordHidden.value
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: kBodyTextColor,
+            ),
+            onPressed: controller.togglePasswordVisibility,
+          ),
+        ),
+      );
+    });
   }
 
-  Widget _buildSendButton(BuildContext context) {
+  Widget _buildConfirmPasswordField() {
+    return Obx(() {
+      return TextFormField(
+        controller: controller.confirmPasswordController,
+        validator: controller.validateConfirmPassword,
+        obscureText: controller.isConfirmPasswordHidden.value,
+        decoration: _inputDecoration(
+          'Konfirmasi Password Baru',
+          Icons.lock_outline,
+          suffixIcon: IconButton(
+            icon: Icon(
+              controller.isConfirmPasswordHidden.value
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              color: kBodyTextColor,
+            ),
+            onPressed: controller.toggleConfirmPasswordVisibility,
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildResetButton(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => controller.sendRecoveryEmail(context),
+      onPressed: () => controller.resetPassword(context),
       style: ElevatedButton.styleFrom(
         backgroundColor: kPrimaryDarkGreen,
         foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 56), // Lebar penuh
+        minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
       ),
       child: const Text(
-        'Kirim Email Pemulihan',
+        'Simpan Password Baru',
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
