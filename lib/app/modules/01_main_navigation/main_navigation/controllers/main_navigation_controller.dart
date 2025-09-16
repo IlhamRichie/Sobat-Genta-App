@@ -1,23 +1,23 @@
 import 'package:get/get.dart';
+import '../../../../routes/app_pages.dart';
+
+// [UPDATE] Tambahkan status 'inReview'
+enum UserKycStatus { pending, inReview, verified }
 
 class MainNavigationController extends GetxController {
-  //TODO: Implement MainNavigationController
+  
+  final RxInt selectedIndex = 0.obs;
 
-  final count = 0.obs;
-  @override
-  void onInit() {
-    super.onInit();
+  void onItemTapped(int index) {
+    selectedIndex.value = index;
   }
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
+  // [SIMULASI] Tetap mulai sebagai 'pending' (belum mengisi)
+  final Rx<UserKycStatus> kycStatus = UserKycStatus.pending.obs;
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
+  // (Nanti, 'kycStatus' ini akan diisi dari data user_model saat login)
 
-  void increment() => count.value++;
+  void goToKycForm() {
+    Get.toNamed(Routes.KYC_FORM);
+  }
 }

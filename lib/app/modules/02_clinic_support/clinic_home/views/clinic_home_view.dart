@@ -1,24 +1,8 @@
 import 'package:flutter/material.dart';
-
-import 'package:get/get.dart';
-
-import '../controllers/clinic_home_controller.dart';
-
-class ClinicHomeView extends GetView<ClinicHomeController> {
-  const ClinicHomeView({super.key});
+class ClinicHomeView extends StatelessWidget {
+  const ClinicHomeView({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ClinicHomeView'),
-        centerTitle: true,
-      ),
-      body: const Center(
-        child: Text(
-          'ClinicHomeView is working',
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
-    );
+    return const Scaffold(body: Center(child: Text("Halaman Klinik (Tab 2)")));
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import '../../../../routes/app_pages.dart';
 import '../controllers/login_controller.dart';
 
 // --- Best Practice: Definisikan Palet Warna (sesuai UI) ---
@@ -227,11 +228,13 @@ class LoginView extends GetView<LoginController> {
 
   Widget _buildLoginButton(BuildContext context) {
     return ElevatedButton(
-      onPressed: () => controller.login(context),
+      onPressed: () {
+        Get.offAllNamed(Routes.MAIN_NAVIGATION); // <-- langsung ke dashboard
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: kPrimaryDarkGreen,
         foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 56), // Lebar penuh
+        minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
