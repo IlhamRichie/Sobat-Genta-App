@@ -14,6 +14,7 @@ class MainNavigationController extends GetxController {
 
   // [SIMULASI] Tetap mulai sebagai 'pending' (belum mengisi)
   final Rx<UserKycStatus> kycStatus = UserKycStatus.verified.obs;
+  //pending
 
   // (Nanti, 'kycStatus' ini akan diisi dari data user_model saat login)
 

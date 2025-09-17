@@ -12,10 +12,8 @@ class ConsultationChatRoomView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Gunakan GetBuilder, bukan GetView/Obx.
-    // GetBuilder akan "mendengarkan" panggilan controller.update()
     return GetBuilder<ConsultationChatRoomController>(
-      builder: (controller) { // Dapatkan controller dari builder
+      builder: (controller) {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
@@ -26,6 +24,7 @@ class ConsultationChatRoomView extends StatelessWidget {
               icon: const Icon(Icons.arrow_back_ios_new, color: kDarkTextColor),
               onPressed: () => Get.back(),
             ),
+            // PERBAIKAN: Bungkus Row di dalam `title` dengan Expanded
             title: Row(
               children: [
                 CircleAvatar(
@@ -33,49 +32,54 @@ class ConsultationChatRoomView extends StatelessWidget {
                   backgroundImage: NetworkImage(controller.expertData.imageUrl),
                 ),
                 const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      controller.expertData.name,
-                      style: const TextStyle(
-                        color: kDarkTextColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                
+                // PERBAIKAN: Bungkus Column dengan Expanded untuk mencegah overflowed
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        controller.expertData.name,
+                        style: const TextStyle(
+                          color: kDarkTextColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        overflow: TextOverflow.ellipsis, // Tambahkan ellipsis
+                        maxLines: 1, // Pastikan hanya satu baris
                       ),
-                    ),
-                    Text(
-                      controller.expertData.isOnline ? 'Online' : 'Offline',
-                      style: TextStyle(
-                        color: controller.expertData.isOnline ? kPrimaryDarkGreen : kBodyTextColor,
-                        fontSize: 14,
+                      Text(
+                        controller.expertData.isOnline ? 'Online' : 'Offline',
+                        style: TextStyle(
+                          color: controller.expertData.isOnline ? kPrimaryDarkGreen : kBodyTextColor,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
-              actions: [
-            IconButton(
-              onPressed: () {
-                // (TODO: Tambahkan logic untuk Audio Call nanti)
-              },
-              icon: const Icon(Icons.phone_outlined, color: kPrimaryDarkGreen),
-            ),
-            IconButton(
-              onPressed: () => controller.goToVideoCallPage(), // Panggil controller
-              icon: const Icon(Icons.videocam_outlined, color: kPrimaryDarkGreen),
-            ),
-            const SizedBox(width: 10),
-          ],
+            actions: [
+              IconButton(
+                onPressed: () {
+                  // (TODO: Tambahkan logic untuk Audio Call nanti)
+                },
+                icon: const Icon(Icons.phone_outlined, color: kPrimaryDarkGreen),
+              ),
+              IconButton(
+                onPressed: () => controller.goToVideoCallPage(),
+                icon: const Icon(Icons.videocam_outlined, color: kPrimaryDarkGreen),
+              ),
+              const SizedBox(width: 10),
+            ],
           ),
-          // --- [FIX] Widget Chat sekarang di dalam GetBuilder ---
           body: Chat(
-            messages: controller.messages, // Ambil List biasa (bukan .obs)
+            messages: controller.messages,
             onSendPressed: controller.onSendPressed,
             user: controller.currentUser,
-            
-            // (Semua ChatTheme tetap sama persis)
             theme: DefaultChatTheme(
               primaryColor: kPrimaryDarkGreen,
               secondaryColor: kLightGreenBlob,
@@ -94,7 +98,6 @@ class ConsultationChatRoomView extends StatelessWidget {
                 border: Border(top: BorderSide(color: kBodyTextColor.withOpacity(0.3))),
               ),
             ),
-            
             showUserAvatars: true,
             showUserNames: true,
           ),

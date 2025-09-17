@@ -49,7 +49,7 @@ class ClinicExpertProfileView extends GetView<ClinicExpertProfileController> {
           ),
         ],
       ).animate().fadeIn(),
-      
+
       // --- Tombol Aksi Sticky di Bawah ---
       // (Best Practice: Menggunakan slot bottomNavigationBar)
       bottomNavigationBar: _buildStickyButton(context, controller.expertData),
@@ -71,9 +71,11 @@ class ClinicExpertProfileView extends GetView<ClinicExpertProfileController> {
       ),
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
-        title: Text( // Judul akan mengecil saat di-scroll
+        title: Text(
+          // Judul akan mengecil saat di-scroll
           expert.name,
-          style: const TextStyle(color: kDarkTextColor, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              color: kDarkTextColor, fontWeight: FontWeight.bold),
         ),
         background: Stack(
           fit: StackFit.expand,
@@ -95,15 +97,19 @@ class ClinicExpertProfileView extends GetView<ClinicExpertProfileController> {
                   // (Nama akan muncul di sini saat AppBar di-expand)
                   // (Status Online)
                   Container(
-                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                     decoration: BoxDecoration(
-                       color: expert.isOnline ? kPrimaryDarkGreen : Colors.grey,
-                       borderRadius: BorderRadius.circular(12)
-                     ),
-                     child: Text(
-                       expert.isOnline ? 'Online' : 'Offline',
-                       style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                     ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                        color:
+                            expert.isOnline ? kPrimaryDarkGreen : Colors.grey,
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Text(
+                      expert.isOnline ? 'Online' : 'Offline',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold),
+                    ),
                   )
                 ],
               ),
@@ -118,29 +124,32 @@ class ClinicExpertProfileView extends GetView<ClinicExpertProfileController> {
     return Row(
       // Gunakan spaceEvenly agar padding konsisten
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.start, // Agar rata atas jika ada yg wrap
+      crossAxisAlignment:
+          CrossAxisAlignment.start, // Agar rata atas jika ada yg wrap
       children: [
         // [FIX] Bungkus setiap item dengan Flexible
         Flexible(
-          child: _buildStatItem(FontAwesomeIcons.solidStar, '4.9', 'Rating')
-        ),
+            child: _buildStatItem(FontAwesomeIcons.solidStar, '4.9', 'Rating')),
         Flexible(
-          child: _buildStatItem(FontAwesomeIcons.solidMessage, '100+', 'Sesi Selesai')
-        ),
+            child: _buildStatItem(
+                FontAwesomeIcons.solidMessage, '100+', 'Sesi Selesai')),
         Flexible(
-          child: _buildStatItem(FontAwesomeIcons.award, '5 Thn', 'Pengalaman')
-        ),
+            child:
+                _buildStatItem(FontAwesomeIcons.award, '5 Thn', 'Pengalaman')),
       ],
     ).animate(delay: 200.ms).fadeIn().slideY(begin: 0.5);
   }
-
 
   Widget _buildStatItem(IconData icon, String value, String label) {
     return Column(
       children: [
         FaIcon(icon, color: kPrimaryDarkGreen, size: 28),
         const SizedBox(height: 8),
-        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kDarkTextColor)),
+        Text(value,
+            style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: kDarkTextColor)),
         const SizedBox(height: 4),
         Text(
           label,
@@ -154,7 +163,8 @@ class ClinicExpertProfileView extends GetView<ClinicExpertProfileController> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kDarkTextColor),
+      style: const TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: kDarkTextColor),
     );
   }
 
@@ -182,8 +192,10 @@ class ClinicExpertProfileView extends GetView<ClinicExpertProfileController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Petani Jaya', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('Sangat membantu! Ternak saya sehat kembali.', style: TextStyle(color: kBodyTextColor)),
+                Text('Petani Jaya',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('Sangat membantu! Ternak saya sehat kembali.',
+                    style: TextStyle(color: kBodyTextColor)),
               ],
             ),
           ),
@@ -194,52 +206,70 @@ class ClinicExpertProfileView extends GetView<ClinicExpertProfileController> {
 
   // --- [SR-KYC-02] Tombol Aksi Sticky yang Reaktif terhadap KYC ---
   Widget _buildStickyButton(BuildContext context, ExpertModel expert) {
-    // Kita 'listen' ke MainNavigationController untuk status KYC
     return Obx(() {
       final kycStatus = controller.mainNavController.kycStatus.value;
       final bool isLocked = (kycStatus != UserKycStatus.verified);
 
       return Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32), // Padding bawah untuk home bar
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15)],
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15)
+          ],
         ),
-        child: ElevatedButton(
-          // Panggil fungsi controller. Aksi akan ditangani di dalam controller.
-          onPressed: () => controller.startConsultation(context), 
-          style: ElevatedButton.styleFrom(
-            // Tombol akan berwarna abu-abu jika terkunci
-            backgroundColor: isLocked ? Colors.grey.shade400 : kPrimaryDarkGreen, 
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Rp ${expert.price} /sesi',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        child: Column(
+          // Ganti dari Row menjadi Column
+          mainAxisSize:
+              MainAxisSize.min, // Agar Column tidak memakan ruang berlebih
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch, // Agar anak-anaknya merentang penuh
+          children: [
+            // Teks Harga di atas tombol
+            Text(
+              'Rp ${expert.price} /sesi',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: kDarkTextColor, // Warna yang lebih gelap agar terbaca
               ),
-              Row(
+              textAlign: TextAlign.center, // Pusatkan teks
+            ),
+            const SizedBox(height: 12), // Spasi antara teks harga dan tombol
+
+            // Tombol Mulai Konsultasi
+            ElevatedButton(
+              onPressed:
+                  isLocked ? null : () => controller.startConsultation(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    isLocked ? Colors.grey.shade400 : kPrimaryDarkGreen,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 56),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              // Hapus teks harga dari sini
+              child: Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Pusatkan isi tombol
+                mainAxisSize: MainAxisSize.min, // Agar Row hanya selebar isinya
                 children: [
                   Text(
                     'Mulai Konsultasi',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 8),
-                  // Tampilkan Ikon Gembok jika terkunci
                   if (isLocked)
                     const Icon(Icons.lock, size: 20)
-                  else
-                    const Icon(FontAwesomeIcons.solidMessage, size: 18),
+                    else
+                    const Icon(FontAwesomeIcons.solidMessage, size: 18, color: Colors.white),
                 ],
-              )
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       );
     });

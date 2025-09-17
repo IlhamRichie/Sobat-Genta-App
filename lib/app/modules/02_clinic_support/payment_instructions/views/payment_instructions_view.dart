@@ -20,7 +20,8 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
       backgroundColor: kLightGreenBlob, // Background abu-abu muda
       appBar: AppBar(
         title: const Text('Pembayaran',
-            style: TextStyle(color: kDarkTextColor, fontWeight: FontWeight.bold)),
+            style:
+                TextStyle(color: kDarkTextColor, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 1,
         centerTitle: true,
@@ -34,13 +35,19 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
         child: Column(
           children: [
             _buildHeaderCard(context)
-                .animate().fadeIn(delay: 200.ms).slideY(begin: 0.2),
+                .animate()
+                .fadeIn(delay: 200.ms)
+                .slideY(begin: 0.2),
             const SizedBox(height: 20),
             _buildVaCard(context)
-                .animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
+                .animate()
+                .fadeIn(delay: 400.ms)
+                .slideY(begin: 0.2),
             const SizedBox(height: 20),
             _buildInstructionsExpansion()
-                .animate().fadeIn(delay: 600.ms).slideY(begin: 0.2),
+                .animate()
+                .fadeIn(delay: 600.ms)
+                .slideY(begin: 0.2),
           ],
         ),
       ),
@@ -58,7 +65,9 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: Column(
         children: [
@@ -69,7 +78,8 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text('Total Pembayaran', style: TextStyle(color: kBodyTextColor, fontSize: 15)),
+                  const Text('Total Pembayaran',
+                      style: TextStyle(color: kBodyTextColor, fontSize: 15)),
                   Text(
                     'Rp ${controller.totalPayment.toStringAsFixed(0)}',
                     style: const TextStyle(
@@ -88,7 +98,8 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Selesaikan dalam', style: TextStyle(color: kBodyTextColor, fontSize: 15)),
+                const Text('Selesaikan dalam',
+                    style: TextStyle(color: kBodyTextColor, fontSize: 15)),
                 Text(
                   controller.formattedCountdown, // Data dari controller
                   style: const TextStyle(
@@ -112,35 +123,45 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Nomor Virtual Account (${controller.paymentMethod.name})',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: kBodyTextColor),
+            style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: kBodyTextColor),
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // [PERBAIKAN 1]: Atur fontSize lebih kecil untuk nomor VA
               Text(
                 controller.virtualAccount,
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 18, // Ukuran font diturunkan dari 22 menjadi 18
                   fontWeight: FontWeight.bold,
                   color: kDarkTextColor,
                 ),
               ),
-              OutlinedButton.icon(
+
+              // [PERBAIKAN 2]: Ganti OutlinedButton dengan IconButton
+              // IconButton lebih cocok untuk ikon kecil tanpa teks.
+              IconButton(
                 onPressed: () => controller.copyToClipboard(context),
-                icon: const FaIcon(FontAwesomeIcons.copy, size: 16, color: kPrimaryDarkGreen),
-                label: const Text('Salin', style: TextStyle(color: kPrimaryDarkGreen, fontWeight: FontWeight.bold)),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: kPrimaryDarkGreen, width: 1.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                icon: const FaIcon(
+                  FontAwesomeIcons.solidCopy, // Icon copy yang lebih ringkas
+                  size: 20, // Ukuran ikon
+                  color: kPrimaryDarkGreen,
                 ),
+                // Tooltip opsional untuk aksesibilitas
+                tooltip: 'Salin Nomor Virtual Account',
               ),
             ],
           ),
@@ -148,29 +169,36 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
       ),
     );
   }
-  
+
   // Petunjuk Pembayaran (ExpansionTile)
   Widget _buildInstructionsExpansion() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+        ],
       ),
       child: ExpansionTile(
         title: const Text(
           'Petunjuk Pembayaran',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: kDarkTextColor),
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.bold, color: kDarkTextColor),
         ),
-        tilePadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
+        tilePadding:
+            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20.0),
         childrenPadding: const EdgeInsets.fromLTRB(20.0, 0, 20.0, 20.0),
         children: [
           // (UI Dulu Aja: Isi dengan langkah-langkah dummy)
-          _buildInstructionStep(1, 'Buka aplikasi ${controller.paymentMethod.name} Anda.'),
+          _buildInstructionStep(
+              1, 'Buka aplikasi ${controller.paymentMethod.name} Anda.'),
           _buildInstructionStep(2, 'Pilih menu "Bayar" atau "Transfer".'),
           _buildInstructionStep(3, 'Masukkan Nomor Virtual Account di atas.'),
-          _buildInstructionStep(4, 'Konfirmasi jumlah pembayaran (Rp ${controller.totalPayment.toStringAsFixed(0)}).'),
-          _buildInstructionStep(5, 'Masukkan PIN Anda dan selesaikan transaksi.'),
+          _buildInstructionStep(4,
+              'Konfirmasi jumlah pembayaran (Rp ${controller.totalPayment.toStringAsFixed(0)}).'),
+          _buildInstructionStep(
+              5, 'Masukkan PIN Anda dan selesaikan transaksi.'),
         ],
       ),
     );
@@ -181,9 +209,15 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
       leading: CircleAvatar(
         radius: 14,
         backgroundColor: kPrimaryDarkGreen,
-        child: Text('$step', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+        child: Text('$step',
+            style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12)),
       ),
-      title: Text(text, style: const TextStyle(color: kBodyTextColor, fontSize: 15, height: 1.4)),
+      title: Text(text,
+          style: const TextStyle(
+              color: kBodyTextColor, fontSize: 15, height: 1.4)),
     );
   }
 
@@ -193,7 +227,9 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15)
+        ],
       ),
       child: ElevatedButton(
         onPressed: () => controller.checkPaymentStatus(context),
