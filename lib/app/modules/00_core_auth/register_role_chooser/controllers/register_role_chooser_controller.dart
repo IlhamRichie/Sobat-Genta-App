@@ -1,39 +1,29 @@
+// lib/app/modules/register_role_chooser/controllers/register_role_chooser_controller.dart
+
 import 'package:get/get.dart';
 import '../../../../routes/app_pages.dart';
 
-// Best Practice: Gunakan Enum untuk role agar kode lebih aman dan bersih
-enum UserRole { farmer, investor, expert }
-
 class RegisterRoleChooserController extends GetxController {
-  
-  // State reaktif untuk melacak peran yang dipilih
-  // (null berarti belum ada yang dipilih)
-  final Rx<UserRole?> selectedRole = Rx<UserRole?>(null);
 
-  // Dipanggil oleh View saat card peran di-tap
-  void selectRole(UserRole role) {
-    selectedRole.value = role;
+  /// Navigasi ke form registrasi Petani
+  void navigateToFarmerRegistration() {
+    Get.toNamed(Routes.REGISTER_FARMER);
   }
 
-  // Aksi tombol "Lanjutkan Pendaftaran"
-  void continueRegistration() {
-    // Gunakan switch-case untuk navigasi yang bersih
-    switch (selectedRole.value) {
-      case UserRole.farmer:
-        Get.toNamed(Routes.REGISTER_FARMER);
-        break;
-      case UserRole.investor:
-        Get.toNamed(Routes.REGISTER_INVESTOR);
-        break;
-      case UserRole.expert:
-        Get.toNamed(Routes.REGISTER_EXPERT);
-        break;
-      default:
-        // Seharusnya tidak akan pernah terjadi karena tombol di-disable
-        Get.snackbar("Error", "Silakan pilih peran terlebih dahulu.");
-        break;
-    }
+  /// Navigasi ke form registrasi Investor
+  void navigateToInvestorRegistration() {
+    Get.toNamed(Routes.REGISTER_INVESTOR);
+  }
+
+  /// Navigasi ke form registrasi Pakar
+  void navigateToExpertRegistration() {
+    Get.toNamed(Routes.REGISTER_EXPERT);
+  }
+
+  /// Kembali ke halaman Login jika sudah punya akun
+  void navigateToLogin() {
+    // Kita gunakan offNamed untuk 'mengganti' halaman ini
+    // dengan halaman Login, membersihkan stack.
+    Get.offNamed(Routes.LOGIN);
   }
 }
-
-// (Jangan lupa tambahkan enum UserRole di atas atau di file terpisah)

@@ -1,277 +1,177 @@
+// lib/app/modules/clinic_expert_profile/views/clinic_expert_profile_view.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:sobatgenta/app/modules/02_clinic_support/clinic_expert_list/views/clinic_expert_list_view.dart';
-import '../../../../data/models/expert_model.dart';
-import '../../../01_main_navigation/main_navigation/controllers/main_navigation_controller.dart';
+import 'package:intl/intl.dart';
+import '../../../../theme/app_colors.dart';
 import '../controllers/clinic_expert_profile_controller.dart';
 
-// (Konstanta warna tema konsisten)
-const kPrimaryDarkGreen = Color(0xFF3A8A40);
-const kLightGreenBlob = Color(0xFFEAF4EB);
-const kDarkTextColor = Color(0xFF1B2C1E);
-const kBodyTextColor = Color(0xFF5A6A5C);
-
 class ClinicExpertProfileView extends GetView<ClinicExpertProfileController> {
-  const ClinicExpertProfileView({Key? key}) : super(key: key);
+  ClinicExpertProfileView({Key? key}) : super(key: key);
+  
+  final rupiahFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   @override
   Widget build(BuildContext context) {
+    final pakar = controller.pakar;
+    
     return Scaffold(
-      backgroundColor: Colors.white,
-      // Gunakan CustomScrollView untuk efek AppBar yang modern
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(controller.expertData),
-          SliverList(
-            delegate: SliverChildListDelegate([
-              // Konten di bawah AppBar
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildStatsRow(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Tentang Saya'),
-                    const SizedBox(height: 8),
-                    _buildBiography(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Ulasan Pengguna (3)'),
-                    const SizedBox(height: 16),
-                    _buildReviewPlaceholder(), // Placeholder Ulasan
-                    _buildReviewPlaceholder(),
-                  ],
-                ),
-              ),
-            ]),
-          ),
-        ],
-      ).animate().fadeIn(),
-
-      // --- Tombol Aksi Sticky di Bawah ---
-      // (Best Practice: Menggunakan slot bottomNavigationBar)
-      bottomNavigationBar: _buildStickyButton(context, controller.expertData),
-    );
-  }
-
-  // --- Helper Widgets (Best Practice) ---
-
-  Widget _buildSliverAppBar(ExpertModel expert) {
-    return SliverAppBar(
-      expandedHeight: 250.0,
-      backgroundColor: kLightGreenBlob,
-      pinned: true,
-      stretch: true,
-      elevation: 1,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, color: kDarkTextColor),
-        onPressed: () => Get.back(),
+      appBar: AppBar(
+        title: Text("Profil Pakar"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      flexibleSpace: FlexibleSpaceBar(
-        centerTitle: true,
-        title: Text(
-          // Judul akan mengecil saat di-scroll
-          expert.name,
-          style: const TextStyle(
-              color: kDarkTextColor, fontWeight: FontWeight.bold),
-        ),
-        background: Stack(
-          fit: StackFit.expand,
+      bottomNavigationBar: _buildBottomCtaBar(), // Tombol Aksi
+      body: SingleChildScrollView(
+        child: Column(
           children: [
-            // Gambar Pakar sebagai background
-            // (Kita bisa ganti dengan Image.network(expert.imageUrl))
-            Container(color: kLightGreenBlob),
-            // Avatar di tengah
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 40), // Ruang untuk status bar
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundImage: NetworkImage(expert.imageUrl),
-                  ),
-                  const SizedBox(height: 12),
-                  // (Nama akan muncul di sini saat AppBar di-expand)
-                  // (Status Online)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                        color:
-                            expert.isOnline ? kPrimaryDarkGreen : Colors.grey,
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Text(
-                      expert.isOnline ? 'Online' : 'Offline',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  )
-                ],
-              ),
-            ),
+            _buildProfileHeader(pakar),
+            const SizedBox(height: 16),
+            _buildStatsRow(pakar),
+            const Divider(height: 32),
+            _buildInfoSection(pakar),
+            _buildScheduleSection(pakar), // Tampilkan jadwal
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatsRow() {
-    return Row(
-      // Gunakan spaceEvenly agar padding konsisten
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment:
-          CrossAxisAlignment.start, // Agar rata atas jika ada yg wrap
-      children: [
-        // [FIX] Bungkus setiap item dengan Flexible
-        Flexible(
-            child: _buildStatItem(FontAwesomeIcons.solidStar, '4.9', 'Rating')),
-        Flexible(
-            child: _buildStatItem(
-                FontAwesomeIcons.solidMessage, '100+', 'Sesi Selesai')),
-        Flexible(
-            child:
-                _buildStatItem(FontAwesomeIcons.award, '5 Thn', 'Pengalaman')),
-      ],
-    ).animate(delay: 200.ms).fadeIn().slideY(begin: 0.5);
-  }
-
-  Widget _buildStatItem(IconData icon, String value, String label) {
+  /// Bagian Header (Foto, Nama, Spesialisasi)
+  Widget _buildProfileHeader(pakar) {
+    bool isOnline = pakar.isAvailable;
     return Column(
       children: [
-        FaIcon(icon, color: kPrimaryDarkGreen, size: 28),
-        const SizedBox(height: 8),
-        Text(value,
-            style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: kDarkTextColor)),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(color: kBodyTextColor, fontSize: 14),
-          textAlign: TextAlign.center,
+        CircleAvatar(
+          radius: 50,
+          backgroundColor: AppColors.greyLight,
+          child: const FaIcon(FontAwesomeIcons.userDoctor, size: 50, color: Colors.grey),
+          // TODO: Ganti dengan Foto Pakar
+        ),
+        const SizedBox(height: 16),
+        Text(pakar.user.fullName, style: Get.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+        Text(pakar.specialization, style: Get.textTheme.titleMedium?.copyWith(color: AppColors.primary)),
+        const SizedBox(height: 12),
+        // Status Online/Offline
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: (isOnline ? Colors.green.shade700 : Colors.grey.shade600).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            FaIcon(isOnline ? FontAwesomeIcons.solidCircleCheck : FontAwesomeIcons.solidCircleXmark, 
+                   size: 14, color: isOnline ? Colors.green.shade700 : Colors.grey.shade600),
+            const SizedBox(width: 8),
+            Text(isOnline ? "Online" : "Offline - Saat ini tidak tersedia", 
+                 style: TextStyle(fontWeight: FontWeight.bold, color: isOnline ? Colors.green.shade700 : Colors.grey.shade600)),
+          ]),
         ),
       ],
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-          fontSize: 20, fontWeight: FontWeight.bold, color: kDarkTextColor),
+  /// Baris Statistik (Rating, Pasien, Pengalaman) - (Placeholder)
+  Widget _buildStatsRow(pakar) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Column(children: [ FaIcon(FontAwesomeIcons.solidStar, color: Colors.amber), SizedBox(height: 4), Text("4.9", style: TextStyle(fontWeight: FontWeight.bold)), Text("Rating")]),
+        Column(children: [ FaIcon(FontAwesomeIcons.users, color: AppColors.textLight), SizedBox(height: 4), Text("100+", style: TextStyle(fontWeight: FontWeight.bold)), Text("Pasien")]),
+        Column(children: [ FaIcon(FontAwesomeIcons.briefcase, color: AppColors.textLight), SizedBox(height: 4), Text("7 Thn", style: TextStyle(fontWeight: FontWeight.bold)), Text("Pengalaman")]),
+      ],
     );
   }
 
-  Widget _buildBiography() {
-    return const Text(
-      'Drh. Anita Dewi adalah dokter hewan lulusan IPB dengan pengalaman 5 tahun menangani ternak besar dan unggas. Beliau berfokus pada pencegahan penyakit dan nutrisi pakan ternak...',
-      style: TextStyle(color: kBodyTextColor, fontSize: 16, height: 1.5),
-    );
-  }
-
-  Widget _buildReviewPlaceholder() {
-    // (Placeholder untuk UI Ulasan Pengguna)
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: kTextFieldBorder),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Row(
+  /// Bagian Info Detail (SIP & Bio)
+  Widget _buildInfoSection(pakar) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(radius: 20, child: Text('P')),
-          SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Petani Jaya',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('Sangat membantu! Ternak saya sehat kembali.',
-                    style: TextStyle(color: kBodyTextColor)),
-              ],
-            ),
+          Text("Nomor Izin Praktik (SIP)", style: Get.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(pakar.sipNumber, style: Get.textTheme.bodyLarge),
+          const SizedBox(height: 20),
+          Text("Tentang Pakar", style: Get.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            "Alumnus UGM, 7 tahun pengalaman menangani kesehatan sapi perah dan hewan ternak besar. Spesialis penyakit menular ternak.", // Placeholder Bio
+            style: Get.textTheme.bodyLarge?.copyWith(height: 1.5, color: AppColors.textLight),
           ),
         ],
       ),
     );
   }
-
-  // --- [SR-KYC-02] Tombol Aksi Sticky yang Reaktif terhadap KYC ---
-  Widget _buildStickyButton(BuildContext context, ExpertModel expert) {
-    return Obx(() {
-      final kycStatus = controller.mainNavController.kycStatus.value;
-      final bool isLocked = (kycStatus != UserKycStatus.verified);
-
-      return Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15)
-          ],
-        ),
-        child: Column(
-          // Ganti dari Row menjadi Column
-          mainAxisSize:
-              MainAxisSize.min, // Agar Column tidak memakan ruang berlebih
-          crossAxisAlignment:
-              CrossAxisAlignment.stretch, // Agar anak-anaknya merentang penuh
-          children: [
-            // Teks Harga di atas tombol
-            Text(
-              'Rp ${expert.price} /sesi',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: kDarkTextColor, // Warna yang lebih gelap agar terbaca
+  
+  /// Menampilkan Jadwal Ketersediaan Pakar
+  Widget _buildScheduleSection(pakar) {
+     return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Jadwal Ketersediaan", style: Get.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          // Render jadwal dari model pakar
+          ...pakar.schedule.map((slot) {
+            bool isActive = slot.isActive.value;
+            return ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: FaIcon(FontAwesomeIcons.calendarDay, color: isActive ? AppColors.primary : Colors.grey),
+              title: Text(slot.dayName, style: TextStyle(fontWeight: FontWeight.bold, color: isActive ? AppColors.textDark : Colors.grey)),
+              trailing: Text(
+                isActive ? "${slot.startTime.value} - ${slot.endTime.value}" : "Tutup",
+                style: TextStyle(color: isActive ? Colors.green.shade700 : Colors.red.shade700, fontWeight: FontWeight.bold),
               ),
-              textAlign: TextAlign.center, // Pusatkan teks
-            ),
-            const SizedBox(height: 12), // Spasi antara teks harga dan tombol
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
 
-            // Tombol Mulai Konsultasi
-            ElevatedButton(
-              onPressed:
-                  isLocked ? null : () => controller.startConsultation(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isLocked ? Colors.grey.shade400 : kPrimaryDarkGreen,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+  /// Tombol CTA Bawah (Dinamis)
+  Widget _buildBottomCtaBar() {
+    final pakar = controller.pakar;
+    bool isAvailable = pakar.isAvailable;
+    
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+      ),
+      child: Row(
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Tarif Konsultasi", style: TextStyle(color: AppColors.textLight)),
+              Text(
+                "${rupiahFormatter.format(pakar.consultationFee)} /sesi",
+                style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
-              // Hapus teks harga dari sini
-              child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // Pusatkan isi tombol
-                mainAxisSize: MainAxisSize.min, // Agar Row hanya selebar isinya
-                children: [
-                  Text(
-                    'Mulai Konsultasi',
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 8),
-                  if (isLocked)
-                    const Icon(Icons.lock, size: 20)
-                    else
-                    const Icon(FontAwesomeIcons.solidMessage, size: 18, color: Colors.white),
-                ],
+            ],
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Obx(() => FilledButton(
+              onPressed: isAvailable 
+                  ? (controller.isProcessingPayment.value ? null : controller.startConsultation)
+                  : controller.showNotAvailableDialog,
+              style: FilledButton.styleFrom(
+                backgroundColor: isAvailable ? AppColors.primary : Colors.grey.shade600,
               ),
-            ),
-          ],
-        ),
-      );
-    });
+              child: controller.isProcessingPayment.value
+                  ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                  : Text(isAvailable ? "Konsultasi Sekarang" : "Pakar Offline"),
+            )),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,233 +1,295 @@
+// lib/app/modules/clinic_home/views/clinic_home_view.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import '../../../../data/models/pakar_profile_model.dart';
+import '../../../../theme/app_colors.dart';
 import '../controllers/clinic_home_controller.dart';
 
-const kPrimaryDarkGreen = Color(0xFF3A8A40);
-const kLightGreenBlob = Color(0xFFEAF4EB);
-const kDarkTextColor = Color(0xFF1B2C1E);
-const kBodyTextColor = Color(0xFF5A6A5C);
-
 class ClinicHomeView extends GetView<ClinicHomeController> {
-  const ClinicHomeView({Key? key}) : super(key: key);
+  ClinicHomeView({Key? key}) : super(key: key);
+  
+  final rupiahFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kLightGreenBlob, // Background halaman tab
-      // AppBar kustom untuk Halaman Tab
       appBar: AppBar(
-        title: const Text(
-          'Klinik Tani',
-          style: TextStyle(color: kDarkTextColor, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {}, // Tombol notifikasi
-            icon: const Icon(Icons.notifications_outlined, color: kDarkTextColor),
-          )
-        ],
+        title: const Text("Klinik"),
+        // Ini adalah root tab, tidak perlu back button
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
             const SizedBox(height: 24),
-            // Fitur Utama 1: Telekonsultasi (CTA Besar)
-            _buildFeatureCardLarge(
-              context: context,
-              icon: FontAwesomeIcons.userDoctor,
-              title: 'Telekonsultasi Pakar',
-              description: 'Konsultasi chat/video langsung dengan Ahli Tani & Dokter Hewan.',
-              onTap: controller.goToTelekonsultasi,
-            ).animate().fadeIn(delay: 500.ms).slideX(begin: -0.2),
+            _buildCategorySection(),
+            const SizedBox(height: 24),
+            _buildFeaturedPakarSection(), // Skenario 3
+            const SizedBox(height: 24),
+            _buildDigitalLibrarySection(), //
+          ],
+        ),
+      ),
+    );
+  }
 
-            const SizedBox(height: 20),
-            
-            // Fitur Utama 2 & 3 (Side-by-side)
-            Row(
+  /// Header dengan shortcut ke AI Scan
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: _buildFeatureCardSmall(
-                    context: context,
-                    icon: FontAwesomeIcons.cameraRetro,
-                    title: 'Scan AI',
-                    onTap: controller.goToAiScan,
-                  ).animate().fadeIn(delay: 700.ms).slideY(begin: 0.5),
+                Text(
+                  "Punya Masalah?",
+                  style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: _buildFeatureCardSmall(
-                    context: context,
-                    icon: FontAwesomeIcons.bookAtlas,
-                    title: 'Pustaka Digital',
-                    onTap: controller.goToPustakaDigital,
-                  ).animate().fadeIn(delay: 900.ms).slideY(begin: 0.5),
+                const SizedBox(height: 8),
+                Text(
+                  "Coba scan hama atau penyakit tanaman/ternak Anda dengan AI.",
+                  style: Get.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: controller.goToAiScan,
+                  icon: const FaIcon(FontAwesomeIcons.camera, size: 16),
+                  label: const Text("Scan Sekarang"),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ],
             ),
-            
-            const SizedBox(height: 32),
-            _buildSectionTitle(title: 'Artikel Terbaru'),
-            _buildArticlePlaceholder(), // Placeholder untuk artikel
-          ],
-        ),
+          ),
+          const FaIcon(FontAwesomeIcons.robot, size: 60, color: AppColors.primary),
+        ],
       ),
     );
   }
 
-  // --- Helper Widgets ---
-
-  Widget _buildHeader() {
+  /// Bagian Kategori (Pertanian/Peternakan)
+  Widget _buildCategorySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Butuh Bantuan?',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: kDarkTextColor,
-          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text("Cari Bantuan Ahli", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
         ),
-        SizedBox(height: 8),
-        Text(
-          'Temukan solusi instan untuk masalah pertanian atau peternakan Anda di sini.',
-          style: TextStyle(
-            fontSize: 17,
-            color: kBodyTextColor,
-            height: 1.5,
-          ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildCategoryButton(
+              "Pertanian",
+              FontAwesomeIcons.leaf,
+              Colors.green.shade700,
+              () => controller.goToPakarList('PERTANIAN'),
+            ),
+            _buildCategoryButton(
+              "Peternakan",
+              FontAwesomeIcons.cow,
+              Colors.brown.shade700,
+              // Skenario 3: Budi memfilter "Peternakan"
+              () => controller.goToPakarList('PETERNAKAN'),
+            ),
+          ],
         ),
       ],
-    ).animate().fadeIn(delay: 300.ms).slideY(begin: -0.2);
+    );
   }
 
-  // Kartu CTA Besar (Telekonsultasi)
-  Widget _buildFeatureCardLarge({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required String description,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildCategoryButton(String label, IconData icon, Color color, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
+        width: Get.width * 0.4,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: kPrimaryDarkGreen,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: kPrimaryDarkGreen.withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            )
-          ],
-        ),
-        child: Row(
-          children: [
-            FaIcon(icon, color: Colors.white.withOpacity(0.8), size: 40),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Kartu CTA Kecil (AI Scan & Pustaka)
-  Widget _buildFeatureCardSmall({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        height: 120, // Tinggi tetap agar sejajar
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-            )
-          ],
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FaIcon(icon, color: kPrimaryDarkGreen, size: 32),
-            const Spacer(),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: kDarkTextColor,
-              ),
-            ),
+            FaIcon(icon, size: 32, color: color),
+            const SizedBox(height: 12),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle({required String title}) {
-    return Text(
-      title,
-      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kDarkTextColor),
-    ).animate().fadeIn();
+  /// Bagian Pakar Unggulan (menampilkan Drh. Santoso)
+  Widget _buildFeaturedPakarSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Pakar Online", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+              TextButton(
+                onPressed: () => controller.goToPakarList('ALL'), // Tampilkan semua
+                child: const Text("Lihat Semua"),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Obx(() {
+          if (controller.isLoadingPakar.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (controller.featuredPakarList.isEmpty) {
+            return const Center(child: Text("Belum ada pakar tersedia."));
+          }
+          
+          return SizedBox(
+            height: 220,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: controller.featuredPakarList.length,
+              itemBuilder: (context, index) {
+                final pakar = controller.featuredPakarList[index];
+                return _buildPakarCard(pakar);
+              },
+            ),
+          );
+        }),
+      ],
+    );
   }
 
-  Widget _buildArticlePlaceholder() {
-    return Container(
-      margin: const EdgeInsets.only(top: 16),
-      height: 150,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+  /// Kartu untuk satu Pakar
+  Widget _buildPakarCard(PakarProfileModel pakar) {
+    bool isOnline = pakar.isAvailable;
+    return SizedBox(
+      width: 160,
+      child: Card(
+        elevation: 1,
+        child: InkWell(
+          onTap: () => controller.goToPakarDetail(pakar),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Foto & Status Online
+              Stack(
+                children: [
+                  Container(
+                    height: 100,
+                    width: 160,
+                    decoration: BoxDecoration(
+                      color: AppColors.greyLight,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                    ),
+                    child: const Center(child: FaIcon(FontAwesomeIcons.userDoctor, color: Colors.grey)),
+                  ),
+                  Positioned(
+                    top: 8, right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isOnline ? Colors.green.shade700 : Colors.grey.shade600,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        isOnline ? "Online" : "Offline",
+                        style: Get.textTheme.bodySmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              // Info
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      pakar.user.fullName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      pakar.specialization,
+                      style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      rupiahFormatter.format(pakar.consultationFee),
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
       ),
-      child: const Center(child: Text('Placeholder Artikel Terbaru (ListView)')),
-    ).animate().fadeIn(delay: 500.ms);
+    );
+  }
+
+  /// Bagian Artikel Perpustakaan Digital (Mock Lokal)
+  Widget _buildDigitalLibrarySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Perpustakaan Digital", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+              TextButton(
+                onPressed: controller.goToDigitalLibrary,
+                child: const Text("Lihat Semua"),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Gunakan data mock lokal dari controller
+        ...controller.featuredArticles.map((article) => Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: ListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey.shade300)
+            ),
+            leading: Container(
+              width: 60, height: 60,
+              decoration: BoxDecoration(color: AppColors.greyLight, borderRadius: BorderRadius.circular(8)),
+              child: const FaIcon(FontAwesomeIcons.image, color: Colors.grey),
+            ),
+            title: Text(article['title']!, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text(article['category']!),
+            onTap: () { /* TODO: Navigasi ke detail artikel */ },
+          ),
+        )).toList(),
+      ],
+    );
   }
 }

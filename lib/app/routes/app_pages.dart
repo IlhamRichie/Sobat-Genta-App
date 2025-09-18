@@ -246,7 +246,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.CLINIC_HOME,
-      page: () => const ClinicHomeView(),
+      page: () => ClinicHomeView(),
       binding: ClinicHomeBinding(),
     ),
     GetPage(
@@ -256,7 +256,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.CLINIC_EXPERT_PROFILE,
-      page: () => const ClinicExpertProfileView(),
+      page: () => ClinicExpertProfileView(),
       binding: ClinicExpertProfileBinding(),
     ),
     GetPage(
@@ -271,7 +271,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.EXPERT_DASHBOARD,
-      page: () => const ExpertDashboardView(),
+      page: () => ExpertDashboardView(),
       binding: ExpertDashboardBinding(),
     ),
     GetPage(
@@ -281,7 +281,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.EXPERT_PAYOUT,
-      page: () => const ExpertPayoutView(),
+      page: () => ExpertPayoutView(),
       binding: ExpertPayoutBinding(),
     ),
     GetPage(
@@ -381,17 +381,17 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.FARMER_MY_PROJECTS_LIST,
-      page: () => const FarmerMyProjectsListView(),
+      page: () => FarmerMyProjectsListView(),
       binding: FarmerMyProjectsListBinding(),
     ),
     GetPage(
       name: _Paths.INVESTOR_FUNDING_MARKETPLACE,
-      page: () => const InvestorFundingMarketplaceView(),
+      page: () => InvestorFundingMarketplaceView(),
       binding: InvestorFundingMarketplaceBinding(),
     ),
     GetPage(
       name: _Paths.INVESTOR_PROJECT_DETAIL,
-      page: () => const InvestorProjectDetailView(),
+      page: () => InvestorProjectDetailView(),
       binding: InvestorProjectDetailBinding(),
     ),
     GetPage(
@@ -401,12 +401,12 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.INVESTOR_PORTFOLIO,
-      page: () => const InvestorPortfolioView(),
+      page: () => InvestorPortfolioView(),
       binding: InvestorPortfolioBinding(),
     ),
     GetPage(
       name: _Paths.INVESTOR_PORTFOLIO_DETAIL,
-      page: () => const InvestorPortfolioDetailView(),
+      page: () => InvestorPortfolioDetailView(),
       binding: InvestorPortfolioDetailBinding(),
     ),
     GetPage(

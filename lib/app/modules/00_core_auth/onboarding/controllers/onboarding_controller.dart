@@ -1,56 +1,53 @@
+// lib/app/modules/onboarding/controllers/onboarding_controller.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+
 import '../../../../routes/app_pages.dart';
 
 class OnboardingController extends GetxController {
+  final PageController pageController = PageController();
   
-  // 1. Controller untuk PageView
-  late PageController pageController;
-
-  // 2. Variabel reaktif untuk melacak halaman saat ini
+  // State reaktif untuk melacak halaman saat ini
   final RxInt currentPageIndex = 0.obs;
 
-  // 3. Jumlah total halaman
-  final int totalPages = 4;
-
-  final storage = GetStorage(); // Panggil instance GetStorage
-
-  @override
-  void onInit() {
-    super.onInit();
-    pageController = PageController();
-  }
+  // Sesuai user story, kita punya 3 halaman
+  final int totalPages = 3;
 
   @override
   void onClose() {
-    // Best practice: Selalu dispose controller
     pageController.dispose();
     super.onClose();
   }
 
-  // 4. Dipanggil oleh PageView setiap kali halaman berganti
+  /// Dipanggil oleh PageView saat halaman digeser
   void onPageChanged(int index) {
     currentPageIndex.value = index;
   }
 
-  // 5. Dipanggil oleh tombol "Next"
+  /// Dipanggil oleh tombol "Lanjut"
   void nextPage() {
-    if (currentPageIndex.value < totalPages - 1) {
-      pageController.nextPage(
-        duration: 300.ms,
+    if (currentPageIndex.value == totalPages - 1) {
+      // Jika di halaman terakhir, kita "Mulai"
+      goToAuth();
+    } else {
+      // Animasikan ke halaman berikutnya
+      pageController.animateToPage(
+        currentPageIndex.value + 1,
+        duration: const Duration(milliseconds: 400),
         curve: Curves.easeInOut,
       );
     }
   }
 
-  // 6. Dipanggil oleh tombol "Mulai Sekarang" atau "Lewati"
-  void onOnboardingDone() {
-    // Set flag di storage bahwa onboarding sudah selesai
-    storage.write('isOnboardingDone', true);
+  /// Dipanggil oleh tombol "Skip"
+  void skip() {
+    goToAuth();
+  }
 
-    // Navigasi ke Halaman Login
-    Get.offAllNamed(Routes.LOGIN);
+  /// Navigasi ke alur autentikasi
+  void goToAuth() {
+    // Sesuai rencana, user baru diarahkan ke pemilih peran
+    Get.offAllNamed(Routes.REGISTER_ROLE_CHOOSER);
   }
 }

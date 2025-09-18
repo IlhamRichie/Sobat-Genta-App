@@ -1,15 +1,10 @@
+// lib/app/modules/register_role_chooser/views/register_role_chooser_view.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import '../../../../theme/app_colors.dart';
 import '../controllers/register_role_chooser_controller.dart';
-
-// (Best Practice: Pindahkan ini ke lib/app/theme/app_colors.dart)
-const kPrimaryDarkGreen = Color(0xFF3A8A40);
-const kLightGreenBlob = Color(0xFFEAF4EB);
-const kTextFieldBorder = Color(0xFFD9D9D9);
-const kDarkTextColor = Color(0xFF1B2C1E);
-const kBodyTextColor = Color(0xFF5A6A5C);
 
 class RegisterRoleChooserView extends GetView<RegisterRoleChooserController> {
   const RegisterRoleChooserView({Key? key}) : super(key: key);
@@ -17,222 +12,135 @@ class RegisterRoleChooserView extends GetView<RegisterRoleChooserController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
+        title: const Text("Mulai Mendaftar"),
+        centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: kDarkTextColor),
-          onPressed: () => Get.back(),
-        ),
+        leading: BackButton(color: AppColors.textDark),
       ),
-      body: Stack(
-        children: [
-          _buildBackgroundBlobs(), // Konsistensi UI
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: Get.height * 0.02),
-                  
-                  _buildHeader()
-                      .animate()
-                      .fadeIn(delay: 300.ms)
-                      .slideY(begin: 0.2, end: 0),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // --- Pilihan Peran (Reaktif) ---
-                  // Gunakan Obx untuk 'mendengarkan' perubahan di controller
-                  Obx(() {
-                    return Column(
-                      children: [
-                        _buildRoleCard(
-                          title: 'Petani',
-                          description: 'Saya petani yang butuh modal & konsultasi.',
-                          icon: FontAwesomeIcons.leaf,
-                          isSelected: controller.selectedRole.value == UserRole.farmer,
-                          onTap: () => controller.selectRole(UserRole.farmer),
-                        ).animate().fadeIn(delay: 500.ms).slideX(begin: -0.2),
-                        
-                        const SizedBox(height: 16),
-                        
-                        _buildRoleCard(
-                          title: 'Investor',
-                          description: 'Saya ingin mendanai proyek agrikultur.',
-                          icon: FontAwesomeIcons.chartLine,
-                          isSelected: controller.selectedRole.value == UserRole.investor,
-                          onTap: () => controller.selectRole(UserRole.investor),
-                        ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.2),
-                        
-                        const SizedBox(height: 16),
-                        
-                        _buildRoleCard(
-                          title: 'Pakar',
-                          description: 'Saya (dokter hewan/ahli tani) penyedia jasa.',
-                          icon: FontAwesomeIcons.userDoctor,
-                          isSelected: controller.selectedRole.value == UserRole.expert,
-                          onTap: () => controller.selectRole(UserRole.expert),
-                        ).animate().fadeIn(delay: 700.ms).slideX(begin: -0.2),
-                      ],
-                    );
-                  }),
-                  
-                  const Spacer(), // Dorong tombol ke bawah
-                  
-                  // --- Tombol Lanjutkan (State-Driven) ---
-                  Obx(() {
-                    return _buildContinueButton(
-                      // Tombol akan 'null' (disabled) jika selectedRole masih null
-                      onPressed: controller.selectedRole.value == null
-                          ? null
-                          : controller.continueRegistration,
-                    );
-                  }).animate().fadeIn(delay: 800.ms).slideY(begin: 0.5),
-                  
-                  SizedBox(height: Get.height * 0.05),
-                ],
-              ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Pilih Peran Anda",
+              style: Get.textTheme.titleLarge?.copyWith(fontSize: 24),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 8),
+            Text(
+              "Setiap peran memiliki fitur dan manfaat yang berbeda.",
+              style: Get.textTheme.bodyMedium?.copyWith(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            
+            // --- Card 1: Petani ---
+            _buildRoleCard(
+              icon: FontAwesomeIcons.leaf,
+              role: "Saya Petani",
+              description: "Ajukan pendanaan, kelola lahan, dan beli kebutuhan tani.",
+              color: AppColors.primary, // Warna hijau tema kita
+              onTap: controller.navigateToFarmerRegistration,
+            ),
+            const SizedBox(height: 20),
 
-  // --- Helper Widgets (Best Practice) ---
+            // --- Card 2: Investor ---
+            _buildRoleCard(
+              icon: FontAwesomeIcons.chartLine,
+              role: "Saya Investor",
+              description: "Temukan proyek pertanian & dapatkan imbal hasil.",
+              color: AppColors.accent, // Warna kuning aksen kita
+              onTap: controller.navigateToInvestorRegistration,
+            ),
+            const SizedBox(height: 20),
 
-  Widget _buildBackgroundBlobs() {
-    return Positioned(
-      top: -100,
-      left: -100,
-      child: Container(
-        width: 300,
-        height: 300,
-        decoration: const BoxDecoration(
-          color: kLightGreenBlob,
-          shape: BoxShape.circle,
+            // --- Card 3: Pakar ---
+            _buildRoleCard(
+              icon: FontAwesomeIcons.userDoctor, // Sesuai Skenario 3
+              role: "Saya Pakar",
+              description: "Beri konsultasi (ahli tani/dokter hewan) & dapatkan penghasilan.",
+              color: Colors.blue.shade700,
+              onTap: controller.navigateToExpertRegistration,
+            ),
+          ],
         ),
       ),
+      bottomNavigationBar: _buildLoginRedirect(),
     );
   }
 
-  Widget _buildHeader() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Daftar Akun',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: kDarkTextColor,
-          ),
-        ),
-        SizedBox(height: 8),
-        Text(
-          'Pilih peran yang paling sesuai untuk Anda.',
-          style: TextStyle(
-            fontSize: 17,
-            color: kBodyTextColor,
-            height: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Helper widget kustom untuk kartu pilihan
+  /// Widget Reusable untuk Kartu Pilihan Peran
+  /// BEST PRACTICE: Memecah UI kompleks menjadi widget/method
   Widget _buildRoleCard({
-    required String title,
-    required String description,
     required IconData icon,
-    required bool isSelected,
+    required String role,
+    required String description,
+    required Color color,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: 200.ms,
-        padding: const EdgeInsets.all(20.0),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? kLightGreenBlob : Colors.white,
+          color: color.withOpacity(0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? kPrimaryDarkGreen : kTextFieldBorder,
-            width: isSelected ? 2.0 : 1.5,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: kPrimaryDarkGreen.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  )
-                ]
-              : [], // Tidak ada shadow jika tidak dipilih
+          border: Border.all(color: color.withOpacity(0.3), width: 1.5),
         ),
         child: Row(
           children: [
-            FaIcon(
-              icon,
-              color: isSelected ? kPrimaryDarkGreen : kDarkTextColor,
-              size: 32,
-            ),
+            FaIcon(icon, size: 36, color: color),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
-                    style: TextStyle(
+                    role,
+                    style: Get.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? kPrimaryDarkGreen : kDarkTextColor,
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: kBodyTextColor,
+                    style: Get.textTheme.bodyMedium?.copyWith(
+                      fontSize: 14,
+                      color: AppColors.textLight,
                     ),
                   ),
                 ],
               ),
             ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: kPrimaryDarkGreen,
-              ),
+            FaIcon(FontAwesomeIcons.chevronRight, size: 16, color: color.withOpacity(0.7)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContinueButton({required VoidCallback? onPressed}) {
-    return ElevatedButton(
-      onPressed: onPressed, // Ini kuncinya
-      style: ElevatedButton.styleFrom(
-        backgroundColor: kPrimaryDarkGreen,
-        foregroundColor: Colors.white,
-        // Style 'disabled' akan otomatis diterapkan saat onPressed: null
-        disabledBackgroundColor: kTextFieldBorder,
-        disabledForegroundColor: kBodyTextColor,
-        minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
-      child: const Text(
-        'Lanjutkan Pendaftaran',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  /// Widget untuk link "Sudah punya akun?" di bawah
+  Widget _buildLoginRedirect() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Sudah punya akun?', style: Get.textTheme.bodyMedium),
+          TextButton(
+            onPressed: controller.navigateToLogin,
+            child: const Text(
+              'Login di sini',
+              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }

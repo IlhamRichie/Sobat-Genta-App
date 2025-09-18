@@ -1,16 +1,10 @@
+// lib/app/modules/forgot_password/views/forgot_password_view.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import '../../../../theme/app_colors.dart';
 import '../controllers/forgot_password_controller.dart';
-
-// (Best Practice: Idealnya, semua konstanta ini ada di lib/app/theme/...)
-// Kita definisikan di sini untuk menjaga konsistensi visual dengan Login
-const kPrimaryDarkGreen = Color(0xFF3A8A40);
-const kLightGreenBlob = Color(0xFFEAF4EB);
-const kTextFieldBorder = Color(0xFFD9D9D9);
-const kDarkTextColor = Color(0xFF1B2C1E);
-const kBodyTextColor = Color(0xFF5A6A5C);
 
 class ForgotPasswordView extends GetView<ForgotPasswordController> {
   const ForgotPasswordView({Key? key}) : super(key: key);
@@ -18,184 +12,84 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      // AppBar custom yang bersih
       appBar: AppBar(
+        title: const Text("Lupa Password"),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: kDarkTextColor),
-          onPressed: () => Get.back(),
-        ),
+        leading: BackButton(color: AppColors.textDark),
       ),
-      body: Stack(
-        children: [
-          // 1. Elemen Dekorasi Background (Konsisten dengan Login)
-          _buildBackgroundBlobs(),
-
-          // 2. Konten Utama
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Form(
-                key: controller.formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(height: Get.height * 0.05),
-                    
-                    // --- Ilustrasi ---
-                    _buildIllustration()
-                        .animate()
-                        .fadeIn(delay: 300.ms, duration: 500.ms)
-                        .scale(begin: const Offset(0.8, 0.8)),
-
-                    SizedBox(height: Get.height * 0.05),
-                    
-                    // --- Header ---
-                    _buildHeader()
-                        .animate()
-                        .fadeIn(delay: 500.ms, duration: 500.ms)
-                        .slideY(begin: 0.2, end: 0),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // --- Form Email ---
-                    _buildEmailField()
-                        .animate()
-                        .fadeIn(delay: 600.ms, duration: 500.ms)
-                        .slideX(begin: -0.2, end: 0),
-                    
-                    SizedBox(height: Get.height * 0.1),
-                    
-                    // --- Tombol Kirim ---
-                    _buildSendButton(context)
-                        .animate()
-                        .fadeIn(delay: 700.ms, duration: 500.ms),
-                  ],
-                ),
-              ),
-            ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        child: Form(
+          key: controller.formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 32),
+              _buildEmailField(),
+              const SizedBox(height: 32),
+              _buildSendButton(),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-
-  // --- Helper Widgets (Best Practice) ---
-
-  Widget _buildBackgroundBlobs() {
-    // (Helper ini sama dengan di LoginPage untuk konsistensi)
-    return Stack(
-      children: [
-        Positioned(
-          top: -100,
-          left: -100,
-          child: Container(
-            width: 300,
-            height: 300,
-            decoration: const BoxDecoration(
-              color: kLightGreenBlob,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildIllustration() {
-    // Placeholder untuk ilustrasi modern
-    // 
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(40),
-        decoration: const BoxDecoration(
-          color: kLightGreenBlob, // Warna blob
-          shape: BoxShape.circle,
-        ),
-        child: FaIcon(
-          FontAwesomeIcons.envelopeOpenText,
-          size: Get.height * 0.1,
-          color: kPrimaryDarkGreen,
         ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
+        FaIcon(FontAwesomeIcons.circleQuestion, size: 64, color: AppColors.primary),
+        const SizedBox(height: 24),
         Text(
-          'Lupa Password?',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: kDarkTextColor,
-          ),
+          "Jangan Khawatir",
+          style: Get.textTheme.titleLarge?.copyWith(fontSize: 24),
+          textAlign: TextAlign.center,
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
-          'Jangan khawatir! Masukkan email terdaftar Anda untuk menerima kode verifikasi.',
-          style: TextStyle(
-            fontSize: 17,
-            color: kBodyTextColor,
-            height: 1.5,
-          ),
+          "Masukkan email Anda yang terdaftar. Kami akan mengirimkan kode OTP untuk mengatur ulang password Anda.",
+          style: Get.textTheme.bodyMedium?.copyWith(fontSize: 16),
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
 
-  // Dekorasi Input Form (SAMA PERSIS dengan LoginPage)
-  InputDecoration _inputDecoration(String hintText, IconData prefixIcon) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: const TextStyle(color: kBodyTextColor),
-      prefixIcon: Icon(prefixIcon, color: kBodyTextColor),
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: kTextFieldBorder, width: 1.5),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: kTextFieldBorder, width: 1.5),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: kPrimaryDarkGreen, width: 2),
-      ),
-    );
-  }
-
   Widget _buildEmailField() {
     return TextFormField(
-      controller: controller.emailController,
-      validator: controller.validateEmail,
+      controller: controller.emailC,
       keyboardType: TextInputType.emailAddress,
-      decoration: _inputDecoration('Email', Icons.mail_outline),
+      autocorrect: false,
+      decoration: InputDecoration(
+        labelText: 'Email Terdaftar',
+        hintText: 'contoh: budi@petani.com',
+        prefixIcon: const FaIcon(FontAwesomeIcons.solidEnvelope, size: 20),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Email tidak boleh kosong';
+        }
+        if (!GetUtils.isEmail(value)) {
+          return 'Format email tidak valid';
+        }
+        return null;
+      },
     );
   }
 
-  Widget _buildSendButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => controller.sendRecoveryEmail(context),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: kPrimaryDarkGreen,
-        foregroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 56), // Lebar penuh
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
-      child: const Text(
-        'Kirim Email Pemulihan',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-    );
+  Widget _buildSendButton() {
+    return Obx(() => FilledButton(
+          onPressed: controller.isLoading.value ? null : controller.sendResetRequest,
+          child: controller.isLoading.value
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                )
+              : const Text('Kirim Kode OTP'),
+        ));
   }
 }

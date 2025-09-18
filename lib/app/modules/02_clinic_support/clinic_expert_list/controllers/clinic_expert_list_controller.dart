@@ -1,119 +1,114 @@
+// lib/app/modules/clinic_expert_list/controllers/clinic_expert_list_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import '../../../../data/models/expert_model.dart';
-import '../../../../routes/app_pages.dart';
-import '../../../01_main_navigation/main_navigation/controllers/main_navigation_controller.dart';
 
-// --- Best Practice: Definisikan Model Data ---
-enum ExpertSpecialty { all, farmer, vet }
+import '../../../../data/models/pakar_profile_model.dart';
+import '../../../../data/repositories/abstract/pakar_profile_repository.dart';
+import '../../../../routes/app_pages.dart';
 
 class ClinicExpertListController extends GetxController {
+
+  // --- DEPENDENCIES ---
+  final IPakarProfileRepository _pakarRepo = Get.find<IPakarProfileRepository>();
   
-  late MainNavigationController mainNavController;
+  // --- STATE ---
+  final RxBool isLoading = true.obs;
+  
+  // --- FILTER & SEARCH STATE ---
+  final TextEditingController searchC = TextEditingController();
+  final RxString filterCategory = ''.obs;
+  final RxString filterSearchTerm = ''.obs;
+  final RxBool filterOnlineOnly = false.obs;
 
-  late TextEditingController searchController;
-  final RxString searchQuery = ''.obs;
-  final Rx<ExpertSpecialty> selectedFilter = ExpertSpecialty.all.obs;
-  final List<String> filterChips = ['Semua', 'Ahli Tani', 'Dokter Hewan'];
-
-  final RxList<ExpertModel> allExperts = <ExpertModel>[].obs;
-  final RxList<ExpertModel> filteredExperts = <ExpertModel>[].obs;
-
+  // --- DATA LISTS ---
+  /// List master yang menyimpan data asli dari API
+  final List<PakarProfileModel> _masterPakarList = [];
+  /// List yang ditampilkan ke UI dan akan dimodifikasi oleh filter
+  final RxList<PakarProfileModel> displayedPakarList = <PakarProfileModel>[].obs;
+  
   @override
   void onInit() {
     super.onInit();
-    searchController = TextEditingController();
-    mainNavController = Get.find<MainNavigationController>();
+    // 1. Ambil argumen kategori (cth: "PETERNAKAN")
+    final String? initialCategory = Get.arguments?['category'];
+    if (initialCategory != null) {
+      filterCategory.value = initialCategory;
+    }
     
-    _loadDummyData(); // Muat data dummy
+    // 2. Ambil data awal berdasarkan filter kategori
+    fetchInitialPakarList(initialCategory);
     
-    // Best Practice: Listener reaktif untuk filter
-    searchController.addListener(() {
-      searchQuery.value = searchController.text;
-    });
-    
-    // 'ever' akan 'mendengarkan' perubahan pada 2 variabel ini dan memanggil filterList
-    ever(searchQuery, (_) => filterList());
-    ever(selectedFilter, (_) => filterList());
+    // 3. BEST PRACTICE: Buat listener (worker) untuk filter lokal.
+    // 'ever' akan mendengarkan perubahan pada filter-filter ini
+    // dan memanggil '_applyLocalFilters' secara otomatis.
+    ever(filterSearchTerm, (_) => _applyLocalFilters());
+    ever(filterOnlineOnly, (_) => _applyLocalFilters());
   }
 
   @override
   void onClose() {
-    searchController.dispose();
+    searchC.dispose();
     super.onClose();
   }
 
-  // --- Logic Utama ---
+  /// 1. Ambil data dari API (SATU KALI)
+  Future<void> fetchInitialPakarList(String? category) async {
+    isLoading.value = true;
+    _masterPakarList.clear();
+    displayedPakarList.clear();
+    
+    try {
+      final pakar = await _pakarRepo.getPakarList(category);
+      // Sortir yang Online duluan
+      pakar.sort((a, b) => (a.isAvailable ? 0 : 1).compareTo(b.isAvailable ? 0 : 1));
+      
+      _masterPakarList.assignAll(pakar); // Simpan ke list master
+      displayedPakarList.assignAll(pakar); // Tampilkan ke UI
+      
+    } catch (e) {
+      Get.snackbar("Error", "Gagal memuat daftar pakar: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
   
-  void filterList() {
-    List<ExpertModel> results = [];
-    
-    // 1. Filter berdasarkan Kategori (Chip)
-    if (selectedFilter.value == ExpertSpecialty.all) {
-      results = allExperts;
-    } else {
-      results = allExperts.where((p) => p.specialtyEnum == selectedFilter.value).toList();
+  /// 2. Jalankan filter lokal (CLIENT-SIDE FILTERING)
+  void _applyLocalFilters() {
+    List<PakarProfileModel> filteredList = List.from(_masterPakarList);
+
+    // Filter A: Status Online
+    if (filterOnlineOnly.value) {
+      filteredList = filteredList.where((pakar) => pakar.isAvailable).toList();
     }
     
-    // 2. Filter berdasarkan Pencarian (Search Query)
-    if (searchQuery.value.isNotEmpty) {
-      results = results.where((p) => 
-        p.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-        p.specialtyName.toLowerCase().contains(searchQuery.value.toLowerCase())
-      ).toList();
+    // Filter B: Search Term (Nama atau Spesialisasi)
+    if (filterSearchTerm.value.isNotEmpty) {
+      String searchTerm = filterSearchTerm.value.toLowerCase();
+      filteredList = filteredList.where((pakar) {
+        return pakar.user.fullName.toLowerCase().contains(searchTerm) ||
+               pakar.specialization.toLowerCase().contains(searchTerm);
+      }).toList();
     }
     
-    filteredExperts.value = results;
+    // Update UI
+    displayedPakarList.assignAll(filteredList);
   }
 
-  void selectFilter(int index) {
-    if (index == 0) selectedFilter.value = ExpertSpecialty.all;
-    if (index == 1) selectedFilter.value = ExpertSpecialty.farmer;
-    if (index == 2) selectedFilter.value = ExpertSpecialty.vet;
+  // --- METODE YANG DIPANGGIL DARI UI ---
+
+  /// Dipanggil oleh Search Bar (onChanged)
+  void onSearchChanged(String query) {
+    filterSearchTerm.value = query;
   }
 
-  // --- [SR-KYC-02] LOGIC KUNCI & SNACKBAR ---
-  void onConsultationTap(BuildContext context, ExpertModel expert) {
-    // Cek status KYC dari Main Controller
-    if (mainNavController.kycStatus.value == UserKycStatus.verified) {
-      // 1. JIKA LOLOS: Lanjut ke profil pakar
-      Get.toNamed(Routes.CLINIC_EXPERT_PROFILE, arguments: expert);
-    } else {
-      // 2. JIKA TERKUNCI: Tampilkan Snackbar Informatif
-      showKycSnackbar(context);
-    }
+  /// Dipanggil oleh Toggle/Switch
+  void onOnlineOnlyToggled(bool value) {
+    filterOnlineOnly.value = value;
   }
-
-  void showKycSnackbar(BuildContext context) {
-    // Ambil status KYC
-    final kycStatus = mainNavController.kycStatus.value;
-    String message = "";
-
-    if (kycStatus == UserKycStatus.pending) {
-      message = "Fitur terkunci. Harap lengkapi verifikasi KYC Anda untuk memulai konsultasi.";
-    } else { // Ini berarti statusnya inReview
-      message = "Fitur terkunci. Akun Anda sedang ditinjau, mohon tunggu persetujuan Admin.";
-    }
-
-    showTopSnackBar(
-      Overlay.of(context),
-      CustomSnackBar.error(
-        message: message,
-      ),
-      displayDuration: 3.seconds,
-    );
-  }
-
-  // --- Data Dummy (UI Dulu Aja) ---
-  void _loadDummyData() {
-    allExperts.value = [
-      ExpertModel(id: 1, name: 'Dr. Budi Santoso', specialtyName: 'Ahli Hama Tanaman', specialtyEnum: ExpertSpecialty.farmer, rating: 4.9, price: '50rb', isOnline: true, imageUrl: 'https://picsum.photos/seed/doc1/200'),
-      ExpertModel(id: 2, name: 'Drh. Anita Dewi', specialtyName: 'Dokter Hewan Ternak', specialtyEnum: ExpertSpecialty.vet, rating: 4.8, price: '75rb', isOnline: true, imageUrl: 'https://picsum.photos/seed/doc2/200'),
-      ExpertModel(id: 3, name: 'Prof. Ir. Jaya Wijaya', specialtyName: 'Ahli Nutrisi Tanah', specialtyEnum: ExpertSpecialty.farmer, rating: 4.9, price: '80rb', isOnline: false, imageUrl: 'https://picsum.photos/seed/doc3/200'),
-      ExpertModel(id: 4, name: 'Drh. Rina Pratiwi', specialtyName: 'Spesialis Unggas', specialtyEnum: ExpertSpecialty.vet, rating: 4.7, price: '60rb', isOnline: true, imageUrl: 'https://picsum.photos/seed/doc4/200'),
-    ];
-    filteredExperts.value = allExperts;
+  
+  /// Navigasi ke detail profil pakar
+  void goToPakarDetail(PakarProfileModel pakar) {
+    Get.toNamed(Routes.CLINIC_EXPERT_PROFILE, arguments: pakar);
   }
 }

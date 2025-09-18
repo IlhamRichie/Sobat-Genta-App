@@ -1,62 +1,70 @@
+// lib/app/modules/forgot_password/controllers/forgot_password_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
+
+import '../../../../data/repositories/abstract/auth_repository.dart';
 import '../../../../routes/app_pages.dart';
 
 class ForgotPasswordController extends GetxController {
-  
-  // Kunci Global untuk Form Validasi
+
+  final IAuthRepository _authRepo = Get.find<IAuthRepository>();
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  // Controller untuk input email
-  late TextEditingController emailController;
-
-  @override
-  void onInit() {
-    super.onInit();
-    emailController = TextEditingController();
-  }
+  final TextEditingController emailC = TextEditingController();
+  
+  final RxBool isLoading = false.obs;
 
   @override
   void onClose() {
-    // Best practice: Selalu dispose controller
-    emailController.dispose();
+    emailC.dispose();
     super.onClose();
   }
 
-  // Validator untuk Email
-  String? validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email tidak boleh kosong';
-    }
-    if (!GetUtils.isEmail(value)) {
-      return 'Email tidak valid';
-    }
-    return null;
-  }
-
-  // Aksi saat tombol "Kirim Email Pemulihan" ditekan
-  void sendRecoveryEmail(BuildContext context) {
+  /// Aksi untuk mengirim permintaan reset password
+  Future<void> sendResetRequest() async {
     // 1. Validasi form
-    if (formKey.currentState!.validate()) {
-      // 2. (LOGIC API NANTI DI SINI)
-      // ... (Tampilkan loading)
-      // ... (Panggil API forgot password)
-      
-      // 3. (UI SEMENTARA) Tampilkan notifikasi sukses
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      // 2. Panggil repository
+      await _authRepo.forgotPassword(emailC.text);
+
+      // 3. Tampilkan notifikasi sukses
       showTopSnackBar(
-        Overlay.of(context),
-        const CustomSnackBar.success(
-          message: "Email pemulihan terkirim! Silakan cek inbox Anda.",
+        Overlay.of(Get.context!),
+        CustomSnackBar.success(
+          message: "Permintaan terkirim. Cek email Anda untuk kode OTP.",
+          backgroundColor: Colors.green.shade700,
         ),
       );
 
-      // 4. Pindah ke halaman OTP setelah 2 detik
-      Future.delayed(2.seconds, () {
-        // (Kita akan buat halaman OtpVerificationPage selanjutnya)
-        Get.toNamed(Routes.OTP_VERIFICATION, arguments: emailController.text);
-      });
+      // 4. Navigasi ke Halaman OTP
+      //    PENTING: Kirim 'purpose' yang berbeda
+      Get.toNamed(
+        Routes.OTP_VERIFICATION,
+        arguments: {
+          'email': emailC.text,
+          'purpose': 'reset_password', // Berbeda dari 'registration'
+        },
+      );
+      
+    } catch (e) {
+      // 5. Tangani error
+      showTopSnackBar(
+        Overlay.of(Get.context!),
+        CustomSnackBar.error(
+          message: e.toString().replaceAll("Exception: ", ""),
+        ),
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 }

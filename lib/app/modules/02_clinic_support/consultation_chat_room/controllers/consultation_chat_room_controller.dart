@@ -1,84 +1,121 @@
-import 'package:flutter_animate/flutter_animate.dart';
+// lib/app/modules/consultation_chat_room/controllers/consultation_chat_room_controller.dart
+
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uuid/uuid.dart';
-import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import '../../../../data/models/expert_model.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../../../data/models/chat_message_model.dart';
+import '../../../../data/models/consultation_model.dart';
+import '../../../../data/repositories/abstract/consultation_repository.dart';
 import '../../../../routes/app_pages.dart';
+import '../../../../services/chat_service.dart';
+import '../../../../services/session_service.dart';
 
 class ConsultationChatRoomController extends GetxController {
-  
-  late ExpertModel expertData;
-  late types.User expertUser; 
-  late types.User currentUser; 
 
-  // --- [FIX] Ubah dari RxList menjadi List biasa ---
-  final List<types.Message> messages = <types.Message>[];
-  final uuid = const Uuid();
+  // --- DEPENDENCIES ---
+  final IConsultationRepository _consultationRepo = Get.find<IConsultationRepository>();
+  final ChatService _chatService = Get.find<ChatService>();
+  final SessionService _sessionService = Get.find<SessionService>();
+
+  // --- STATE ---
+  final TextEditingController textC = TextEditingController();
+  final RxBool isLoadingHistory = true.obs;
+  final RxList<ChatMessageModel> messageList = <ChatMessageModel>[].obs;
+  
+  late final ConsultationModel consultation; // Data sesi dari argumen
+  late final String currentUserId;
+  late StreamSubscription _messageSubscription; // Listener socket
 
   @override
   void onInit() {
     super.onInit();
+    consultation = Get.arguments as ConsultationModel;
+    currentUserId = _sessionService.currentUser.value!.userId;
     
-    expertData = Get.arguments as ExpertModel;
-    expertUser = types.User(
-      id: expertData.id.toString(),
-      firstName: expertData.name,
-      imageUrl: expertData.imageUrl,
-    );
-    currentUser = const types.User(
-      id: 'farmer_user_id_001',
-      firstName: 'Budi Santoso',
-      imageUrl: 'https://picsum.photos/seed/user/200',
-    );
+    fetchChatHistory();
     
-    _loadInitialMessages();
+    // 3. Mulai MENDENGARKAN pesan baru dari ChatService
+    _messageSubscription = _chatService.newIncomingMessage.listen(_onNewMessageReceived);
   }
 
-  void onSendPressed(types.PartialText message) {
-    final textMessage = types.TextMessage(
-      author: currentUser,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: uuid.v4(),
-      text: message.text,
+  @override
+  void onClose() {
+    textC.dispose();
+    _messageSubscription.cancel(); // Wajib stop listener
+    super.onClose();
+  }
+
+  /// 1. Mengambil riwayat chat dari REST API
+  Future<void> fetchChatHistory() async {
+    isLoadingHistory.value = true;
+    try {
+      final history = await _consultationRepo.getChatHistory(consultation.consultationId);
+      messageList.assignAll(history);
+    } catch (e) {
+      Get.snackbar("Error", "Gagal memuat riwayat chat.");
+    } finally {
+      isLoadingHistory.value = false;
+    }
+  }
+
+  /// 2. Listener: Dipanggil oleh ChatService jika ada pesan baru
+  void _onNewMessageReceived(ChatMessageModel? message) {
+    if (message != null && message.consultationId == consultation.consultationId) {
+      // Tambahkan pesan baru ke paling atas list
+      messageList.insert(0, message);
+    }
+  }
+
+  /// 4. Mengirim pesan teks (via Socket Service)
+  void sendTextMessage() {
+    if (textC.text.isEmpty) return;
+    
+    // Panggil service untuk kirim
+    _chatService.sendMessage(textC.text, consultation.consultationId);
+    
+    // Optimistic UI Update: Langsung tambahkan pesan kita ke list
+    // tanpa menunggu balasan server (server akan kirim ke penerima)
+    final optimisticMessage = ChatMessageModel(
+      messageId: "temp_${DateTime.now().millisecondsSinceEpoch}",
+      consultationId: consultation.consultationId,
+      senderId: currentUserId,
+      messageContent: textC.text,
+      timestamp: DateTime.now(),
     );
-    _addMessage(textMessage);
-    _simulateExpertReply();
+    messageList.insert(0, optimisticMessage);
+    
+    textC.clear();
   }
 
-  // --- [FIX] Helper ini sekarang harus memanggil update() ---
-  void _addMessage(types.Message message) {
-    messages.insert(0, message);
-    update(); // <-- INI KUNCINYA: Beri tahu GetBuilder untuk update UI
+  /// 5. Mengirim lampiran foto (Skenario 3)
+  Future<void> sendImageAttachment() async {
+    try {
+      final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        final file = File(pickedFile.path);
+        // Panggil service untuk upload & kirim
+        _chatService.sendImage(file, consultation.consultationId);
+        
+        // Optimistic UI (simulasi)
+         final optimisticMessage = ChatMessageModel(
+            messageId: "temp_img_${DateTime.now().millisecondsSinceEpoch}",
+            consultationId: consultation.consultationId,
+            senderId: currentUserId,
+            imageUrl: file.path, // Tampilkan dari path lokal dulu
+            timestamp: DateTime.now(),
+         );
+         messageList.insert(0, optimisticMessage);
+      }
+    } catch (e) {
+       Get.snackbar("Error", "Gagal memilih gambar.");
+    }
   }
 
-  void _loadInitialMessages() {
-    final initialMessage = types.TextMessage(
-      author: expertUser,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: uuid.v4(),
-      text: 'Halo, ${currentUser.firstName}! Ada yang bisa saya bantu terkait ${expertData.specialtyName}?',
-    );
-    _addMessage(initialMessage); // Ini juga akan memanggil update()
+  /// 6. Navigasi ke Video Call
+  void goToVideoCall() {
+    Get.toNamed(Routes.CONSULTATION_VIDEO_CALL, arguments: consultation);
   }
-
-  void _simulateExpertReply() {
-    Future.delayed(1500.ms, () {
-      final replyMessage = types.TextMessage(
-        author: expertUser,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        id: uuid.v4(),
-        text: 'Baik, saya terima pesannya. Akan segera saya analisis.',
-      );
-      _addMessage(replyMessage); // Ini juga akan memanggil update()
-    });
-  }
-
-  void goToVideoCallPage() {
-    // Arahkan ke halaman Video Call, kirim data Pakar juga
-    Get.toNamed(
-      Routes.CONSULTATION_VIDEO_CALL,
-      arguments: expertData,
-    );
-  }
-  
 }

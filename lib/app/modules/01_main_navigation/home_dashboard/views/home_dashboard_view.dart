@@ -1,300 +1,266 @@
+// lib/app/modules/home_dashboard/views/home_dashboard_view.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import '../../../00_core_auth/register_role_chooser/controllers/register_role_chooser_controller.dart';
-import '../../main_navigation/controllers/main_navigation_controller.dart';
+import '../../../../theme/app_colors.dart';
 import '../controllers/home_dashboard_controller.dart';
-
-// (Best Practice: Pindahkan ini ke lib/app/theme/app_colors.dart)
-const kPrimaryDarkGreen = Color(0xFF3A8A40);
-const kLightGreenBlob = Color(0xFFEAF4EB);
-const kDarkTextColor = Color(0xFF1B2C1E);
-const kBodyTextColor = Color(0xFF5A6A5C);
 
 class HomeDashboardView extends GetView<HomeDashboardController> {
   const HomeDashboardView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Ambil status KYC dari controller induk
-    // Obx akan 'mendengarkan' perubahan pada mainNavController.kycStatus
-    return Obx(() {
-      final kycStatus = controller.mainNavController.kycStatus.value;
-      final bool isKycVerified = (kycStatus == UserKycStatus.verified);
-
-      return Scaffold(
-        backgroundColor: kLightGreenBlob, // Background dashboard
-        body: SingleChildScrollView(
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: RefreshIndicator(
+        // BEST PRACTICE: Tambahkan RefreshIndicator
+        onRefresh: controller.fetchDashboardData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context, controller.userName.value, controller.userRoleName.value),
-              _buildWalletSummaryCard(isKycVerified),
-              _buildQuickActions(context, isKycVerified),
-              _buildPopularProjects(),
+              _buildWalletCard(),
+              const SizedBox(height: 24),
+              _buildShortcutGrid(),
+              const SizedBox(height: 24),
+              _buildAssetSummary(),
+              const SizedBox(height: 24),
+              _buildPromoBanners(), // Placeholder
             ],
           ),
         ),
-      );
-    });
-  }
-
-  // --- Helper Widgets (Best Practice) ---
-
-  Widget _buildHeader(BuildContext context, String name, String role) {
-    return Container(
-      padding: const EdgeInsets.all(24.0),
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
-        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Selamat Datang,',
-            style: TextStyle(
-              fontSize: 18,
-              color: kBodyTextColor,
-            ),
-          ),
-          Text(
-            name, // Nama dari controller
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: kDarkTextColor,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: kPrimaryDarkGreen.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              role, // Peran dari controller
-              style: const TextStyle(
-                color: kPrimaryDarkGreen,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ).animate().fadeIn(delay: 300.ms).slideY(begin: -0.1),
     );
   }
 
-  Widget _buildWalletSummaryCard(bool isKycVerified) {
-    return Container(
-      padding: const EdgeInsets.all(20.0),
-      margin: const EdgeInsets.all(24.0),
-      decoration: BoxDecoration(
-        color: kPrimaryDarkGreen,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: kPrimaryDarkGreen.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+  /// AppBar Khusus untuk Halaman Home
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Selamat Datang,",
+            style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+          ),
+          Text(
+            controller.userName, // "Budi (Petani)"
+            style: Get.textTheme.titleLarge?.copyWith(
+              color: AppColors.textDark, 
+              fontSize: 20,
+            ),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Total Saldo',
-            style: TextStyle(color: kLightGreenBlob, fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            isKycVerified ? 'Rp 1.250.000' : 'Rp 0',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+      actions: [
+        IconButton(
+          onPressed: () { /* TODO: Go to Notification Page */ },
+          icon: const FaIcon(FontAwesomeIcons.solidBell, color: AppColors.textLight),
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  /// Widget 1: Kartu Dompet
+  Widget _buildWalletCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: AppColors.primary,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Total Saldo Dompet",
+              style: Get.textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ),
-          ),
-          const SizedBox(height: 16),
-          if (!isKycVerified) // Tampilkan pesan jika KYC belum verified
+            const SizedBox(height: 8),
+            // Dengarkan state isLoading dan walletBalance
+            Obx(() => controller.isLoading.value
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(color: Colors.white),
+                  )
+                : Text(
+                    controller.walletBalance.value,
+                    style: Get.textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontSize: 28,
+                    ),
+                  )),
+            const SizedBox(height: 20),
             Row(
               children: [
-                const Icon(Icons.lock_outline, color: Colors.white, size: 16),
-                const SizedBox(width: 8),
-                const Expanded(
-                  child: Text(
-                    'Dompet Anda akan aktif setelah verifikasi KYC.',
-                    style: TextStyle(color: Colors.white, fontSize: 13),
-                  ),
-                ),
-              ],
-            ),
-          // (Tampilkan tombol TopUp/Tarik jika sudah verified)
-        ],
-      ),
-    ).animate().fadeIn(delay: 500.ms).scale(begin: const Offset(0.9, 0.9));
-  }
-  
-  Widget _buildQuickActions(BuildContext context, bool isKycVerified) {
-    // (Simulasi UI berbeda berdasarkan Peran Pengguna)
-    final bool isFarmer = controller.userRole.value == UserRole.farmer;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Aksi Cepat',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kDarkTextColor),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // --- [SR-KYC-02] Fitur Terkunci ---
-              // Jika pengguna adalah Petani, tunjukkan "Ajukan Dana"
-              // Jika Investor, tunjukkan "Investasi"
-              if (isFarmer)
-                _buildActionButton(
-                  context,
-                  icon: FontAwesomeIcons.handHoldingDollar,
-                  label: 'Ajukan Dana',
-                  isLocked: !isKycVerified, // Terkunci jika KYC belum
-                  onTap: controller.goToFundingMarketplace,
-                ),
-              if (!isFarmer) // (Ini asumsi Investor/Pakar)
-                 _buildActionButton(
-                  context,
-                  icon: FontAwesomeIcons.chartLine,
-                  label: 'Investasi',
-                  isLocked: !isKycVerified, // Terkunci jika KYC belum
-                  onTap: controller.goToFundingMarketplace,
-                ),
-              
-              // --- Fitur Terkunci (Klinik) ---
-              _buildActionButton(
-                context,
-                icon: FontAwesomeIcons.stethoscope,
-                label: 'Klinik',
-                isLocked: !isKycVerified, // Terkunci jika KYC belum
-                onTap: controller.goToClinic,
-              ),
-
-              // --- Fitur Tidak Terkunci (Toko - Sesuai SRS) ---
-              _buildActionButton(
-                context,
-                icon: FontAwesomeIcons.store,
-                label: 'Toko',
-                isLocked: false, // Toko tidak terkunci
-                onTap: controller.goToStore,
-              ),
-
-              _buildActionButton(
-                context,
-                icon: FontAwesomeIcons.bullhorn,
-                label: 'Kebutuhan',
-                isLocked: !isKycVerified, // Terkunci jika KYC belum
-                onTap: () {},
-              ),
-            ],
-          ).animate(delay: 700.ms).fadeIn().slideX(begin: -0.2),
-        ],
-      ),
-    );
-  }
-
-  // Helper widget untuk tombol aksi cepat
-  Widget _buildActionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isLocked,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: isLocked ? () => controller.showKycSnackbar(context) : onTap,
-      child: Column(
-        children: [
-          Container(
-            width: Get.width * 0.18, // Responsif
-            height: Get.width * 0.18,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                )
-              ],
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                FaIcon(
-                  icon,
-                  size: 28,
-                  color: isLocked ? kBodyTextColor.withOpacity(0.5) : kPrimaryDarkGreen,
-                ),
-                if (isLocked)
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(16),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: controller.goToWallet,
+                    icon: const FaIcon(FontAwesomeIcons.wallet, size: 16),
+                    label: const Text("Lihat Dompet"),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.white.withOpacity(0.1),
+                      side: const BorderSide(color: Colors.white),
                     ),
                   ),
-                if (isLocked)
-                  const Icon(Icons.lock, color: kDarkTextColor, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () { /* TODO: Go to Top Up */ },
+                    icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
+                    label: const Text("Top Up"),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary,
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: isLocked ? kBodyTextColor.withOpacity(0.5) : kDarkTextColor,
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Widget 2: Grid Shortcut
+  Widget _buildShortcutGrid() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Menu Utama", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+        const SizedBox(height: 16),
+        GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          children: [
+            _buildShortcutItem(
+              icon: FontAwesomeIcons.store,
+              label: "Toko",
+              onTap: controller.goToStore,
+              color: Colors.orange.shade700,
             ),
-          )
+            _buildShortcutItem(
+              icon: FontAwesomeIcons.stethoscope,
+              label: "Klinik",
+              onTap: controller.goToClinic,
+              color: Colors.blue.shade700,
+            ),
+            _buildShortcutItem(
+              icon: FontAwesomeIcons.bullhorn,
+              label: "Tender",
+              onTap: controller.goToTender,
+              color: Colors.purple.shade700,
+            ),
+            _buildShortcutItem(
+              icon: FontAwesomeIcons.solidHeart,
+              label: "Komunitas",
+              onTap: () {},
+              color: Colors.red.shade700,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  
+  // Helper untuk item shortcut
+  Widget _buildShortcutItem({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: Get.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
         ],
       ),
     );
   }
 
-  // (Placeholder untuk sisa dashboard)
-  Widget _buildPopularProjects() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Proyek Populer',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kDarkTextColor),
-          ),
-          const SizedBox(height: 16),
-          // (List horizontal proyek/berita nanti di sini)
-          Container(
-            height: 150,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16)
+  /// Widget 3: Ringkasan Aset Lahan
+  Widget _buildAssetSummary() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Aset Anda", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+            TextButton(
+              onPressed: controller.goToManageAssets,
+              child: const Text("Lihat Semua"),
             ),
-            child: const Center(child: Text('Placeholder Proyek Populer')),
-          ).animate().fadeIn(delay: 900.ms),
-        ],
-      ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Obx(() => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade300),
+                ),
+                leading: FaIcon(FontAwesomeIcons.mapLocationDot, color: AppColors.primary),
+                title: Text("Total Lahan Terdaftar", style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text("Lahan Pertanian & Peternakan"),
+                trailing: Text(
+                  controller.landCount.value.toString(),
+                  style: Get.textTheme.titleLarge?.copyWith(color: AppColors.primary),
+                ),
+                onTap: controller.goToManageAssets,
+              ),
+        ),
+      ],
+    );
+  }
+
+  /// Widget 4: Placeholder untuk Banner/Artikel
+  Widget _buildPromoBanners() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Info & Promo", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+        const SizedBox(height: 16),
+        Container(
+          height: 140,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: AppColors.greyLight,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Center(
+            child: Text("Banner Promo Akan Tampil di Sini"),
+          ),
+        ),
+      ],
     );
   }
 }

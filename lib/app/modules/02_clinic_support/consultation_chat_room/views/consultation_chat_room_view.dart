@@ -1,108 +1,179 @@
+// lib/app/modules/consultation_chat_room/views/consultation_chat_room_view.dart
+
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:sobatgenta/app/modules/02_clinic_support/clinic_expert_profile/views/clinic_expert_profile_view.dart';
+import 'package:intl/intl.dart';
+import '../../../../data/models/chat_message_model.dart';
+import '../../../../theme/app_colors.dart';
 import '../controllers/consultation_chat_room_controller.dart';
 
-// ... (Konstanta warna tetap sama)
-
-// --- [FIX] Ubah dari GetView menjadi StatelessWidget ---
-class ConsultationChatRoomView extends StatelessWidget {
+class ConsultationChatRoomView extends GetView<ConsultationChatRoomController> {
   const ConsultationChatRoomView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ConsultationChatRoomController>(
-      builder: (controller) {
-        return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 1,
-            centerTitle: false,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: kDarkTextColor),
-              onPressed: () => Get.back(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(controller.consultation.pakar.user.fullName), // Nama Pakar
+            Text(
+              controller.consultation.pakar.specialization,
+              style: Get.textTheme.bodySmall?.copyWith(color: Colors.white70),
             ),
-            // PERBAIKAN: Bungkus Row di dalam `title` dengan Expanded
-            title: Row(
+          ],
+        ),
+        actions: [
+          // Tombol Video Call
+          IconButton(
+            onPressed: controller.goToVideoCall,
+            icon: const FaIcon(FontAwesomeIcons.video),
+          ),
+          IconButton(
+            onPressed: () { /* TODO: Opsi lain (end chat) */ },
+            icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // 1. Area List Chat
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoadingHistory.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (controller.messageList.isEmpty) {
+                return const Center(child: Text("Mulai percakapan Anda..."));
+              }
+              
+              // Gunakan ListView.builder dengan reverse: true
+              return ListView.builder(
+                reverse: true, // Chat dimulai dari bawah
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.messageList.length,
+                itemBuilder: (context, index) {
+                  final message = controller.messageList[index];
+                  // Cek apakah pesan ini dari user saat ini
+                  final isMe = message.senderId == controller.currentUserId;
+                  return _buildChatBubble(message, isMe);
+                },
+              );
+            }),
+          ),
+          
+          // 2. Area Input Teks
+          _buildTextInputArea(),
+        ],
+      ),
+    );
+  }
+
+  /// Area Input di bagian bawah
+  Widget _buildTextInputArea() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            // Tombol Lampiran (Skenario 3)
+            IconButton(
+              icon: const FaIcon(FontAwesomeIcons.paperclip, color: AppColors.textLight),
+              onPressed: controller.sendImageAttachment,
+            ),
+            // Field Teks
+            Expanded(
+              child: TextField(
+                controller: controller.textC,
+                decoration: InputDecoration(
+                  hintText: "Ketik pesan...",
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide(color: Colors.grey.shade300)),
+                  filled: true,
+                  fillColor: AppColors.greyLight,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                textInputAction: TextInputAction.send,
+                onSubmitted: (value) => controller.sendTextMessage(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Tombol Kirim
+            FilledButton(
+              onPressed: controller.sendTextMessage,
+              style: FilledButton.styleFrom(shape: const CircleBorder(), padding: const EdgeInsets.all(16)),
+              child: const FaIcon(FontAwesomeIcons.paperPlane, size: 20),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// Widget untuk satu gelembung chat
+  Widget _buildChatBubble(ChatMessageModel message, bool isMe) {
+    final alignment = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    final color = isMe ? AppColors.primary : AppColors.greyLight;
+    final textColor = isMe ? Colors.white : AppColors.textDark;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: alignment,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            constraints: BoxConstraints(maxWidth: Get.width * 0.75),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage(controller.expertData.imageUrl),
-                ),
-                const SizedBox(width: 12),
-                
-                // PERBAIKAN: Bungkus Column dengan Expanded untuk mencegah overflowed
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        controller.expertData.name,
-                        style: const TextStyle(
-                          color: kDarkTextColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                        overflow: TextOverflow.ellipsis, // Tambahkan ellipsis
-                        maxLines: 1, // Pastikan hanya satu baris
-                      ),
-                      Text(
-                        controller.expertData.isOnline ? 'Online' : 'Offline',
-                        style: TextStyle(
-                          color: controller.expertData.isOnline ? kPrimaryDarkGreen : kBodyTextColor,
-                          fontSize: 14,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ],
+                // Tampilkan gambar jika ada
+                if (message.imageUrl != null)
+                  _buildImageAttachment(message.imageUrl!),
+                  
+                // Tampilkan teks jika ada
+                if (message.messageContent != null && message.messageContent!.isNotEmpty)
+                  Text(
+                    message.messageContent!,
+                    style: TextStyle(color: textColor, fontSize: 16, height: 1.4),
                   ),
-                ),
               ],
             ),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  // (TODO: Tambahkan logic untuk Audio Call nanti)
-                },
-                icon: const Icon(Icons.phone_outlined, color: kPrimaryDarkGreen),
-              ),
-              IconButton(
-                onPressed: () => controller.goToVideoCallPage(),
-                icon: const Icon(Icons.videocam_outlined, color: kPrimaryDarkGreen),
-              ),
-              const SizedBox(width: 10),
-            ],
           ),
-          body: Chat(
-            messages: controller.messages,
-            onSendPressed: controller.onSendPressed,
-            user: controller.currentUser,
-            theme: DefaultChatTheme(
-              primaryColor: kPrimaryDarkGreen,
-              secondaryColor: kLightGreenBlob,
-              inputBackgroundColor: Colors.white,
-              inputTextColor: kDarkTextColor,
-              sendButtonIcon: const Icon(Icons.send, color: kPrimaryDarkGreen),
-              sentMessageBodyTextStyle: const TextStyle(
-                color: Colors.white, fontSize: 16, fontFamily: 'Inter',
-              ),
-              receivedMessageBodyTextStyle: const TextStyle(
-                color: kDarkTextColor, fontSize: 16, fontFamily: 'Inter',
-              ),
-              messageBorderRadius: 16,
-              inputBorderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              inputContainerDecoration: BoxDecoration(
-                border: Border(top: BorderSide(color: kBodyTextColor.withOpacity(0.3))),
-              ),
-            ),
-            showUserAvatars: true,
-            showUserNames: true,
-          ),
-        );
-      },
+          const SizedBox(height: 4),
+          Text(DateFormat('HH:mm').format(message.timestamp), style: Get.textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildImageAttachment(String imageUrl) {
+     // Cek apakah gambar dari path lokal (optimistic) atau URL network
+    bool isLocalFile = !imageUrl.startsWith('http');
+    
+    return Container(
+      height: 150,
+      width: Get.width * 0.7,
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        image: DecorationImage(
+          image: isLocalFile 
+              ? FileImage(File(imageUrl)) as ImageProvider 
+              : NetworkImage(imageUrl),
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 }

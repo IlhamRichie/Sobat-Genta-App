@@ -1,96 +1,84 @@
+// lib/app/modules/create_new_password/controllers/create_new_password_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import '../../../../routes/app_pages.dart'; // Pastikan Routes-nya ada
+
+import '../../../../data/repositories/abstract/auth_repository.dart';
+import '../../../../routes/app_pages.dart';
 
 class CreateNewPasswordController extends GetxController {
   
-  // Kunci Global untuk Form Validasi
+  final IAuthRepository _authRepo = Get.find<IAuthRepository>();
+
+  // --- FORM & STATE ---
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  // Controllers untuk input password
-  late TextEditingController newPasswordController;
-  late TextEditingController confirmPasswordController;
-
-  // Variabel reaktif untuk toggle show/hide password
+  final TextEditingController newPasswordC = TextEditingController();
+  final TextEditingController confirmPasswordC = TextEditingController();
+  final RxBool isLoading = false.obs;
   final RxBool isPasswordHidden = true.obs;
   final RxBool isConfirmPasswordHidden = true.obs;
 
-  // Email didapat dari halaman sebelumnya (OtpVerificationPage)
-  final RxString userEmail = "".obs;
+  // --- PAGE ARGUMENTS ---
+  late final String email;
+  late final String token; // Token otorisasi dari halaman OTP
 
   @override
   void onInit() {
     super.onInit();
-    newPasswordController = TextEditingController();
-    confirmPasswordController = TextEditingController();
-    
-    // Ambil email dari arguments
-    if (Get.arguments != null) {
-      userEmail.value = Get.arguments as String;
-    }
+    // Ambil argumen dari halaman OTP
+    email = Get.arguments['email'] as String;
+    token = Get.arguments['token'] as String;
   }
 
   @override
   void onClose() {
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
+    newPasswordC.dispose();
+    confirmPasswordC.dispose();
     super.onClose();
   }
 
-  // --- Aksi Toggle ---
-  void togglePasswordVisibility() {
-    isPasswordHidden.value = !isPasswordHidden.value;
-  }
+  // --- PUBLIC METHODS ---
+  void togglePasswordVisibility() => isPasswordHidden.toggle();
+  void toggleConfirmPasswordVisibility() => isConfirmPasswordHidden.toggle();
 
-  void toggleConfirmPasswordVisibility() {
-    isConfirmPasswordHidden.value = !isConfirmPasswordHidden.value;
-  }
-
-  // --- Validator ---
-  String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password tidak boleh kosong';
-    }
-    if (value.length < 8) {
-      return 'Password minimal 8 karakter';
-    }
-    return null;
-  }
-
-  String? validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Konfirmasi password tidak boleh kosong';
-    }
-    if (value != newPasswordController.text) {
-      return 'Password tidak cocok';
-    }
-    return null;
-  }
-
-  // --- Aksi Tombol ---
-  void resetPassword(BuildContext context) {
+  /// Aksi untuk submit password baru
+  Future<void> submitNewPassword() async {
     // 1. Validasi form
-    if (formKey.currentState!.validate()) {
-      // 2. (LOGIC API RESET PASSWORD NANTI DI SINI)
-      // ... (Tampilkan loading)
-      // ... (Panggil API dengan: userEmail.value dan newPasswordController.text)
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+    
+    isLoading.value = true;
+    try {
+      // 2. Panggil repository dengan token otorisasi
+      await _authRepo.createNewPassword(
+        email,
+        token,
+        newPasswordC.text,
+      );
       
-      // 3. (UI SEMENTARA) Tampilkan notifikasi sukses
+      // 3. Tampilkan notifikasi sukses
       showTopSnackBar(
-        Overlay.of(context),
-        const CustomSnackBar.success(
-          message: "Password Anda telah berhasil diubah!",
+        Overlay.of(Get.context!),
+        CustomSnackBar.success(
+          message: "Password Anda telah berhasil diubah! Silakan login kembali.",
+          backgroundColor: Colors.green.shade700,
         ),
       );
-
-      // 4. Kembali ke halaman Login setelah 2 detik
-      // Gunakan 'offAllNamed' untuk MENGHAPUS SEMUA halaman sebelumnya (Forgot, OTP, Create)
-      // dari tumpukan (stack) navigasi.
-      Future.delayed(2.seconds, () {
-        Get.offAllNamed(Routes.LOGIN);
-      });
+      
+      // 4. Selesai. Hapus semua stack dan kembali ke Login.
+      Get.offAllNamed(Routes.LOGIN);
+      
+    } catch (e) {
+      // 5. Tangani error (misal, token kedaluwarsa)
+      showTopSnackBar(
+        Overlay.of(Get.context!),
+        CustomSnackBar.error(message: e.toString().replaceAll("Exception: ", "")),
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 }

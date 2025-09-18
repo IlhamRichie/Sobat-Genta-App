@@ -1,64 +1,76 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import '../../../00_core_auth/register_role_chooser/controllers/register_role_chooser_controller.dart';
-import '../../main_navigation/controllers/main_navigation_controller.dart';
+// lib/app/modules/home_dashboard/controllers/home_dashboard_controller.dart
 
-// (Kita akan dapatkan UserRole dari AuthService nanti,
-//  untuk saat ini kita gunakan enum dari role_chooser)
+import 'package:get/get.dart';
+
+import '../../../../routes/app_pages.dart';
+import '../../../../services/session_service.dart';
 
 class HomeDashboardController extends GetxController {
   
-  // Best Practice: Temukan controller induk (MainNavigation)
-  // untuk mendapatkan state global aplikasi (seperti status KYC)
-  late MainNavigationController mainNavController;
-
-  // --- (SIMULASI DATA PENGGUNA) ---
-  // (Nanti, data ini akan diambil dari AuthService/UserService)
-  final RxString userName = "Budi Santoso".obs;
-  final RxString userRoleName = "Petani".obs;
-  final Rx<UserRole> userRole = UserRole.farmer.obs; 
-  // ---------------------------------
+  // --- DEPENDENCIES ---
+  final SessionService _sessionService = Get.find<SessionService>();
+  
+  // --- STATE ---
+  late final String userName;
+  final RxBool isLoading = true.obs;
+  
+  // --- DATA (Akan di-fetch) ---
+  final RxString walletBalance = "Rp 0".obs;
+  final RxInt landCount = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // Temukan controller yang sudah 'hidup'
-    mainNavController = Get.find<MainNavigationController>();
+    // Ambil nama user dari sesi
+    userName = _sessionService.currentUser.value?.fullName ?? "SobatGenta";
+    
+    // Panggil method untuk fetch data dashboard
+    fetchDashboardData();
   }
 
-  // Aksi yang dipanggil jika pengguna mengklik fitur yang terkunci
-  void showKycSnackbar(BuildContext context) {
-    // Cek status KYC dari controller induk
-    final kycStatus = mainNavController.kycStatus.value;
+  /// Mengambil data untuk dashboard
+  /// BEST PRACTICE: Bungkus dengan Future<void> agar bisa dipakai di RefreshIndicator
+  Future<void> fetchDashboardData() async {
+    isLoading.value = true;
 
-    String message = "Fitur terkunci. Harap lengkapi verifikasi KYC Anda.";
+    // --- CATATAN ARSITEKTUR ---
+    // Saat ini kita gunakan data palsu.
+    // Nanti, kita akan inject `IWalletRepository` dan `ILandRepository`
+    // dan mengganti `Future.delayed` ini dengan panggilan API asli.
+    
+    // 1. Simulasi panggil API (Fake Repos)
+    await Future.delayed(const Duration(seconds: 1));
+    
+    // 2. Set data palsu (sesuai Skenario Budi)
+    walletBalance.value = "Rp 1.250.000";
+    landCount.value = 2; // "Lahan Bawang Kejayaan" + 1 lahan lain
 
-    // [LOGIC BARU] Sesuaikan pesan snackbar
-    if (kycStatus == UserKycStatus.inReview) {
-      message = "Fitur terkunci. Data KYC Anda sedang ditinjau oleh Admin.";
-    }
-
-    showTopSnackBar(
-      Overlay.of(context),
-      CustomSnackBar.error(
-        message: message,
-      ),
-      displayDuration: 2.seconds,
-    );
+    isLoading.value = false;
   }
 
+  // --- NAVIGATION METHODS ---
+  // (Fungsi-fungsi ini akan dipanggil oleh tombol shortcut di View)
 
-  // --- Navigasi Aksi Cepat ---
-  // (Nanti, ini akan pindah ke tab yang sesuai)
-  void goToFundingMarketplace() {
-    mainNavController.onItemTapped(4); // Pindah ke Tab Profil (Contoh)
+  void goToWallet() {
+    Get.toNamed(Routes.WALLET_MAIN);
   }
-  void goToClinic() {
-    mainNavController.onItemTapped(1); // Pindah ke Tab Klinik
-  }
+
   void goToStore() {
-    mainNavController.onItemTapped(2); // Pindah ke Tab Toko
+    // Kita tidak pakai Get.toNamed, karena Toko sudah ada di
+    // bottom nav. Kita hanya perlu pindah tab.
+    // TODO: Implementasi pindah tab via MainNavigationController
+    Get.toNamed(Routes.STORE_HOME); // Sementara
+  }
+
+  void goToClinic() {
+    Get.toNamed(Routes.CLINIC_HOME); // Sementara
+  }
+
+  void goToTender() {
+    Get.toNamed(Routes.TENDER_MARKETPLACE); // Sementara
+  }
+  
+  void goToManageAssets() {
+    Get.toNamed(Routes.FARMER_MANAGE_ASSETS);
   }
 }

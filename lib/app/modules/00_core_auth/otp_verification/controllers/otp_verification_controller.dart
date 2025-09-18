@@ -1,104 +1,143 @@
+// lib/app/modules/otp_verification/controllers/otp_verification_controller.dart
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
+
+import '../../../../data/repositories/abstract/auth_repository.dart';
 import '../../../../routes/app_pages.dart';
 
 class OtpVerificationController extends GetxController {
   
-  // Controller untuk Pinput
-  late TextEditingController pinController;
+  final IAuthRepository _authRepo = Get.find<IAuthRepository>();
 
-  // Email didapat dari halaman sebelumnya (ForgotPasswordPage)
-  final RxString userEmail = "".obs;
+  // --- FORM & STATE ---
+  final TextEditingController otpC = TextEditingController();
+  final RxBool isLoading = false.obs;
+  
+  // --- PAGE ARGUMENTS ---
+  // Variabel ini akan diisi saat onInit
+  late final String email;
+  late final String purpose; // 'registration' atau 'reset_password'
 
-  // Logic Timer Countdown
-  late Timer _timer;
+  // --- COUNTDOWN TIMER ---
+  Timer? _timer;
   final RxInt countdown = 60.obs;
-  final RxBool isResendActive = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    pinController = TextEditingController();
     
-    // Ambil email dari arguments
-    if (Get.arguments != null) {
-      userEmail.value = Get.arguments as String;
+    // Ambil argumen yang dikirim dari halaman sebelumnya
+    if (Get.arguments is Map) {
+      email = Get.arguments['email'] as String;
+      purpose = Get.arguments['purpose'] as String;
+    } else {
+      // Fallback jika argumen tidak ada (seharusnya tidak terjadi)
+      email = 'Email tidak ditemukan';
+      purpose = '';
+      Get.back(); // Kembali jika tidak ada data
     }
     
-    // Langsung mulai timer saat halaman dibuka
-    startTimer();
+    startCountdown();
   }
 
   @override
   void onClose() {
-    pinController.dispose();
-    _timer.cancel(); // Matikan timer saat controller ditutup
+    _timer?.cancel(); // Selalu matikan timer
+    otpC.dispose();
     super.onClose();
   }
 
-  // --- Logic Timer ---
-  void startTimer() {
-    isResendActive.value = false;
-    countdown.value = 60; // Reset timer
-    _timer = Timer.periodic(1.seconds, (timer) {
+  /// Memulai timer countdown
+  void startCountdown() {
+    countdown.value = 60;
+    _timer?.cancel(); // Matikan timer lama jika ada
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (countdown.value > 0) {
         countdown.value--;
       } else {
-        timer.cancel();
-        isResendActive.value = true;
+        timer.cancel(); // Hentikan timer jika sudah 0
       }
     });
   }
 
-  // --- Aksi Tombol ---
+  /// Meminta kirim ulang OTP
+  Future<void> resendOtp() async {
+    if (countdown.value > 0) return; // Jangan kirim jika timer masih jalan
 
-  void resendCode(BuildContext context) {
-    if (isResendActive.value) {
-      // (LOGIC API KIRIM ULANG OTP NANTI DI SINI)
-      
+    isLoading.value = true;
+    try {
+      await _authRepo.resendOtp(email, purpose);
       showTopSnackBar(
-        Overlay.of(context),
-        const CustomSnackBar.success(
-          message: "Kode OTP baru telah dikirim ulang.",
-        ),
+        Overlay.of(Get.context!),
+        CustomSnackBar.success(message: "OTP baru telah dikirim ke $email"),
       );
-      startTimer(); // Mulai ulang timer
+      startCountdown(); // Mulai ulang countdown
+    } catch (e) {
+      showTopSnackBar(
+        Overlay.of(Get.context!),
+        CustomSnackBar.error(message: e.toString().replaceAll("Exception: ", "")),
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  void verifyOtp(String pin, BuildContext context) {
-    // (LOGIC API VERIFIKASI OTP NANTI DI SINI)
-
-    // --- (UI SEMENTARA) ---
-    // Kita anggap kode sukses adalah '123456'
-    if (pin == '123456') {
+  /// Memverifikasi OTP yang dimasukkan
+  Future<void> verifyOtp() async {
+    if (otpC.text.length != 6) {
       showTopSnackBar(
-        Overlay.of(context),
-        const CustomSnackBar.success(
-          message: "Verifikasi Berhasil! Silakan buat password baru.",
-        ),
+        Overlay.of(Get.context!),
+        CustomSnackBar.info(message: "Harap isi 6 digit kode OTP"),
       );
+      return;
+    }
+    
+    isLoading.value = true;
+    try {
+      // Panggil repository
+      final resultToken = await _authRepo.verifyOtp(email, otpC.text, purpose);
       
-      _timer.cancel(); // Hentikan timer
+      _timer?.cancel(); // Matikan timer
       
-      // Lanjut ke halaman berikutnya
-      Get.offNamed(
-        Routes.CREATE_NEW_PASSWORD,
-        arguments: userEmail.value, // Kirim email/token ke halaman berikutnya
-      );
+      // --- INI LOGIKA UTAMA-NYA ---
+      // Tentukan navigasi berdasarkan 'purpose'
+      
+      if (purpose == 'registration') {
+        // Alur registrasi selesai
+        showTopSnackBar(
+          Overlay.of(Get.context!),
+          CustomSnackBar.success(message: "Verifikasi berhasil! Silakan login."),
+        );
+        // Hapus semua stack, lempar ke Login
+        Get.offAllNamed(Routes.LOGIN); 
+        
+      } else if (purpose == 'reset_password') {
+        // Alur lupa password berlanjut
+        showTopSnackBar(
+          Overlay.of(Get.context!),
+          CustomSnackBar.success(message: "Verifikasi berhasil!"),
+        );
+        // Buka halaman Buat Password Baru
+        Get.toNamed(
+          Routes.CREATE_NEW_PASSWORD,
+          arguments: {
+            'email': email,
+            'token': resultToken, // Kirim 'token reset' yang kita dapat dari repo
+          },
+        );
+      }
 
-    } else {
-      // Jika GAGAL
+    } catch (e) {
       showTopSnackBar(
-        Overlay.of(context),
-        const CustomSnackBar.error(
-          message: "Kode OTP salah. Silakan coba lagi.",
-        ),
+        Overlay.of(Get.context!),
+        CustomSnackBar.error(message: e.toString().replaceAll("Exception: ", "")),
       );
-      pinController.clear(); // Bersihkan input
+    } finally {
+      isLoading.value = false;
     }
   }
 }
