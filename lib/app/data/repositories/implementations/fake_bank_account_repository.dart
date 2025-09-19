@@ -25,4 +25,42 @@ class FakeBankAccountRepository implements IBankAccountRepository {
     
     return _mockBankAccounts.map((json) => BankAccountModel.fromJson(json)).toList();
   }
+
+  // --- IMPLEMENTASI (C) CREATE ---
+  @override
+  Future<BankAccountModel> addBankAccount(Map<String, dynamic> accountData) async {
+    await Future.delayed(const Duration(seconds: 1));
+    
+    final newAccountJson = {
+      "account_id": "BA-${DateTime.now().millisecondsSinceEpoch}",
+      "bank_name": accountData['bank_name'],
+      "account_number": accountData['account_number'],
+      "account_holder_name": accountData['account_holder_name'],
+      "is_primary": _mockBankAccounts.isEmpty, // Jadi primary jika ini yang pertama
+    };
+    
+    _mockBankAccounts.add(newAccountJson);
+    print("Fake DB: Bank account added.");
+    return BankAccountModel.fromJson(newAccountJson);
+  }
+
+  // --- IMPLEMENTASI (U) UPDATE ---
+  @override
+  Future<void> setPrimaryAccount(String accountId) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    // Set semua ke false, lalu set satu ke true
+    for (var acc in _mockBankAccounts) {
+      acc['is_primary'] = (acc['account_id'] == accountId);
+    }
+    print("Fake DB: Primary account set to $accountId");
+  }
+
+  // --- IMPLEMENTASI (D) DELETE ---
+  @override
+  Future<void> deleteBankAccount(String accountId) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    _mockBankAccounts.removeWhere((acc) => acc['account_id'] == accountId);
+    print("Fake DB: Account $accountId deleted.");
+  }
 }

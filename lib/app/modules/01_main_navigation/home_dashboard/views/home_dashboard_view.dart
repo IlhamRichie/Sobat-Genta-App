@@ -115,7 +115,7 @@ class HomeDashboardView extends GetView<HomeDashboardController> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () { /* TODO: Go to Top Up */ },
+                    onPressed: controller.goToWalletTopUp,
                     icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
                     label: const Text("Top Up"),
                     style: FilledButton.styleFrom(

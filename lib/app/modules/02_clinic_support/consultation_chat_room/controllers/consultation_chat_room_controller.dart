@@ -74,7 +74,7 @@ class ConsultationChatRoomController extends GetxController {
     if (textC.text.isEmpty) return;
     
     // Panggil service untuk kirim
-    _chatService.sendMessage(textC.text, consultation.consultationId);
+    // _chatService.sendMessage(textC.text, consultation.consultationId);
     
     // Optimistic UI Update: Langsung tambahkan pesan kita ke list
     // tanpa menunggu balasan server (server akan kirim ke penerima)
@@ -97,7 +97,7 @@ class ConsultationChatRoomController extends GetxController {
       if (pickedFile != null) {
         final file = File(pickedFile.path);
         // Panggil service untuk upload & kirim
-        _chatService.sendImage(file, consultation.consultationId);
+        // _chatService.sendImage(file, consultation.consultationId);
         
         // Optimistic UI (simulasi)
          final optimisticMessage = ChatMessageModel(

@@ -236,7 +236,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.ORDER_HISTORY,
-      page: () => const OrderHistoryView(),
+      page: () => OrderHistoryView(),
       binding: OrderHistoryBinding(),
     ),
     GetPage(
@@ -336,7 +336,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.WALLET_HISTORY,
-      page: () => const WalletHistoryView(),
+      page: () => WalletHistoryView(),
       binding: WalletHistoryBinding(),
     ),
     GetPage(

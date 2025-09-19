@@ -1,15 +1,14 @@
 // lib/app/modules/splash/controllers/splash_controller.dart
 
 import 'package:get/get.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import '../../../../data/repositories/abstract/auth_repository.dart';
 import '../../../../routes/app_pages.dart';
-import '../../../../services/session_service.dart';
+import '../../../../services/session_service.dart'; // <-- 1. IMPORT
 
 class SplashController extends GetxController {
   
-  // Kita akan mengambil service global yang sudah di-inject
-  // di main.dart atau InitialBinding
   final SessionService _sessionService = Get.find<SessionService>();
   final IAuthRepository _authRepo = Get.find<IAuthRepository>();
 
@@ -20,12 +19,11 @@ class SplashController extends GetxController {
   }
 
   Future<void> _initializeApp() async {
-    // 1. Tentukan waktu minimum splash screen (misal 2 detik)
-    //    Ini untuk UX, agar logo tidak "flash" (hilang terlalu cepat).
+    // 1. Definisikan minimum splash time (Ini tetap berjalan, 
+    //    ini adalah splash Flutter kita, tapi tertutup native splash)
     Future<void> minSplashTime = Future.delayed(const Duration(seconds: 2));
 
-    // 2. Tentukan tugas inisialisasi
-    //    Kita cek apakah ada user session yang valid
+    // 2. Definisikan tugas inisialisasi (tetap berjalan)
     Future<bool> checkAuthTask = _checkCurrentUserSession();
 
     // 3. Jalankan kedua tugas secara bersamaan
@@ -33,35 +31,32 @@ class SplashController extends GetxController {
       minSplashTime,
       checkAuthTask,
     ]);
-
-    // 4. Ambil hasil dari tugas inisialisasi
-    //    Hasilnya ada di index [1]
+    
     final bool isLoggedIn = results[1] as bool;
 
-    // 5. Navigasi berdasarkan hasil
+    // 4. --- PERBAIKAN DI SINI ---
+    // Setelah semua logic async kita selesai, perintahkan 
+    // splash NATIVE untuk menghilang.
+    FlutterNativeSplash.remove();
+    
+    // (Opsional: Beri delay super singkat agar transisi render mulus)
+    await Future.delayed(const Duration(milliseconds: 50)); 
+
+    // 5. Navigasi seperti biasa
     if (isLoggedIn) {
-      // User punya sesi valid. Langsung ke home.
       Get.offAllNamed(Routes.MAIN_NAVIGATION);
     } else {
-      // Tidak ada sesi. Arahkan ke onboarding.
       Get.offAllNamed(Routes.ONBOARDING);
     }
   }
 
-  /// Memeriksa sesi user saat ini ke repository.
-  /// Ini akan memanggil FakeAuthRepository.getMyProfile()
   Future<bool> _checkCurrentUserSession() async {
+    // ... (Logika cek sesi tetap sama) ...
     try {
-      // Fake repository akan mengembalikan mock user jika "token" ada,
-      // atau melempar exception jika tidak.
       final user = await _authRepo.getMyProfile();
-      
-      // Jika berhasil, simpan user ke service global kita
       _sessionService.setCurrentUser(user);
-      
       return true;
     } catch (e) {
-      // Error (misal: "No token", "401 Unauthorized" di API asli)
       _sessionService.clearSession();
       return false;
     }

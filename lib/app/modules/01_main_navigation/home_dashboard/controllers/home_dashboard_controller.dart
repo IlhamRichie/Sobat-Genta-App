@@ -55,6 +55,10 @@ class HomeDashboardController extends GetxController {
     Get.toNamed(Routes.WALLET_MAIN);
   }
 
+  void goToWalletTopUp() {
+    Get.toNamed(Routes.WALLET_TOP_UP);
+  }
+
   void goToStore() {
     // Kita tidak pakai Get.toNamed, karena Toko sudah ada di
     // bottom nav. Kita hanya perlu pindah tab.

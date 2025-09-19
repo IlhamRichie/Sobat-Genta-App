@@ -60,30 +60,34 @@ class LoginController extends GetxController {
       _sessionService.setCurrentUser(user);
 
       // 5. Tampilkan notifikasi sukses (sesuai request)
-      showTopSnackBar(
-        Overlay.of(Get.context!), // Butuh overlay context
-        CustomSnackBar.success(
-          message: "Login berhasil! Selamat datang kembali, ${user.fullName}.",
-          backgroundColor: Colors.green.shade700,
-        ),
-      );
 
-      // 6. Navigasi ke Halaman Utama. 
-      //    Kita gunakan offAllNamed agar user tidak bisa "back" ke login.
+      Get.snackbar(
+        "Login Berhasil", // Judul
+        "Selamat datang kembali, ${user.fullName}.", // Pesan
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green.shade700,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 8,
+      );
+      // ---------------------------------
+
       Get.offAllNamed(Routes.MAIN_NAVIGATION);
 
+      // 6. Navigasi ke Halaman Utama.
+      //    Kita gunakan offAllNamed agar user tidak bisa "back" ke login.
     } catch (e) {
-      // 7. Tangani jika terjadi error (dari FakeAuthRepository)
-      showTopSnackBar(
-        Overlay.of(Get.context!),
-        CustomSnackBar.error(
-          // Kita bersihkan pesan error agar lebih rapi
-          message: e.toString().replaceAll("Exception: ", ""),
-        ),
+      // --- Perbaikan Snackbar Error ---
+      Get.snackbar(
+        "Login Gagal", // Judul
+        e.toString().replaceAll("Exception: ", ""), // Pesan
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red.shade700,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 8,
       );
-    } finally {
-      // 8. Apapun hasilnya, set state loading kembali ke false
-      isLoading.value = false;
+      // --------------------------------
     }
   }
 }

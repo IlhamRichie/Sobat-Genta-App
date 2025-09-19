@@ -59,7 +59,6 @@ class MainNavigationController extends GetxController {
         _buildExpertNav();
         break;
       case UserRole.UNKNOWN:
-      default:
         // Idealnya ini tidak terjadi, user harusnya di-redirect ke login
         // oleh SplashController.
         break;

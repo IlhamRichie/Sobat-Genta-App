@@ -33,17 +33,17 @@ class OnboardingView extends GetView<OnboardingController> {
             onPageChanged: controller.onPageChanged,
             children: const [
               OnboardingPageContent(
-                image: 'assets/images/onboarding_funding.png', // Ganti dengan path asset Anda
+                image: '/assets/onboarding/onboarding_funding.png', // Ganti dengan path asset Anda
                 title: 'Pendanaan Proyek Transparan',
                 description: 'Hubungkan lahan produktif Anda dengan investor terverifikasi.',
               ),
               OnboardingPageContent(
-                image: 'assets/images/onboarding_market.png', // Ganti dengan path asset Anda
+                image: '/assets/onboarding/onboarding_market.png', // Ganti dengan path asset Anda
                 title: 'Toko Kebutuhan Tani',
                 description: 'Temukan bibit, pupuk, dan alat berkualitas langsung dari produsen.',
               ),
               OnboardingPageContent(
-                image: 'assets/images/onboarding_clinic.png', // Ganti dengan path asset Anda
+                image: '/assets/onboarding/onboarding_clinic.png', // Ganti dengan path asset Anda
                 title: 'Klinik Tani & Pakar',
                 description: 'Dapatkan solusi instan dari pakar pertanian dan dokter hewan.',
               ),

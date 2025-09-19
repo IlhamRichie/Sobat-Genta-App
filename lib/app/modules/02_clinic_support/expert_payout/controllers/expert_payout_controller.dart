@@ -58,11 +58,20 @@ class ExpertPayoutController extends GetxController {
   }
 
   /// Navigasi ke form tarik dana
-  void goToWithdrawForm() {
+  Future<void> goToWithdrawForm() async { // <-- Tambahkan 'async'
     if (canWithdraw) {
-      Get.toNamed(Routes.WALLET_WITHDRAW);
+      // --- UPDATE DI SINI ---
+      // Kita 'await' navigasi ini untuk hasil
+      final result = await Get.toNamed(Routes.WALLET_WITHDRAW);
+      
+      if (result == 'success') {
+        // Jika penarikan berhasil diajukan, muat ulang data dompet
+        // (Di backend asli, ini akan menunjukkan saldo 'tertahan',
+        // di fake repo kita, saldo tetap tapi user tahu itu sukses)
+        fetchPayoutData();
+      }
     } else {
-      Get.snackbar("Tidak Bisa", "Anda harus memiliki saldo dan rekening bank terdaftar untuk tarik dana.");
+      Get.snackbar("Tidak Bisa", "Anda harus memiliki saldo dan rekening bank terdaftar.");
     }
   }
 }
