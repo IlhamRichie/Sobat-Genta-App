@@ -182,4 +182,25 @@ class FakeAuthRepository implements IAuthRepository {
     _fakeToken = null;
     print("Fake Auth Repo: User logged out, token cleared.");
   }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await Future.delayed(const Duration(seconds: 1)); // Simulasi API
+
+    // Simulasi validasi password lama
+    // Kita asumsikan password lama semua user palsu kita adalah "password123"
+    const String fakeCurrentPasswordInDB = "password123"; 
+
+    if (currentPassword != fakeCurrentPasswordInDB) {
+      // Ini adalah error case yang paling umum
+      throw Exception("Password Anda saat ini salah.");
+    }
+
+    // Jika password lama benar
+    print("Fake DB: Password berhasil diubah ke: $newPassword");
+    return;
+  }
 }

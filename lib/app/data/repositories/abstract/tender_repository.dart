@@ -1,6 +1,7 @@
 // lib/data/repositories/abstract/tender_repository.dart
 // (Buat file baru)
 
+import '../../models/tender_offer_model.dart';
 import '../../models/tender_request_model.dart';
 
 abstract class ITenderRepository {
@@ -13,6 +14,7 @@ abstract class ITenderRepository {
 
   Future<void> submitTenderOffer(Map<String, dynamic> offerData);
 
+  Future<List<TenderOfferModel>> getMySubmittedOffers(int page, {int limit = 10});
   
   // (Nanti kita akan tambah: createTender, getTenderById, submitOffer)
 }

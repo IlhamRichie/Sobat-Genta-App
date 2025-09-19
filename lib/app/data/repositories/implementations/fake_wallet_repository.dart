@@ -100,4 +100,23 @@ class FakeWalletRepository implements IWalletRepository {
     
     return pageData.map((json) => WalletTransactionModel.fromJson(json)).toList();
   }
+
+  @override
+  Future<bool> checkTopUpStatus(String transactionId, double amount) async {
+    await Future.delayed(const Duration(seconds: 2)); // Simulasi pengecekan API
+
+    // Di backend asli: Cek status transaksi 'transactionId' ke Midtrans.
+    // Jika 'PAID':
+    // 1. Update DB Transaksi -> "SUCCESS"
+    // 2. Update DB Wallet -> balance += amount
+    
+    // Simulasi kita:
+    double currentBalance = (_mockWalletData['balance'] as num).toDouble();
+    _mockWalletData['balance'] = currentBalance + amount;
+    
+    print("Fake Wallet: Top Up $amount BERHASIL. Saldo baru: ${_mockWalletData['balance']}");
+    
+    // Kembalikan 'true' untuk menandakan sukses
+    return true;
+  }
 }

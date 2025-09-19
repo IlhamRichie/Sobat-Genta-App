@@ -16,4 +16,6 @@ abstract class IWalletRepository {
 
   Future<List<WalletTransactionModel>> getWalletHistory(int page, {int limit = 20});
 
+  Future<bool> checkTopUpStatus(String transactionId, double amount);
+
 }

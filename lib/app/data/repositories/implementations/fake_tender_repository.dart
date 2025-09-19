@@ -4,6 +4,7 @@
 import 'package:get/get.dart';
 
 import '../../../services/session_service.dart';
+import '../../models/tender_offer_model.dart';
 import '../../models/tender_request_model.dart';
 import '../abstract/tender_repository.dart';
 
@@ -59,6 +60,26 @@ class FakeTenderRepository implements ITenderRepository {
     // Tender "TDR-30" belum ada penawaran
     "TDR-30": [],
   };
+
+  final List<Map<String, dynamic>> _mockMyOffersDB = List.generate(25, (i) {
+    String status = (i == 0) ? "ACCEPTED" : (i == 1 ? "REJECTED" : "PENDING");
+    return {
+      "offer_id": "MY-OFF-${i+1}",
+      "offer_price": (i+1) * 100000.0,
+      "notes": "Ini adalah penawaran saya nomor #${i+1}",
+      "timestamp": DateTime.now().subtract(Duration(days: i)).toIso8601String(),
+      "status": status,
+      "tender_request": { // Data Induk yang di-JOIN
+        "request_id": "TDR-FAKE-${i+1}",
+        "title": "Permintaan Tender Palsu #${i+1}",
+        "category": "Jasa",
+        "deadline": DateTime.now().add(Duration(days: 5)).toIso8601String(),
+        "requestor_name": "Petani Lain"
+        // Catatan: API tidak perlu menumpuk 'offers' lagi di dalam sini
+      }
+    };
+  });
+
 
 
   // --- IMPLEMENTASI METODE BARU (PAGINATION) ---
@@ -154,5 +175,25 @@ class FakeTenderRepository implements ITenderRepository {
     }
     
     print("Fake DB: Offer baru ditambahkan ke $requestId.");
+  }
+
+  @override
+  Future<List<TenderOfferModel>> getMySubmittedOffers(int page, {int limit = 10}) async {
+    await Future.delayed(const Duration(milliseconds: 900));
+
+    // Logika Pagination Palsu (Identik dengan OrderHistory)
+    final startIndex = (page - 1) * limit;
+    if (startIndex >= _mockMyOffersDB.length) {
+      return []; // Halaman habis
+    }
+    
+    final endIndex = (startIndex + limit > _mockMyOffersDB.length)
+        ? _mockMyOffersDB.length
+        : (startIndex + limit);
+        
+    final pageData = _mockMyOffersDB.sublist(startIndex, endIndex);
+    
+    // Gunakan factory TenderOfferModel.fromJson (yang sekarang mengharapkan data nested)
+    return pageData.map((json) => TenderOfferModel.fromJson(json)).toList();
   }
 }

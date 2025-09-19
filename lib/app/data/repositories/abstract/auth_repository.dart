@@ -21,4 +21,8 @@ abstract class IAuthRepository {
 
   Future<void> logout();
 
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
 }

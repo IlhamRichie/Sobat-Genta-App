@@ -321,7 +321,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.TENDER_MY_OFFERS_LIST,
-      page: () => const TenderMyOffersListView(),
+      page: () => TenderMyOffersListView(),
       binding: TenderMyOffersListBinding(),
     ),
     GetPage(
@@ -421,7 +421,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.PAYMENT_INSTRUCTIONS,
-      page: () => const PaymentInstructionsView(),
+      page: () => PaymentInstructionsView(),
       binding: PaymentInstructionsBinding(),
     ),
     GetPage(
