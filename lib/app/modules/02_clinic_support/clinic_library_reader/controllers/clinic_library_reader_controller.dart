@@ -1,23 +1,26 @@
+// lib/app/modules/clinic_library_reader/controllers/clinic_library_reader_controller.dart
 import 'package:get/get.dart';
 
-class ClinicLibraryReaderController extends GetxController {
-  //TODO: Implement ClinicLibraryReaderController
+import '../../../../data/models/digital_document_model.dart';
 
-  final count = 0.obs;
+class ClinicLibraryReaderController extends GetxController {
+  
+  late final DigitalDocumentModel document;
+  final RxBool isLoading = true.obs;
+
   @override
   void onInit() {
     super.onInit();
+    document = Get.arguments as DigitalDocumentModel;
+    _simulateLoading();
   }
-
-  @override
-  void onReady() {
-    super.onReady();
+  
+  // Simulasi loading webview/pdf
+  void _simulateLoading() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    isLoading.value = false;
   }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
-
-  void increment() => count.value++;
+  
+  // Nanti di sini akan ada logic untuk WebView Controller
+  // atau PDF Controller
 }

@@ -301,7 +301,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.TENDER_MARKETPLACE,
-      page: () => const TenderMarketplaceView(),
+      page: () => TenderMarketplaceView(),
       binding: TenderMarketplaceBinding(),
     ),
     GetPage(

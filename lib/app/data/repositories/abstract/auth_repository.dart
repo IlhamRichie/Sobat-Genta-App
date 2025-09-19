@@ -19,4 +19,6 @@ abstract class IAuthRepository {
 
   Future<void> createNewPassword(String email, String token, String newPassword);
 
+  Future<void> logout();
+
 }

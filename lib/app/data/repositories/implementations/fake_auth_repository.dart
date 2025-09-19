@@ -174,4 +174,12 @@ class FakeAuthRepository implements IAuthRepository {
     // Jika token tidak valid
     throw Exception("Token reset password tidak valid atau kedaluwarsa.");
   }
+
+  @override
+  Future<void> logout() async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    // Logika logout palsu kita adalah menghapus token
+    _fakeToken = null;
+    print("Fake Auth Repo: User logged out, token cleared.");
+  }
 }

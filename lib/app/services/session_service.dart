@@ -2,11 +2,15 @@
 
 import 'package:get/get.dart';
 import '../data/models/user_model.dart';
+import '../data/repositories/abstract/auth_repository.dart';
+import '../routes/app_pages.dart';
 
 class SessionService extends GetxService {
   
   // State reaktif untuk menyimpan data user yang login
   final Rx<User?> currentUser = Rx<User?>(null);
+
+  final IAuthRepository _authRepo = Get.find<IAuthRepository>();
 
   // --- Helper Getters ---
   
@@ -31,6 +35,23 @@ class SessionService extends GetxService {
   void clearSession() {
     currentUser.value = null;
     // TODO: Hapus token/user dari GetStorage
+  }
+
+  Future<void> logoutUser() async {
+    try {
+      // 1. (Opsional) Panggil API backend untuk invalidate token di server
+      await _authRepo.logout(); 
+    } catch (e) {
+      // Abaikan error saat logout, tetap lanjutkan proses
+      print("Error calling API logout: $e");
+    }
+    
+    // 2. Bersihkan state lokal (currentUser = null)
+    clearSession(); 
+    
+    // 3. (PENTING) Paksa navigasi ke Login dan HAPUS semua halaman sebelumnya.
+    // Ini memastikan user tidak bisa 'back' ke halaman profil setelah logout.
+    Get.offAllNamed(Routes.LOGIN);
   }
   
 }
