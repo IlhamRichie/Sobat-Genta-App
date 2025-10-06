@@ -16,6 +16,7 @@ import '../../../04_tender_needs/tender_marketplace/views/tender_marketplace_vie
 import '../../../05_funding_investment/investor_funding_marketplace/views/investor_funding_marketplace_view.dart';
 import '../../../05_funding_investment/investor_portfolio/views/investor_portfolio_view.dart';
 import '../../../06_profile_wallet/profile_main/views/profile_main_view.dart';
+import '../../../consultation_history/views/consultation_history_view.dart';
 import '../../home_dashboard/views/home_dashboard_view.dart';
 
 class MainNavigationController extends GetxController {
@@ -107,8 +108,8 @@ class MainNavigationController extends GetxController {
     // Sesuai Skenario 3 (Drh. Santoso) & SRS
     pages.addAll([
       ExpertDashboardView(), // Tab 1: Dashboard Pakar
-      Center(child: Text("Daftar Konsultasi")), // Tab 2: Riwayat/Daftar Chat
-      ProfileMainView(),     // Tab 3: Profil
+      const ConsultationHistoryView(), // Tab 2: Riwayat/Daftar Chat
+      const ProfileMainView(),     // Tab 3: Profil
     ]);
     navItems.addAll([
       _buildNavItem(FontAwesomeIcons.chartPie, "Dashboard"),

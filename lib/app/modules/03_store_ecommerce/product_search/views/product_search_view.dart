@@ -13,9 +13,8 @@ class ProductSearchView extends GetView<ProductSearchController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: _buildAppBarTitle(),
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
       body: Column(
         children: [
           _buildFilterBar(),
@@ -30,12 +29,13 @@ class ProductSearchView extends GetView<ProductSearchController> {
               
               // Tampilkan hasil di GridView
               return GridView.builder(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.7, // Rasio dari ProductCard
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+                  // Rasio aspek diubah agar kartu lebih tinggi
+                  childAspectRatio: 0.65, 
+                  crossAxisSpacing: 16, 
+                  mainAxisSpacing: 16, 
                 ),
                 itemCount: controller.productList.length,
                 itemBuilder: (context, index) {
@@ -53,46 +53,86 @@ class ProductSearchView extends GetView<ProductSearchController> {
     );
   }
 
-  /// AppBar dinamis (menampilkan kategori atau "Cari Produk")
-  Widget _buildAppBarTitle() {
-    return Obx(() => Text(
-      controller.selectedCategory.value?.name ?? "Cari Produk",
-    ));
+  /// AppBar kustom
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      leading: BackButton(color: AppColors.textDark),
+      title: Obx(() => Text(
+        controller.selectedCategory.value?.name ?? "Cari Produk",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      )),
+      centerTitle: false,
+    );
   }
 
   /// Baris Filter (Search & Sort)
   Widget _buildFilterBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         children: [
-          // 1. Search Bar
-          TextField(
-            controller: controller.searchC,
-            onChanged: controller.onSearchChanged,
-            decoration: InputDecoration(
-              hintText: "Cari pupuk, bibit, obat...",
-              prefixIcon: const FaIcon(FontAwesomeIcons.magnifyingGlass, size: 16),
-              suffixIcon: Obx(() => controller.searchTerm.value.isNotEmpty
-                  ? IconButton(
-                      icon: const FaIcon(FontAwesomeIcons.circleXmark, size: 16),
-                      onPressed: controller.onClearSearch,
-                    )
-                  : const SizedBox.shrink()),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          // 1. Search Bar (Didesain Ulang)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: controller.searchC,
+              onChanged: controller.onSearchChanged,
+              decoration: InputDecoration(
+                hintText: "Cari pupuk, bibit, obat...",
+                hintStyle: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+                prefixIcon: const FaIcon(FontAwesomeIcons.magnifyingGlass, size: 16, color: AppColors.textLight),
+                suffixIcon: Obx(() => controller.searchTerm.value.isNotEmpty
+                    ? IconButton(
+                        icon: const FaIcon(FontAwesomeIcons.circleXmark, size: 16, color: AppColors.textLight),
+                        onPressed: controller.onClearSearch,
+                      )
+                    : const SizedBox.shrink()),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+              ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           // 2. Baris Filter Aktif & Tombol Urutkan
           Row(
             children: [
-              // Chip kategori (jika ada)
               Obx(() {
                 if (controller.selectedCategory.value == null) return const SizedBox.shrink();
-                return Chip(
-                  label: Text(controller.selectedCategory.value!.name),
-                  onDeleted: controller.clearCategoryFilter,
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        controller.selectedCategory.value!.name,
+                        style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: controller.clearCategoryFilter,
+                        child: const FaIcon(FontAwesomeIcons.circleXmark, size: 16, color: AppColors.primary),
+                      ),
+                    ],
+                  ),
                 );
               }),
               const Spacer(),
@@ -101,6 +141,9 @@ class ProductSearchView extends GetView<ProductSearchController> {
                 onPressed: _showSortBottomSheet,
                 icon: const FaIcon(FontAwesomeIcons.arrowDownWideShort, size: 16),
                 label: Obx(() => Text(_getSortLabel(controller.sortBy.value))),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.textDark,
+                ),
               ),
             ],
           ),
@@ -115,60 +158,73 @@ class ProductSearchView extends GetView<ProductSearchController> {
     return "Terpopuler";
   }
 
-  /// Bottom Sheet untuk Opsi Sorting
+  /// Bottom Sheet untuk Opsi Sorting (Didesain Ulang)
   void _showSortBottomSheet() {
     Get.bottomSheet(
       Container(
-        color: AppColors.background,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Urutkan Berdasarkan", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+            Text(
+              "Urutkan Berdasarkan",
+              style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
-            RadioListTile<String>(
-              title: const Text("Terpopuler (Rating)"),
-              value: 'rating',
-              groupValue: controller.sortBy.value,
-              onChanged: (v) => controller.setSortBy(v!),
-            ),
-            RadioListTile<String>(
-              title: const Text("Harga Termurah"),
-              value: 'price_asc',
-              groupValue: controller.sortBy.value,
-              onChanged: (v) => controller.setSortBy(v!),
-            ),
-             RadioListTile<String>(
-              title: const Text("Harga Termahal"),
-              value: 'price_desc',
-              groupValue: controller.sortBy.value,
-              onChanged: (v) => controller.setSortBy(v!),
-            ),
+            _buildRadioListTile('Terpopuler (Rating)', 'rating'),
+            _buildRadioListTile('Harga Termurah', 'price_asc'),
+            _buildRadioListTile('Harga Termahal', 'price_desc'),
           ],
         ),
       ),
     );
   }
+  
+  // Helper untuk RadioListTile
+  Widget _buildRadioListTile(String title, String value) {
+    return Obx(() => ListTile(
+      title: Text(title, style: TextStyle(fontWeight: controller.sortBy.value == value ? FontWeight.bold : FontWeight.normal)),
+      leading: Radio<String>(
+        value: value,
+        groupValue: controller.sortBy.value,
+        onChanged: (v) => controller.setSortBy(v!),
+        activeColor: AppColors.primary,
+      ),
+      onTap: () => controller.setSortBy(value),
+    ));
+  }
 
+  /// Empty State yang Didesain Ulang
   Widget _buildEmptyState() {
-     return Center(
+    return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FaIcon(FontAwesomeIcons.boxOpen, size: 80, color: AppColors.greyLight),
-            const SizedBox(height: 24),
+            const FaIcon(FontAwesomeIcons.boxOpen, size: 96, color: AppColors.greyLight),
+            const SizedBox(height: 32),
             Text(
               "Produk Tidak Ditemukan",
-              style: Get.textTheme.titleLarge?.copyWith(fontSize: 20),
+              style: Get.textTheme.titleLarge?.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               "Coba gunakan kata kunci lain atau hapus filter kategori Anda.",
-              style: Get.textTheme.bodyMedium?.copyWith(fontSize: 16),
+              style: Get.textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                color: AppColors.textLight,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

@@ -128,4 +128,13 @@ class CheckoutAddressController extends GetxController {
       isSavingNewAddress.value = false;
     }
   }
+
+  void clearForm() {
+    labelC.text = "Rumah"; // Set kembali ke nilai default
+    nameC.clear();
+    phoneC.clear();
+    addressC.clear();
+    cityC.clear();
+    postalC.clear();
+  }
 }

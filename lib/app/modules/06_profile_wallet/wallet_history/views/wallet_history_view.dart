@@ -16,80 +16,161 @@ class WalletHistoryView extends GetView<WalletHistoryController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Riwayat Dompet"),
-      ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        if (controller.transactionList.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FaIcon(FontAwesomeIcons.fileInvoiceDollar, size: 80, color: AppColors.greyLight),
-                SizedBox(height: 16),
-                Text("Belum ada riwayat transaksi."),
-              ],
-            ),
-          );
-        }
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
+      body: RefreshIndicator(
+        onRefresh: controller.fetchInitialHistory,
+        child: Obx(() {
+          if (controller.isLoading.value && controller.transactionList.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (controller.transactionList.isEmpty) {
+            return _buildEmptyState();
+          }
 
-        // Render ListView Pagination
-        return RefreshIndicator(
-          onRefresh: controller.fetchInitialHistory,
-          child: ListView.builder(
+          return ListView.builder(
             controller: controller.scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             itemCount: controller.transactionList.length + 1, // +1 untuk loader
             itemBuilder: (context, index) {
               if (index == controller.transactionList.length) {
-                return _buildLoader(); // Loader di akhir list
+                return _buildLoader();
               }
               final trx = controller.transactionList[index];
-              return _buildTransactionTile(trx);
+              return _buildTransactionCard(trx); // Mengganti Tile dengan Card
             },
-          ),
-        );
-      }),
-    );
-  }
-
-  /// Tile untuk satu baris transaksi
-  Widget _buildTransactionTile(WalletTransactionModel trx) {
-    final bool isKredit = trx.type == TransactionType.KREDIT;
-    final Color color = isKredit ? Colors.green.shade700 : Colors.red.shade700;
-    final IconData icon = isKredit ? FontAwesomeIcons.arrowDown : FontAwesomeIcons.arrowUp;
-    final String sign = isKredit ? "+" : "-";
-
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: color.withOpacity(0.1),
-        child: FaIcon(icon, size: 16, color: color),
-      ),
-      title: Text(
-        trx.description,
-        style: const TextStyle(fontWeight: FontWeight.w600),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Text(trx.formattedDate, style: Get.textTheme.bodySmall),
-      trailing: Text(
-        "$sign ${rupiahFormatter.format(trx.amount)}",
-        style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16),
+          );
+        }),
       ),
     );
   }
   
-  /// Loader Pagination (Identik dengan modul lain)
+  /// AppBar Kustom (Konsisten)
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      title: Text(
+        "Riwayat Dompet",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: false,
+    );
+  }
+
+  /// Tampilan Empty State yang Didesain Ulang
+  Widget _buildEmptyState() {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const FaIcon(FontAwesomeIcons.fileInvoiceDollar, size: 96, color: AppColors.greyLight),
+              const SizedBox(height: 32),
+              Text(
+                "Belum Ada Riwayat Transaksi",
+                style: Get.textTheme.titleLarge?.copyWith(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Lakukan transaksi pertama Anda, dan riwayat akan muncul di sini.",
+                style: Get.textTheme.bodyMedium?.copyWith(
+                  fontSize: 16,
+                  color: AppColors.textLight,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Kartu untuk satu baris transaksi (Didesain Ulang)
+  Widget _buildTransactionCard(WalletTransactionModel trx) {
+    final bool isKredit = trx.type == TransactionType.KREDIT;
+    final Color color = isKredit ? AppColors.primary : Colors.red.shade700;
+    final IconData icon = isKredit ? FontAwesomeIcons.arrowUp : FontAwesomeIcons.arrowDown;
+    final String sign = isKredit ? "+" : "-";
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: FaIcon(icon, size: 20, color: color),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  trx.description,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  trx.formattedDate,
+                  style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            "$sign ${rupiahFormatter.format(trx.amount)}",
+            style: Get.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  /// Loader Pagination (Tidak ada perubahan)
   Widget _buildLoader() {
     return Obx(() {
       if (controller.isLoadingMore.value) {
         return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: CircularProgressIndicator()));
       }
       if (!controller.hasMoreData.value) {
-         return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: Text("Akhir dari riwayat.")));
+        return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: Text("Akhir dari riwayat.")));
       }
       return const SizedBox.shrink();
     });

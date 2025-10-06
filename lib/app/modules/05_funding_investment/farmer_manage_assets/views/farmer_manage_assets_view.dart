@@ -13,32 +13,20 @@ class FarmerManageAssetsView extends GetView<FarmerManageAssetsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Manajemen Aset (Lahan/Ternak)"),
-        elevation: 0,
-      ),
-      // Tombol untuk menambah aset baru
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: controller.goToAddAsset,
-        icon: const FaIcon(FontAwesomeIcons.plus),
-        label: const Text("Tambah Aset"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
+      floatingActionButton: _buildFloatingActionButton(),
       body: RefreshIndicator(
         onRefresh: controller.fetchAssets,
         child: Obx(() {
-          // 1. Loading State
           if (controller.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
           }
           
-          // 2. Empty State
           if (controller.assetList.isEmpty) {
             return _buildEmptyState();
           }
 
-          // 3. Data State
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: controller.assetList.length,
@@ -52,100 +40,162 @@ class FarmerManageAssetsView extends GetView<FarmerManageAssetsController> {
     );
   }
 
-  /// Tampilan jika Petani belum mendaftarkan aset
+  /// AppBar Kustom
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      title: Text(
+        "Aset Saya",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: false,
+    );
+  }
+
+  /// FAB yang Ditingkatkan
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton.extended(
+      onPressed: controller.goToAddAsset,
+      icon: const FaIcon(FontAwesomeIcons.plus),
+      label: const Text("Tambah Aset"),
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 8, // Tambah shadow
+    );
+  }
+
+  /// Tampilan Empty State yang Didesain Ulang
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FaIcon(FontAwesomeIcons.mapLocationDot, size: 80, color: AppColors.greyLight),
-            const SizedBox(height: 24),
-            Text(
-              "Anda Belum Punya Aset",
-              style: Get.textTheme.titleLarge?.copyWith(fontSize: 20),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Klik tombol 'Tambah Aset' untuk mendaftarkan lahan atau peternakan Anda agar bisa mengajukan pendanaan.",
-              style: Get.textTheme.bodyMedium?.copyWith(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: controller.goToAddAsset,
-              icon: const FaIcon(FontAwesomeIcons.plus),
-              label: const Text("Daftarkan Aset Pertama"),
-            ),
-          ],
+    return SingleChildScrollView( // Membungkus dengan SingleChildScrollView
+      physics: const AlwaysScrollableScrollPhysics(), // Agar RefreshIndicator tetap berfungsi
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Menggunakan ilustrasi SVG atau gambar
+              // Contoh: Gunakan SvgPicture.asset jika Anda punya ilustrasi
+              // SvgPicture.asset('assets/illustrations/empty-asset.svg', height: 180),
+              const FaIcon(FontAwesomeIcons.mapLocationDot, size: 96, color: AppColors.greyLight),
+              const SizedBox(height: 32),
+              Text(
+                "Belum Ada Aset Terdaftar",
+                style: Get.textTheme.titleLarge?.copyWith(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Klik tombol 'Tambah Aset' untuk mendaftarkan lahan atau peternakan Anda dan memulai pendanaan.",
+                style: Get.textTheme.bodyMedium?.copyWith(
+                  fontSize: 16,
+                  color: AppColors.textLight,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              FilledButton.icon(
+                onPressed: controller.goToAddAsset,
+                icon: const FaIcon(FontAwesomeIcons.plus),
+                label: const Text("Daftarkan Aset Pertama"),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Kartu untuk menampilkan satu aset
+  /// Kartu untuk menampilkan satu aset (Didesain Ulang)
   Widget _buildAssetCard(AssetModel asset) {
-    return Card(
-      elevation: 2,
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20), // Sudut lebih rounded
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: () => controller.goToAssetDetail(asset),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Placeholder Gambar Aset
-            Container(
-              height: 140,
-              decoration: BoxDecoration(
-                color: AppColors.greyLight,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                // TODO: Ganti dengan Image.network(asset.imageUrl)
-              ),
-              child: Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey.shade400)),
+            Stack(
+              children: [
+                // Gambar Aset atau Placeholder
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  child: asset.imageUrl != null && asset.imageUrl!.isNotEmpty
+                      ? Image.network(
+                          asset.imageUrl!,
+                          height: 160,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 160,
+                            color: AppColors.greyLight,
+                            child: const Center(child: FaIcon(FontAwesomeIcons.image, size: 48, color: Colors.grey)),
+                          ),
+                        )
+                      : Container(
+                          height: 160,
+                          color: AppColors.greyLight,
+                          child: const Center(child: FaIcon(FontAwesomeIcons.image, size: 48, color: Colors.grey)),
+                        ),
+                ),
+                // Status Badge di pojok kanan atas gambar
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: _buildStatusBadge(asset.status),
+                ),
+              ],
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Status Badge (VERIFIED/PENDING)
-                  _buildStatusBadge(asset.status),
-                  const SizedBox(height: 8),
-                  // Nama Aset
                   Text(
                     asset.name,
-                    style: Get.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700, 
-                      fontSize: 18,
+                    style: Get.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // Lokasi
-                  Row(
-                    children: [
-                      const FaIcon(FontAwesomeIcons.locationDot, size: 14, color: AppColors.textLight),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(asset.location, style: Get.textTheme.bodyMedium),
-                      ),
-                    ],
+                  const SizedBox(height: 12),
+                  _buildAssetInfoRow(
+                    FontAwesomeIcons.locationDot,
+                    asset.location,
+                    Get.textTheme.bodyMedium,
                   ),
-                  const SizedBox(height: 4),
-                  // Tipe Aset
-                  Row(
-                    children: [
-                      FaIcon(
-                        asset.assetType == 'PETERNAKAN' ? FontAwesomeIcons.cow : FontAwesomeIcons.leaf,
-                        size: 14,
-                        color: AppColors.textLight,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(asset.assetType.capitalizeFirst!, style: Get.textTheme.bodyMedium),
-                    ],
+                  const SizedBox(height: 8),
+                  _buildAssetInfoRow(
+                    asset.assetType == 'PETERNAKAN' ? FontAwesomeIcons.cow : FontAwesomeIcons.leaf,
+                    asset.assetType.capitalizeFirst!,
+                    Get.textTheme.bodyMedium,
                   ),
                 ],
               ),
@@ -156,7 +206,20 @@ class FarmerManageAssetsView extends GetView<FarmerManageAssetsController> {
     );
   }
 
-  /// Badge untuk status verifikasi aset
+  /// Widget untuk baris info (lokasi, tipe)
+  Widget _buildAssetInfoRow(IconData icon, String text, TextStyle? style) {
+    return Row(
+      children: [
+        FaIcon(icon, size: 16, color: AppColors.textLight),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(text, style: style?.copyWith(color: AppColors.textDark), overflow: TextOverflow.ellipsis),
+        ),
+      ],
+    );
+  }
+
+  /// Badge untuk status verifikasi aset (Didesain Ulang)
   Widget _buildStatusBadge(AssetStatus status) {
     Color color;
     String text;
@@ -164,27 +227,27 @@ class FarmerManageAssetsView extends GetView<FarmerManageAssetsController> {
 
     switch (status) {
       case AssetStatus.VERIFIED:
-        color = Colors.green.shade700;
+        color = Colors.green;
         text = "Terverifikasi";
-        icon = FontAwesomeIcons.check;
+        icon = FontAwesomeIcons.solidCircleCheck;
         break;
       case AssetStatus.REJECTED:
-        color = Colors.red.shade700;
+        color = Colors.red;
         text = "Ditolak";
-        icon = FontAwesomeIcons.xmark;
+        icon = FontAwesomeIcons.solidCircleXmark;
         break;
       case AssetStatus.PENDING:
       default:
-        color = Colors.orange.shade700;
+        color = Colors.orange;
         text = "Menunggu Verifikasi";
-        icon = FontAwesomeIcons.clock;
+        icon = FontAwesomeIcons.solidClock;
         break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -194,7 +257,10 @@ class FarmerManageAssetsView extends GetView<FarmerManageAssetsController> {
           const SizedBox(width: 6),
           Text(
             text,
-            style: Get.textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w700),
+            style: Get.textTheme.bodySmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

@@ -2,6 +2,7 @@
 
 import 'package:get/get.dart';
 
+import '../../../../data/models/user_model.dart';
 import '../../../../routes/app_pages.dart';
 import '../../../../services/session_service.dart';
 
@@ -13,6 +14,10 @@ class HomeDashboardController extends GetxController {
   // --- STATE ---
   late final String userName;
   final RxBool isLoading = true.obs;
+
+  /// Getter untuk mengecek status KYC secara reaktif
+  KycStatus get kycStatus => _sessionService.kycStatus;
+  bool get isKycPending => _sessionService.kycStatus == KycStatus.PENDING_KYC;
   
   // --- DATA (Akan di-fetch) ---
   final RxString walletBalance = "Rp 0".obs;
@@ -76,5 +81,9 @@ class HomeDashboardController extends GetxController {
   
   void goToManageAssets() {
     Get.toNamed(Routes.FARMER_MANAGE_ASSETS);
+  }
+
+  void goToKycForm() {
+    Get.toNamed(Routes.KYC_FORM);
   }
 }

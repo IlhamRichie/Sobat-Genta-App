@@ -13,22 +13,20 @@ class CheckoutAddressView extends GetView<CheckoutAddressController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Pilih Alamat Pengiriman"),
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
       bottomNavigationBar: _buildBottomConfirmBar(),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           children: [
-            // Render list alamat yang ada
-            ...controller.addressList.map((addr) => _buildAddressCard(addr)),
-            
-            // Tombol Tambah Alamat Baru
+            ...controller.addressList
+                .map((addr) => _buildAddressCard(addr))
+                .toList(),
             const SizedBox(height: 16),
             _buildAddAddressButton(context),
           ],
@@ -37,157 +35,264 @@ class CheckoutAddressView extends GetView<CheckoutAddressController> {
     );
   }
 
-  /// Kartu untuk satu alamat (menggunakan Radio)
-  Widget _buildAddressCard(AddressModel address) {
-    return Obx(() => Card(
+  /// AppBar Kustom
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: (controller.selectedAddressId.value == address.addressId)
-              ? AppColors.primary
-              : Colors.grey.shade300,
-          width: 2,
+      title: Text(
+        "Pilih Alamat",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
         ),
       ),
-      margin: const EdgeInsets.only(bottom: 12),
-      child: RadioListTile<String>(
-        value: address.addressId,
-        groupValue: controller.selectedAddressId.value,
-        onChanged: (val) => controller.selectAddress(val!),
-        activeColor: AppColors.primary,
-        title: Text("${address.label} (${address.recipientName})", style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(
-          "${address.fullAddress}, ${address.city}, ${address.postalCode}\n${address.phoneNumber}",
-          style: Get.textTheme.bodyMedium,
-        ),
-        isThreeLine: true,
-      ),
-    ));
-  }
-
-  /// Tombol "Tambah Alamat"
-  Widget _buildAddAddressButton(BuildContext context) {
-    return OutlinedButton.icon(
-      onPressed: () => _showAddAddressSheet(context),
-      icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
-      label: const Text("Tambah Alamat Baru"),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.primary),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-      ),
+      centerTitle: false,
     );
   }
-  
-  /// Bottom Sheet Formulir (Inline Form)
-  void _showAddAddressSheet(BuildContext context) {
-    // Reset field
-    controller.nameC.clear();
-    controller.phoneC.clear();
-    controller.addressC.clear();
-    controller.cityC.clear();
-    controller.postalC.clear();
-    
-    Get.bottomSheet(
-      Container(
-        height: Get.height * 0.8,
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Form(
-          key: controller.formKey,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text("Alamat Baru", style: Get.textTheme.titleLarge),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: [
-                    TextFormField(
-                      controller: controller.labelC,
-                      decoration: _inputDecoration('Label Alamat (cth: Rumah)', null),
-                      validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: controller.nameC,
-                      decoration: _inputDecoration('Nama Penerima', null),
-                       validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: controller.phoneC,
-                      decoration: _inputDecoration('Nomor Telepon', null),
-                      keyboardType: TextInputType.phone,
-                       validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: controller.addressC,
-                      decoration: _inputDecoration('Alamat Lengkap (Jalan, RT/RW)', null),
-                       validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: controller.cityC,
-                          decoration: _inputDecoration('Kota / Kabupaten', null),
-                          validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: TextFormField(
-                          controller: controller.postalC,
-                          decoration: _inputDecoration('Kode Pos', null),
-                          keyboardType: TextInputType.number,
-                          validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-                        ),
-                      ),
-                    ]),
-                  ],
+
+  /// Kartu untuk satu alamat (Didesain Ulang)
+  Widget _buildAddressCard(AddressModel address) {
+    return Obx(() {
+      final isSelected =
+          controller.selectedAddressId.value == address.addressId;
+      return GestureDetector(
+        onTap: () => controller.selectAddress(address.addressId),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color:
+                isSelected ? AppColors.primary.withOpacity(0.1) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.greyLight,
+              width: 1.5,
+            ),
+            boxShadow: [
+              if (isSelected)
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
                 ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "${address.label} (${address.recipientName})",
+                    style: Get.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color:
+                          isSelected ? AppColors.primary : AppColors.textDark,
+                    ),
+                  ),
+                  FaIcon(
+                    isSelected
+                        ? FontAwesomeIcons.solidCircleDot
+                        : FontAwesomeIcons.circle,
+                    size: 20,
+                    color: isSelected ? AppColors.primary : AppColors.textLight,
+                  ),
+                ],
               ),
-              // Tombol Simpan di dalam Sheet
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Obx(() => FilledButton(
-                  onPressed: controller.isSavingNewAddress.value ? null : controller.saveNewAddress,
-                  child: controller.isSavingNewAddress.value 
-                      ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white))
-                      : const Text("Simpan Alamat"),
-                )),
+              const SizedBox(height: 8),
+              Text(
+                "${address.fullAddress}, ${address.city}, ${address.postalCode}",
+                style: Get.textTheme.bodyMedium
+                    ?.copyWith(color: AppColors.textDark),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                address.phoneNumber,
+                style: Get.textTheme.bodyMedium
+                    ?.copyWith(color: AppColors.textLight),
               ),
             ],
           ),
         ),
+      );
+    });
+  }
+
+  /// Tombol "Tambah Alamat" (Didesain Ulang)
+  Widget _buildAddAddressButton(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () => _showAddAddressSheet(context),
+      icon: const FaIcon(FontAwesomeIcons.plus,
+          size: 16, color: AppColors.primary),
+      label: const Text(
+        "Tambah Alamat Baru",
+        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
       ),
-      isScrollControlled: true, // Wajib agar BottomSheet bisa full height
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        side: const BorderSide(color: AppColors.primary),
+      ),
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData? icon) {
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: icon != null ? FaIcon(icon, size: 20) : null,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+  /// Bottom Sheet Formulir (Didesain Ulang)
+  void _showAddAddressSheet(BuildContext context) {
+    controller.clearForm();
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SingleChildScrollView(
+          child: Form(
+            key: controller.formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Tambahkan Alamat Baru",
+                  style: Get.textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                _buildTextFormField(
+                  controller: controller.labelC,
+                  label: 'Label Alamat (cth: Rumah)',
+                  hint: 'Contoh: Rumah, Kantor',
+                  icon: FontAwesomeIcons.solidBookmark,
+                ),
+                const SizedBox(height: 16),
+                _buildTextFormField(
+                  controller: controller.nameC,
+                  label: 'Nama Penerima',
+                  icon: FontAwesomeIcons.solidUser,
+                ),
+                const SizedBox(height: 16),
+                _buildTextFormField(
+                  controller: controller.phoneC,
+                  label: 'Nomor Telepon',
+                  icon: FontAwesomeIcons.phone,
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+                _buildTextFormField(
+                  controller: controller.addressC,
+                  label: 'Alamat Lengkap',
+                  icon: FontAwesomeIcons.locationDot,
+                ),
+                const SizedBox(height: 16),
+                Row(children: [
+                  Expanded(
+                    child: _buildTextFormField(
+                      controller: controller.cityC,
+                      label: 'Kota / Kabupaten',
+                      icon: FontAwesomeIcons.city,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildTextFormField(
+                      controller: controller.postalC,
+                      label: 'Kode Pos',
+                      icon: FontAwesomeIcons.mailchimp,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ]),
+                const SizedBox(height: 32),
+                Obx(() => FilledButton(
+                      onPressed: controller.isSavingNewAddress.value
+                          ? null
+                          : controller.saveNewAddress,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                        elevation: 4,
+                      ),
+                      child: controller.isSavingNewAddress.value
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2))
+                          : const Text("Simpan Alamat",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                    )),
+              ],
+            ),
+          ),
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 
-  /// Tombol Konfirmasi di Bawah
+  /// Tombol Konfirmasi di Bawah (Didesain Ulang)
   Widget _buildBottomConfirmBar() {
     return Container(
-      padding: const EdgeInsets.all(20),
-      child: FilledButton(
-        onPressed: controller.confirmAndContinue,
-        child: const Text("Lanjut ke Pembayaran"),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, -5),
+          ),
+        ],
       ),
+      child: Obx(() => FilledButton(
+            onPressed: controller.selectedAddressId.value != null
+                ? controller.confirmAndContinue
+                : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              elevation: 4,
+            ),
+            child: const Text("Lanjut ke Pembayaran",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          )),
+    );
+  }
+
+  /// Helper untuk TextFormField (Baru)
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hint,
+    TextInputType? keyboardType,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: FaIcon(icon, size: 20, color: AppColors.textLight),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: AppColors.primary, width: 2)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: AppColors.greyLight)),
+      ),
+      validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
     );
   }
 }

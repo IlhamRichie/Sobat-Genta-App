@@ -14,9 +14,8 @@ class OrderTrackingDetailView extends GetView<OrderTrackingDetailController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Detail Lacak Pesanan"),
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -31,16 +30,16 @@ class OrderTrackingDetailView extends GetView<OrderTrackingDetailController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionTitle("Status Pengiriman"),
-              _buildTrackingTimeline(order.trackingEvents ?? []), // 1. Timeline
+              _buildTrackingTimeline(order.trackingEvents ?? []),
               
               _buildSectionTitle("Detail Pengiriman"),
-              _buildAddressCard(order), // 2. Alamat
+              _buildAddressCard(order),
               
               _buildSectionTitle("Daftar Produk"),
-              _buildProductList(order.items ?? []), // 3. Item List
+              _buildProductList(order.items ?? []),
 
               _buildSectionTitle("Rincian Pembayaran"),
-              _buildPaymentSummary(order), // 4. Rincian Biaya
+              _buildPaymentSummary(order),
               
               const SizedBox(height: 24),
             ],
@@ -50,92 +49,226 @@ class OrderTrackingDetailView extends GetView<OrderTrackingDetailController> {
     );
   }
 
+  /// AppBar Kustom dengan BackButton dan Tombol Home
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      leading: BackButton(
+        color: AppColors.textDark,
+        onPressed: () => Get.back(),
+      ),
+      title: Text(
+        "Lacak Pesanan",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: false,
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-      child: Text(title, style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
-    );
-  }
-
-  /// 1. Timeline Pelacakan (Data Dinamis)
-  Widget _buildTrackingTimeline(List<OrderTrackingEventModel> events) {
-    if (events.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.0),
-        child: Text("Data pelacakan belum tersedia."),
-      );
-    }
-    // Render Timeline
-    return ListView.builder(
-      itemCount: events.length,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        final event = events[index];
-        // (Kita REUSE arsitektur UI dari InvestorPortfolioDetailView)
-        return _OrderTimelineTile(
-          event: event,
-          isFirst: index == 0,
-          isLast: index == events.length - 1,
-        );
-      },
-    );
-  }
-
-  /// 2. Kartu Alamat Pengiriman
-  Widget _buildAddressCard(order) {
-    final addr = order.shippingAddress;
-     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.grey.shade300)
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+      child: Text(
+        title,
+        style: Get.textTheme.titleLarge?.copyWith(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
         ),
-        leading: const FaIcon(FontAwesomeIcons.locationDot, color: AppColors.primary),
-        title: Text("${addr.recipientName} (${addr.label})", style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text("${addr.fullAddress}, ${addr.city} \n${addr.phoneNumber}"),
-        isThreeLine: true,
       ),
     );
   }
 
-  /// 3. Daftar Item Produk (Data Berat)
-  Widget _buildProductList(List<CartItemModel> items) {
-     return ListView.builder(
-      itemCount: items.length,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (ctx, index) {
-        final item = items[index];
-        return ListTile(
-          leading: Container(
-            width: 50, height: 50,
-            decoration: BoxDecoration(color: AppColors.greyLight, borderRadius: BorderRadius.circular(8)),
+  /// 1. Timeline Pelacakan (Didesain Ulang)
+  Widget _buildTrackingTimeline(List<OrderTrackingEventModel> events) {
+    if (events.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.0),
+        child: Text("Data pelacakan belum tersedia."),
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
-          title: Text(item.product.name, maxLines: 2),
-          subtitle: Text("${item.quantity} item"),
-          trailing: Text(
-            controller.rupiahFormatter.format(item.subTotal),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        );
-      },
+        ],
+      ),
+      child: ListView.builder(
+        itemCount: events.length,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          final event = events[index];
+          return _OrderTimelineTile(
+            event: event,
+            isFirst: index == 0,
+            isLast: index == events.length - 1,
+          );
+        },
+      ),
     );
   }
 
-  /// 4. Ringkasan Biaya (dari Order)
+  /// 2. Kartu Alamat Pengiriman (Didesain Ulang)
+  Widget _buildAddressCard(order) {
+    final addr = order.shippingAddress;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const FaIcon(FontAwesomeIcons.locationDot, color: AppColors.primary, size: 20),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${addr.recipientName} (${addr.label})",
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "${addr.fullAddress}, ${addr.city}, ${addr.postalCode}",
+                  style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textDark),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  addr.phoneNumber,
+                  style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 3. Daftar Item Produk (Didesain Ulang)
+  Widget _buildProductList(List<CartItemModel> items) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 24.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ListView.builder(
+        itemCount: items.length,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (ctx, index) {
+          final item = items[index];
+          return Padding(
+            padding: EdgeInsets.only(bottom: index == items.length - 1 ? 0 : 16),
+            child: _buildProductItemTile(item),
+          );
+        },
+      ),
+    );
+  }
+  
+  Widget _buildProductItemTile(CartItemModel item) {
+    return Row(
+      children: [
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: AppColors.greyLight,
+            borderRadius: BorderRadius.circular(12),
+            image: item.product.imageUrl != null && item.product.imageUrl!.isNotEmpty
+                ? DecorationImage(image: NetworkImage(item.product.imageUrl!), fit: BoxFit.cover)
+                : null,
+          ),
+          child: item.product.imageUrl == null || item.product.imageUrl!.isEmpty
+              ? const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey))
+              : null,
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                item.product.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "Jumlah: ${item.quantity} item",
+                style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          controller.rupiahFormatter.format(item.subTotal),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+      ],
+    );
+  }
+
+  /// 4. Ringkasan Biaya (Didesain Ulang)
   Widget _buildPaymentSummary(order) {
-    // (Asumsi ongkir disimpan, kita ambil dari data mock CheckoutPayment)
-    final double shippingCost = 15000.0; 
+    final double shippingCost = 15000.0;
     final double subtotal = order.grandTotal - shippingCost;
     
-    return Padding(
-       padding: const EdgeInsets.symmetric(horizontal: 20.0),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24.0),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Column(
         children: [
-           _buildSummaryRow("Subtotal Produk", controller.rupiahFormatter.format(subtotal)),
+          _buildSummaryRow("Subtotal Produk", controller.rupiahFormatter.format(subtotal)),
+          const SizedBox(height: 12),
           _buildSummaryRow("Biaya Pengiriman", controller.rupiahFormatter.format(shippingCost)),
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: AppColors.greyLight),
+          const SizedBox(height: 12),
           _buildSummaryRow(
             "Total Pembayaran", 
             controller.rupiahFormatter.format(order.grandTotal),
@@ -147,30 +280,35 @@ class OrderTrackingDetailView extends GetView<OrderTrackingDetailController> {
   }
   
   Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
-     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight)),
-          Text(value, style: Get.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.bold, fontSize: isTotal ? 18 : 16
-          )),
-        ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Get.textTheme.bodyMedium?.copyWith(
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            fontSize: isTotal ? 16 : 14,
+          ),
+        ),
+        Text(
+          value,
+          style: Get.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: isTotal ? 18 : 16,
+            color: isTotal ? AppColors.primary : AppColors.textDark,
+          ),
+        ),
+      ],
     );
   }
 }
 
-
 /// WIDGET REUSABLE: Untuk Timeline Tracking
-/// (Ini adalah copy-paste/adaptasi dari InvestorPortfolioDetailView.
-/// Idealnya ini di-refactor ke /widgets/timeline_tile.dart generik)
 class _OrderTimelineTile extends StatelessWidget {
   final OrderTrackingEventModel event;
   final bool isFirst;
   final bool isLast;
-
+  
   const _OrderTimelineTile({
     required this.event,
     required this.isFirst,
@@ -187,34 +325,49 @@ class _OrderTimelineTile extends StatelessWidget {
           Container(
             width: 40,
             alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(left: 20.0),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                Expanded(child: Container(width: 2, color: isFirst ? Colors.transparent : Colors.grey.shade300)),
+                Expanded(child: Container(width: 2, color: isFirst ? Colors.transparent : AppColors.primary)),
                 Container(
                   width: 16, height: 16,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isFirst ? AppColors.primary : Colors.grey.shade300,
+                    color: isFirst ? AppColors.primary : AppColors.greyLight,
+                    border: Border.all(color: isFirst ? AppColors.primary : AppColors.greyLight, width: 2)
                   ),
+                  child: isFirst 
+                      ? const Center(child: FaIcon(FontAwesomeIcons.check, size: 8, color: Colors.white))
+                      : null,
                 ),
-                Expanded(child: Container(width: 2, color: isLast ? Colors.transparent : Colors.grey.shade300)),
+                Expanded(child: Container(width: 2, color: isLast ? Colors.transparent : AppColors.primary)),
               ],
             ),
           ),
           // 2. Konten
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 20, 24),
+              padding: const EdgeInsets.fromLTRB(16, 0, 20, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.statusTitle, style: Get.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: isFirst ? AppColors.primary : AppColors.textDark)),
+                  Text(
+                    event.statusTitle,
+                    style: Get.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isFirst ? AppColors.primary : AppColors.textDark,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text("${event.formattedDate} - ${event.formattedTime}", style: Get.textTheme.bodySmall),
+                  Text(
+                    "${event.formattedDate} - ${event.formattedTime}",
+                    style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
+                  ),
                   const SizedBox(height: 8),
-                  Text(event.description, style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight)),
+                  Text(
+                    event.description,
+                    style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+                  ),
                 ],
               ),
             ),

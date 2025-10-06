@@ -13,4 +13,7 @@ abstract class IConsultationRepository {
   Future<List<ChatMessageModel>> getChatHistory(String consultationId);
 
   Future<RtcTokenModel> getRtcToken(String consultationId);
+
+  Future<List<ConsultationModel>> getMyConsultationList();
+
 }

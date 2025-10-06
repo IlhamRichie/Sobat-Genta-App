@@ -13,26 +13,25 @@ class LoginView extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        // AppBar transparan agar menyatu dengan body
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.background,
         elevation: 0,
         leading: BackButton(color: AppColors.textDark),
       ),
       body: SingleChildScrollView(
-        // Best practice: Selalu bungkus form dengan SingleChildScrollView
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
         child: Form(
-          key: controller.formKey, // Hubungkan form dengan formKey di controller
+          key: controller.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildHeader(),
-              const SizedBox(height: 32),
+              const SizedBox(height: 48),
               _buildEmailField(),
               const SizedBox(height: 16),
               _buildPasswordField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               _buildForgotPasswordLink(),
               const SizedBox(height: 32),
               _buildLoginButton(),
@@ -45,34 +44,42 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
+  /// Header (Didesain Ulang)
   Widget _buildHeader() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           "Selamat Datang Kembali",
-          style: Get.textTheme.titleLarge?.copyWith(fontSize: 24),
+          style: Get.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textDark,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          "Login untuk melanjutkan ke akun SobatGenta Anda.",
-          style: Get.textTheme.bodyMedium?.copyWith(fontSize: 16),
+          "Login untuk melanjutkan ke akun Anda.",
+          style: Get.textTheme.bodyLarge?.copyWith(
+            color: AppColors.textLight,
+            fontSize: 16,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
     );
   }
 
+  /// Field Email (Didesain Ulang)
   Widget _buildEmailField() {
     return TextFormField(
       controller: controller.emailC,
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
-      decoration: InputDecoration(
-        labelText: 'Email',
-        hintText: 'contoh: budi@petani.com',
-        prefixIcon: const FaIcon(FontAwesomeIcons.envelope, size: 20),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      decoration: _inputDecoration(
+        'Email',
+        'contoh: budi@petani.com',
+        FontAwesomeIcons.solidEnvelope,
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -86,40 +93,37 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
+  /// Field Password (Didesain Ulang)
   Widget _buildPasswordField() {
-    // Bungkus dengan Obx agar UI di-build ulang saat
-    // controller.isPasswordHidden berubah
     return Obx(() => TextFormField(
-          controller: controller.passwordC,
-          autocorrect: false,
-          obscureText: controller.isPasswordHidden.value,
-          decoration: InputDecoration(
-            labelText: 'Password',
-            prefixIcon: const FaIcon(FontAwesomeIcons.lock, size: 20),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            suffixIcon: IconButton(
-              icon: FaIcon(
-                // Ganti ikon berdasarkan state
-                controller.isPasswordHidden.value
-                    ? FontAwesomeIcons.eyeSlash
-                    : FontAwesomeIcons.eye,
-                size: 20,
-              ),
-              onPressed: controller.togglePasswordVisibility,
-            ),
+      controller: controller.passwordC,
+      autocorrect: false,
+      obscureText: controller.isPasswordHidden.value,
+      decoration: _inputDecoration(
+        'Password',
+        'Minimal 6 karakter',
+        FontAwesomeIcons.lock,
+        suffixIcon: IconButton(
+          icon: FaIcon(
+            controller.isPasswordHidden.value
+                ? FontAwesomeIcons.eyeSlash
+                : FontAwesomeIcons.eye,
+            size: 20,
+            color: AppColors.textLight,
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Password tidak boleh kosong';
-            }
-            if (value.length < 6) {
-              return 'Password minimal 6 karakter';
-            }
-            return null;
-          },
-        ));
+          onPressed: controller.togglePasswordVisibility,
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.length < 6) {
+          return 'Password minimal 6 karakter';
+        }
+        return null;
+      },
+    ));
   }
 
+  /// Tautan Lupa Password (Didesain Ulang)
   Widget _buildForgotPasswordLink() {
     return Align(
       alignment: Alignment.centerRight,
@@ -129,27 +133,37 @@ class LoginView extends GetView<LoginController> {
         },
         child: const Text(
           'Lupa Password?',
-          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
+  /// Tombol Login (Didesain Ulang)
   Widget _buildLoginButton() {
-    // Bungkus tombol dengan Obx untuk merespon state isLoading
     return Obx(() => FilledButton(
-          // Nonaktifkan tombol jika sedang loading
-          onPressed: controller.isLoading.value ? null : controller.login,
-          child: controller.isLoading.value
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                )
-              : const Text('Login'),
-        ));
+      onPressed: controller.isLoading.value ? null : controller.login,
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        elevation: 4,
+      ),
+      child: controller.isLoading.value
+          ? const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+            )
+          : const Text(
+              'Login',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+    ));
   }
 
+  /// Tautan Daftar (Didesain Ulang)
   Widget _buildRegisterLink() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -157,15 +171,34 @@ class LoginView extends GetView<LoginController> {
         Text('Belum punya akun?', style: Get.textTheme.bodyMedium),
         TextButton(
           onPressed: () {
-            // Arahkan ke halaman pemilih peran
             Get.toNamed(Routes.REGISTER_ROLE_CHOOSER);
           },
           child: const Text(
             'Daftar di sini',
-            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+    );
+  }
+
+  /// Custom InputDecoration untuk konsistensi (Baru)
+  InputDecoration _inputDecoration(
+    String labelText,
+    String hintText,
+    IconData prefixIcon, {
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      labelStyle: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+      hintText: hintText,
+      hintStyle: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+      prefixIcon: FaIcon(prefixIcon, size: 20, color: AppColors.textLight),
+      suffixIcon: suffixIcon,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.greyLight)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.primary, width: 2)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.greyLight)),
     );
   }
 }

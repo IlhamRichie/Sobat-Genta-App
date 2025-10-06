@@ -16,38 +16,8 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Dashboard Pakar"),
-        actions: [
-          // --- FITUR KUNCI: TOGGLE ONLINE/OFFLINE ---
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Obx(() => Row(
-              children: [
-                Text(
-                  controller.isAvailable.value ? "ONLINE" : "OFFLINE",
-                  style: Get.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: controller.isAvailable.value ? Colors.green.shade700 : AppColors.textLight,
-                  ),
-                ),
-                // Tampilkan loading kecil jika toggle sedang proses
-                if (controller.isToggleLoading.value)
-                  const Padding(
-                    padding: EdgeInsets.all(14.0),
-                    child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                  )
-                else
-                  Switch(
-                    value: controller.isAvailable.value,
-                    onChanged: controller.toggleAvailability,
-                    activeColor: Colors.green.shade700,
-                  ),
-              ],
-            )),
-          )
-        ],
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -57,14 +27,14 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
           onRefresh: controller.fetchDashboardData,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
               children: [
                 _buildWelcomeHeader(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 _buildSummaryCards(),
                 const SizedBox(height: 24),
-                _buildConsultationQueue(), // Placeholder antrian
+                _buildConsultationQueue(),
               ],
             ),
           ),
@@ -73,20 +43,70 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
     );
   }
 
-  /// Header Selamat Datang
+  /// AppBar Kustom
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      title: Text(
+        "Dashboard",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: false,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: Obx(() => Row(
+            children: [
+              Text(
+                controller.isAvailable.value ? "Online" : "Offline",
+                style: Get.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: controller.isAvailable.value ? Colors.green.shade700 : AppColors.textLight,
+                ),
+              ),
+              if (controller.isToggleLoading.value)
+                const Padding(
+                  padding: EdgeInsets.all(14.0),
+                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                )
+              else
+                Transform.scale(
+                  scale: 0.8,
+                  child: Switch(
+                    value: controller.isAvailable.value,
+                    onChanged: controller.toggleAvailability,
+                    activeColor: Colors.green,
+                  ),
+                ),
+            ],
+          )),
+        )
+      ],
+    );
+  }
+
+  /// Header Selamat Datang (Didesain Ulang)
   Widget _buildWelcomeHeader() {
     return Column(
       children: [
         CircleAvatar(
-          radius: 40,
+          radius: 50,
           backgroundColor: AppColors.greyLight,
-          // TODO: Ganti dengan foto profil Pakar
-          child: FaIcon(FontAwesomeIcons.userDoctor, size: 40, color: Colors.grey.shade400),
+          backgroundImage: controller.profile.value?.user.profilePictureUrl != null && controller.profile.value!.user.profilePictureUrl!.isNotEmpty
+              ? NetworkImage(controller.profile.value!.user.profilePictureUrl!)
+              : null,
+          child: controller.profile.value?.user.profilePictureUrl == null || controller.profile.value!.user.profilePictureUrl!.isEmpty
+              ? const FaIcon(FontAwesomeIcons.userDoctor, size: 50, color: Colors.grey)
+              : null,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Text(
           "Selamat Datang,",
-          style: Get.textTheme.bodyLarge,
+          style: Get.textTheme.bodyLarge?.copyWith(color: AppColors.textLight),
         ),
         Text(
           controller.profile.value?.user.fullName ?? "Pakar Genta",
@@ -94,66 +114,92 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
         ),
         Text(
           controller.profile.value?.specialization ?? "Spesialisasi",
-          style: Get.textTheme.bodyLarge?.copyWith(color: AppColors.primary),
+          style: Get.textTheme.titleMedium?.copyWith(color: AppColors.primary),
         ),
       ],
     );
   }
 
-  /// Kartu Ringkasan (Penghasilan & Antrian)
+  /// Kartu Ringkasan (Penghasilan & Antrian) (Didesain Ulang)
   Widget _buildSummaryCards() {
     return IntrinsicHeight(
       child: Row(
         children: [
-          // Kartu Penghasilan (Data Mock Lokal)
           Expanded(
-            child: Card(
-              elevation: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Obx(() => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Total Penghasilan", style: Get.textTheme.bodyMedium),
-                    const SizedBox(height: 8),
-                    Text(
-                      rupiahFormatter.format(controller.currentEarnings.value),
-                      style: Get.textTheme.titleLarge?.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton(
-                      onPressed: () { Get.toNamed(Routes.EXPERT_PAYOUT); },
-                      child: const Text("Tarik Dana"),
-                    ),
-                  ],
-                )),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
+              child: Obx(() => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Total Penghasilan", style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight)),
+                  const SizedBox(height: 8),
+                  Text(
+                    rupiahFormatter.format(controller.currentEarnings.value),
+                    style: Get.textTheme.titleLarge?.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton(
+                    onPressed: () { Get.toNamed(Routes.EXPERT_PAYOUT); },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    child: const Text("Tarik Dana"),
+                  ),
+                ],
+              )),
             ),
           ),
           const SizedBox(width: 16),
-          // Kartu Antrian (Data Mock Lokal)
           Expanded(
-            child: Card(
-              elevation: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Obx(() => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Antrian Konsultasi", style: Get.textTheme.bodyMedium),
-                    const SizedBox(height: 8),
-                    Text(
-                      "${controller.pendingConsultations.value} Sesi",
-                      style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton(
-                      onPressed: () { /* TODO: Go to Consultation List */ },
-                      child: const Text("Lihat Antrian"),
-                    ),
-                  ],
-                )),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
+              child: Obx(() => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Antrian Konsultasi", style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight)),
+                  const SizedBox(height: 8),
+                  Text(
+                    "${controller.pendingConsultations.value} Sesi",
+                    style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton(
+                    onPressed: () { /* TODO: Go to Consultation List */ },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.textDark,
+                      side: const BorderSide(color: AppColors.greyLight),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    child: const Text("Lihat Antrian"),
+                  ),
+                ],
+              )),
             ),
           ),
         ],
@@ -161,26 +207,73 @@ class ExpertDashboardView extends GetView<ExpertDashboardController> {
     );
   }
 
-  /// Placeholder untuk daftar antrian
+  /// Placeholder untuk daftar antrian (Didesain Ulang)
   Widget _buildConsultationQueue() {
-    return Card(
-      elevation: 1,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Antrian Anda (1)", style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          // Ini adalah data mock UI
+          _buildQueueItem(
+            name: "Budi (Petani)",
+            status: "Menunggu konfirmasi Anda...",
+            onTap: () { /* TODO: Go to Chat Room */ },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Helper untuk satu item antrian
+  Widget _buildQueueItem({
+    required String name,
+    required String status,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
           children: [
-            Text("Antrian Anda (1)", style: Get.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-            const Divider(height: 24),
-            // Ini adalah data mock UI
-            ListTile(
-              leading: const CircleAvatar(child: FaIcon(FontAwesomeIcons.user)),
-              title: const Text("Budi (Petani)", style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text("Menunggu konfirmasi Anda..."),
-              trailing: FilledButton(
-                onPressed: () { /* TODO: Go to Chat Room */ },
-                child: const Text("Mulai"),
+            const CircleAvatar(
+              backgroundColor: AppColors.greyLight,
+              child: FaIcon(FontAwesomeIcons.solidUser, color: Colors.grey),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 4),
+                  Text(status, style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight)),
+                ],
               ),
+            ),
+            FilledButton(
+              onPressed: onTap,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: const Text("Mulai"),
             ),
           ],
         ),

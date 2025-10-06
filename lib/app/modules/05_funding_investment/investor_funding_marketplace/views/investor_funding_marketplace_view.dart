@@ -12,47 +12,57 @@ class InvestorFundingMarketplaceView
     extends GetView<InvestorFundingMarketplaceController> {
   InvestorFundingMarketplaceView({Key? key}) : super(key: key);
 
-  // Helper untuk format Rupiah
   final rupiahFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Marketplace Proyek"),
-        actions: [
-          IconButton(
-            onPressed: () { /* TODO: Buka Halaman Filter */ },
-            icon: const FaIcon(FontAwesomeIcons.filter),
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
       body: RefreshIndicator(
         onRefresh: controller.fetchPublishedProjects,
         child: Obx(() {
-          // 1. Loading State
           if (controller.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
           }
           
-          // 2. Empty State
           if (controller.projectList.isEmpty) {
             return _buildEmptyState();
           }
 
-          // 3. Data State
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             itemCount: controller.projectList.length,
             itemBuilder: (context, index) {
               final project = controller.projectList[index];
-              // Kita gunakan widget kartu yang SAMA PERSIS
-              // dengan di halaman Petani
               return _buildProjectCard(project);
             },
           );
         }),
       ),
+    );
+  }
+
+  /// AppBar Kustom
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      title: Text(
+        "Marketplace Proyek",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: false,
+      actions: [
+        IconButton(
+          onPressed: () { /* TODO: Buka Halaman Filter */ },
+          icon: const FaIcon(FontAwesomeIcons.filter, color: AppColors.iconSecondary),
+        ),
+        const SizedBox(width: 8),
+      ],
     );
   }
 
@@ -63,17 +73,24 @@ class InvestorFundingMarketplaceView
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FaIcon(FontAwesomeIcons.storeSlash, size: 80, color: AppColors.greyLight),
-            const SizedBox(height: 24),
+            const FaIcon(FontAwesomeIcons.storeSlash, size: 96, color: AppColors.greyLight),
+            const SizedBox(height: 32),
             Text(
               "Belum Ada Proyek Tersedia",
-              style: Get.textTheme.titleLarge?.copyWith(fontSize: 20),
+              style: Get.textTheme.titleLarge?.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               "Saat ini belum ada proposal proyek yang dipublikasikan. Silakan cek kembali nanti.",
-              style: Get.textTheme.bodyMedium?.copyWith(fontSize: 16),
+              style: Get.textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                color: AppColors.textLight,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -82,60 +99,83 @@ class InvestorFundingMarketplaceView
     );
   }
 
-  // --- WIDGET REUSABLE ---
-  // ARSITEKTUR: Ini adalah duplikasi dari FarmerMyProjectsListView
-  // Idealnya, ini di-refactor menjadi satu file widget 'ProjectCard.dart'
-  // Tapi untuk kecepatan sprint, kita copy-paste.
-
-  /// Kartu untuk menampilkan satu proyek
+  /// Kartu untuk menampilkan satu proyek (Didesain Ulang)
   Widget _buildProjectCard(ProjectModel project) {
-    return Card(
-      elevation: 2,
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: () => controller.goToProjectDetail(project),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Placeholder Gambar Proyek
-            Container(
-              height: 150,
-              decoration: BoxDecoration(
-                color: AppColors.greyLight,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              ),
-              child: Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey.shade400)),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  child: project.projectImageUrl != null && project.projectImageUrl!.isNotEmpty
+                      ? Image.network(
+                          project.projectImageUrl!,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 180,
+                            color: AppColors.greyLight,
+                            child: const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey)),
+                          ),
+                        )
+                      : Container(
+                          height: 180,
+                          color: AppColors.greyLight,
+                          child: const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey)),
+                        ),
+                ),
+                Positioned(
+                  top: 12, left: 12,
+                  child: _buildProjectStatusBadge(project.status),
+                ),
+              ],
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildProjectStatusBadge(project.status),
-                  const SizedBox(height: 12),
                   Text(
                     project.title,
-                    style: Get.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700, fontSize: 18),
+                    style: Get.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // Petani tidak perlu lihat nama aset,
-                  // tapi investor mungkin perlu. Kita biarkan.
                   Text(
-                    "Aset: ${project.assetName}",
+                    "Aset: ${project.assetName}", // Menggunakan `assetName` yang sudah ada di model
                     style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight, fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     "Terkumpul: ${rupiahFormatter.format(project.collectedFund)}",
-                    style: Get.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.primary),
+                    style: Get.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 4),
                   Text(
-                    "dari Target: ${rupiahFormatter.format(project.targetFund)}",
-                    style: Get.textTheme.bodySmall,
+                    "Target: ${rupiahFormatter.format(project.targetFund)}",
+                    style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
                   ),
                   const SizedBox(height: 8),
                   LinearProgressIndicator(
@@ -144,6 +184,11 @@ class InvestorFundingMarketplaceView
                     color: AppColors.primary,
                     minHeight: 8,
                     borderRadius: BorderRadius.circular(4),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${(project.fundingProgress * 100).toStringAsFixed(0)}% Terkumpul",
+                    style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
                   ),
                 ],
               ),
@@ -154,32 +199,34 @@ class InvestorFundingMarketplaceView
     );
   }
 
-  /// Badge untuk status proyek
+  /// Badge untuk status proyek (Didesain Ulang)
   Widget _buildProjectStatusBadge(ProjectStatus status) {
     Color color; String text; IconData icon;
 
     switch (status) {
       case ProjectStatus.PUBLISHED:
-        color = Colors.blue.shade700; text = "Galang Dana"; icon = FontAwesomeIcons.bullhorn; break;
+        color = AppColors.primary; text = "Galang Dana"; icon = FontAwesomeIcons.bullhorn; break;
       case ProjectStatus.FUNDED:
-        color = Colors.green.shade700; text = "Didanai Penuh"; icon = FontAwesomeIcons.checkCircle; break;
+        color = Colors.green; text = "Didanai Penuh"; icon = FontAwesomeIcons.solidCircleCheck; break;
       case ProjectStatus.COMPLETED:
         color = AppColors.textDark; text = "Selesai"; icon = FontAwesomeIcons.flagCheckered; break;
       case ProjectStatus.REJECTED:
-        color = Colors.red.shade700; text = "Ditolak"; icon = FontAwesomeIcons.xmarkCircle; break;
-      case ProjectStatus.PENDING_ADMIN:
+        color = Colors.red; text = "Ditolak"; icon = FontAwesomeIcons.solidCircleXmark; break;
       default:
-        // Ini seharusnya tidak tampil di marketplace, tapi kita siapkan
-        color = Colors.orange.shade700; text = "Menunggu Moderasi"; icon = FontAwesomeIcons.clock; break;
+        color = Colors.orange; text = "Menunggu Moderasi"; icon = FontAwesomeIcons.clock; break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        FaIcon(icon, size: 12, color: color), const SizedBox(width: 6),
-        Text(text, style: Get.textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.w700)),
-      ],),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FaIcon(icon, size: 12, color: color),
+          const SizedBox(width: 6),
+          Text(text, style: Get.textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 }

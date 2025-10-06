@@ -16,35 +16,29 @@ class TenderMarketplaceView extends GetView<TenderMarketplaceController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Marketplace Kebutuhan (Tender)"),
-        actions: [
-          IconButton(onPressed: () { /* TODO: Filter */ }, icon: const FaIcon(FontAwesomeIcons.filter)),
-        ],
-      ),
-      // Tombol Aksi (Hanya Petani yg boleh?)
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: controller.goToCreateTender,
-        icon: const FaIcon(FontAwesomeIcons.plus),
-        label: const Text("Buat Permintaan"),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
+      floatingActionButton: _buildFloatingActionButton(),
       
       body: Obx(() {
-        if (controller.isLoading.value) {
+        if (controller.isLoading.value && controller.tenderList.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
         
         if (controller.tenderList.isEmpty) {
-          return const Center(child: Text("Belum ada tender dibuka."));
+          return const Center(
+            child: Text(
+              "Belum ada tender dibuka.",
+              style: TextStyle(color: AppColors.textLight),
+            ),
+          );
         }
 
         return RefreshIndicator(
           onRefresh: controller.fetchInitialTenders,
           child: ListView.builder(
             controller: controller.scrollController,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             itemCount: controller.tenderList.length + 1, // +1 loader
             itemBuilder: (context, index) {
               if (index == controller.tenderList.length) {
@@ -59,17 +53,62 @@ class TenderMarketplaceView extends GetView<TenderMarketplaceController> {
     );
   }
 
-  /// Kartu untuk satu item tender
+  /// AppBar Kustom (Diperbarui)
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      title: Text(
+        "Tender",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: false,
+      actions: [
+        IconButton(
+          onPressed: () { /* TODO: Filter */ },
+          icon: const FaIcon(FontAwesomeIcons.filter, color: AppColors.textDark),
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+  
+  /// FAB (Diperbarui)
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton.extended(
+      onPressed: controller.goToCreateTender,
+      icon: const FaIcon(FontAwesomeIcons.plus),
+      label: const Text("Buat Permintaan"),
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 8, // Tambah shadow
+    );
+  }
+
+  /// Kartu untuk satu item tender (Diperbarui)
   Widget _buildTenderCard(TenderRequestModel tender) {
-    return Card(
-      elevation: 1,
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20), // Sudut lebih rounded
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: () => controller.goToTenderDetail(tender),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20), // Padding lebih lega
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -77,50 +116,98 @@ class TenderMarketplaceView extends GetView<TenderMarketplaceController> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Chip(
-                    label: Text(tender.category, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
-                    visualDensity: VisualDensity.compact,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      tender.category,
+                      style: Get.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
-                  Text(
-                    "${tender.totalOffers} Penawaran",
-                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      const FaIcon(
+                        FontAwesomeIcons.solidCommentDots,
+                        size: 14,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        "${tender.totalOffers} Penawaran",
+                        style: Get.textTheme.bodyMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              // Judul
+              const SizedBox(height: 16),
+              // Judul & Deskripsi Singkat
               Text(
                 tender.title,
-                style: Get.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18),
+                style: Get.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 8),
-              // Requestor
-              Text("Oleh: ${tender.requestorName}", style: Get.textTheme.bodySmall),
-              const Divider(height: 24),
+              const SizedBox(height: 4),
+              Text(
+                "Oleh: ${tender.requestorName}",
+                style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
+              ),
+              const SizedBox(height: 16),
               // Budget & Deadline
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Budget:", style: TextStyle(color: AppColors.textLight)),
-                      Text(
-                        tender.targetBudget != null ? rupiahFormatter.format(tender.targetBudget!) : "Terbuka",
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Budget", style: TextStyle(color: AppColors.textLight)),
+                        const SizedBox(height: 4),
+                        Text(
+                          tender.targetBudget != null
+                              ? rupiahFormatter.format(tender.targetBudget!)
+                              : "Terbuka",
+                          style: Get.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text("Batas Waktu:", style: TextStyle(color: AppColors.textLight)),
-                      Text(
-                        tender.formattedDeadline,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                    ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text("Batas Waktu", style: TextStyle(color: AppColors.textLight)),
+                        const SizedBox(height: 4),
+                        Text(
+                          tender.formattedDeadline,
+                          style: Get.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -131,14 +218,14 @@ class TenderMarketplaceView extends GetView<TenderMarketplaceController> {
     );
   }
   
-  /// Loader Pagination (Identik dengan modul lain)
+  /// Loader Pagination (Tidak ada perubahan signifikan)
   Widget _buildLoader() {
     return Obx(() {
       if (controller.isLoadingMore.value) {
         return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: CircularProgressIndicator()));
       }
       if (!controller.hasMoreData.value) {
-         return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: Text("Akhir dari daftar tender.")));
+        return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: Text("Akhir dari daftar tender.")));
       }
       return const SizedBox.shrink();
     });

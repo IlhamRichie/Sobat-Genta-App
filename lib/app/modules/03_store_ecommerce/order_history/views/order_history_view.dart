@@ -16,37 +16,26 @@ class OrderHistoryView extends GetView<OrderHistoryController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Riwayat Pesanan Toko"),
-      ),
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
       body: Obx(() {
-        if (controller.isLoading.value) {
+        if (controller.isLoading.value && controller.orderList.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
         
         if (controller.orderList.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FaIcon(FontAwesomeIcons.receipt, size: 80, color: AppColors.greyLight),
-                SizedBox(height: 16),
-                Text("Belum ada riwayat pesanan."),
-              ],
-            ),
-          );
+          return _buildEmptyState();
         }
 
-        // Render ListView
         return RefreshIndicator(
           onRefresh: controller.fetchInitialOrders,
           child: ListView.builder(
             controller: controller.scrollController,
-            padding: const EdgeInsets.all(16),
-            itemCount: controller.orderList.length + 1, // +1 untuk loader
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            itemCount: controller.orderList.length + 1,
             itemBuilder: (context, index) {
               if (index == controller.orderList.length) {
-                return _buildLoader(); // Loader di akhir list
+                return _buildLoader();
               }
               final order = controller.orderList[index];
               return _buildOrderCard(order);
@@ -57,38 +46,102 @@ class OrderHistoryView extends GetView<OrderHistoryController> {
     );
   }
 
-  /// Kartu untuk satu riwayat pesanan
+  /// AppBar Kustom
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      leading: BackButton(
+        color: AppColors.textDark,
+        onPressed: () => Get.back(),
+      ),
+      title: Text(
+        "Riwayat Pesanan",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: false,
+    );
+  }
+
+  /// Empty State yang Didesain Ulang
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const FaIcon(FontAwesomeIcons.receipt, size: 96, color: AppColors.greyLight),
+            const SizedBox(height: 32),
+            Text(
+              "Belum Ada Riwayat Pesanan",
+              style: Get.textTheme.titleLarge?.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "Yuk, jelajahi toko kami dan temukan produk menarik!",
+              style: Get.textTheme.bodyMedium?.copyWith(
+                fontSize: 16,
+                color: AppColors.textLight,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Kartu untuk satu riwayat pesanan (Didesain Ulang)
   Widget _buildOrderCard(OrderModel order) {
-    return Card(
-      elevation: 1,
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () => controller.goToTrackingDetail(order),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Order ID: ${order.orderId}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  _buildStatusBadge(order.status),
-                ],
-              ),
-              const Divider(height: 20),
               Text(
-                DateFormat('d MMMM yyyy, HH:mm', 'id_ID').format(order.orderDate),
-                style: Get.textTheme.bodySmall,
+                "Order ID: ${order.orderId}",
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
-              const SizedBox(height: 8),
+              _buildStatusBadge(order.status),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: AppColors.greyLight),
+          const SizedBox(height: 12),
+          Text(
+            DateFormat('d MMMM yyyy, HH:mm', 'id_ID').format(order.orderDate),
+            style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
               Text(
-                "Total Pembayaran:",
+                "Total Pembayaran",
                 style: Get.textTheme.bodyMedium,
               ),
               Text(
@@ -98,37 +151,44 @@ class OrderHistoryView extends GetView<OrderHistoryController> {
                   color: AppColors.primary
                 ),
               ),
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () => controller.goToTrackingDetail(order),
-                child: const Text("Lihat Detail Pesanan"),
-              )
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          OutlinedButton(
+            onPressed: () => controller.goToTrackingDetail(order),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              side: const BorderSide(color: AppColors.primary),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: const Text("Lihat Detail Pesanan"),
+          ),
+        ],
       ),
     );
   }
 
-  /// Badge Status
+  /// Badge Status (Didesain Ulang)
   Widget _buildStatusBadge(String status) {
     Color color;
     String text;
     switch (status.toUpperCase()) {
-      case "COMPLETED":
-        color = Colors.green; text = "Selesai"; break;
-      case "SHIPPED":
-        color = Colors.blue; text = "Dikirim"; break;
-      case "PAID":
-        color = Colors.orange; text = "Diproses"; break;
-      default:
-        color = Colors.grey; text = "Pending";
+      case "COMPLETED": color = Colors.green; text = "Selesai"; break;
+      case "SHIPPED": color = Colors.blue; text = "Dikirim"; break;
+      case "PAID": color = Colors.orange; text = "Diproses"; break;
+      default: color = Colors.grey; text = "Pending";
     }
-    return Chip(
-      label: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      backgroundColor: color,
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      visualDensity: VisualDensity.compact,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: Get.textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.bold),
+      ),
     );
   }
   
@@ -139,7 +199,7 @@ class OrderHistoryView extends GetView<OrderHistoryController> {
         return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: CircularProgressIndicator()));
       }
       if (!controller.hasMoreData.value) {
-         return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: Text("Akhir dari riwayat.")));
+        return const Center(child: Padding(padding: EdgeInsets.all(24.0), child: Text("Akhir dari riwayat.")));
       }
       return const SizedBox.shrink();
     });

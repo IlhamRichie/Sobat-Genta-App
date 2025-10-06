@@ -22,6 +22,14 @@ class FakeAuthRepository implements IAuthRepository {
     "status": "VERIFIED" // Sesuai Skenario Citra
   };
 
+  final Map<String, dynamic> _mockExpertData = {
+    "user_id": "expert_101",
+    "full_name": "Drh. Santoso",
+    "email": "pakar@genta.com",
+    "role": "EXPERT",
+    "status": "VERIFIED" // Sesuai Skenario 3 (sudah KYC)
+  };
+
   final Map<String, dynamic> _mockFarmerDataPendingOtp = {
     "user_id": "farmer_123",
     "full_name": "Budi (Pending OTP)",
@@ -61,6 +69,11 @@ class FakeAuthRepository implements IAuthRepository {
       _fakeToken = "token_investor_456";
       return User.fromJson(_mockInvestorData);
     }
+    if (email == "pakar@genta.com") {
+      _fakeToken = "token_pakar_789";
+      // Gunakan data mock baru yang VERIFIED
+      return User.fromJson(_mockExpertData); 
+    }
     
     throw Exception("User tidak ditemukan");
   }
@@ -74,6 +87,9 @@ class FakeAuthRepository implements IAuthRepository {
     }
     if (_fakeToken == "token_investor_456") {
       return User.fromJson(_mockInvestorData);
+    }
+    if (_fakeToken == "token_pakar_789") {
+      return User.fromJson(_mockExpertData);
     }
 
     // Ini akan ditangkap oleh SplashController sebagai "tidak login"

@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/00_core_auth/create_new_password/bindings/create_new_password_binding.dart';
+import '../modules/00_core_auth/create_new_password/views/create_new_password_view.dart';
 import '../modules/00_core_auth/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/00_core_auth/forgot_password/views/forgot_password_view.dart';
 import '../modules/00_core_auth/login/bindings/login_binding.dart';
@@ -46,6 +48,12 @@ import '../modules/02_clinic_support/expert_dashboard/bindings/expert_dashboard_
 import '../modules/02_clinic_support/expert_dashboard/views/expert_dashboard_view.dart';
 import '../modules/02_clinic_support/expert_payout/bindings/expert_payout_binding.dart';
 import '../modules/02_clinic_support/expert_payout/views/expert_payout_view.dart';
+import '../modules/02_clinic_support/payment_instructions/bindings/payment_instructions_binding.dart';
+import '../modules/02_clinic_support/payment_instructions/views/payment_instructions_view.dart';
+import '../modules/02_clinic_support/payment_success/bindings/payment_success_binding.dart';
+import '../modules/02_clinic_support/payment_success/views/payment_success_view.dart';
+import '../modules/02_clinic_support/payment_summary/bindings/payment_summary_binding.dart';
+import '../modules/02_clinic_support/payment_summary/views/payment_summary_view.dart';
 import '../modules/03_store_ecommerce/cart/bindings/cart_binding.dart';
 import '../modules/03_store_ecommerce/cart/views/cart_view.dart';
 import '../modules/03_store_ecommerce/checkout_address/bindings/checkout_address_binding.dart';
@@ -112,14 +120,8 @@ import '../modules/06_profile_wallet/wallet_top_up/bindings/wallet_top_up_bindin
 import '../modules/06_profile_wallet/wallet_top_up/views/wallet_top_up_view.dart';
 import '../modules/06_profile_wallet/wallet_withdraw/bindings/wallet_withdraw_binding.dart';
 import '../modules/06_profile_wallet/wallet_withdraw/views/wallet_withdraw_view.dart';
-import '../modules/00_core_auth/create_new_password/bindings/create_new_password_binding.dart';
-import '../modules/00_core_auth/create_new_password/views/create_new_password_view.dart';
-import '../modules/02_clinic_support/payment_instructions/bindings/payment_instructions_binding.dart';
-import '../modules/02_clinic_support/payment_instructions/views/payment_instructions_view.dart';
-import '../modules/02_clinic_support/payment_success/bindings/payment_success_binding.dart';
-import '../modules/02_clinic_support/payment_success/views/payment_success_view.dart';
-import '../modules/02_clinic_support/payment_summary/bindings/payment_summary_binding.dart';
-import '../modules/02_clinic_support/payment_summary/views/payment_summary_view.dart';
+import '../modules/consultation_history/bindings/consultation_history_binding.dart';
+import '../modules/consultation_history/views/consultation_history_view.dart';
 
 part 'app_routes.dart';
 
@@ -341,7 +343,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.WALLET_TOP_UP,
-      page: () => const WalletTopUpView(),
+      page: () => WalletTopUpView(),
       binding: WalletTopUpBinding(),
     ),
     GetPage(
@@ -426,8 +428,13 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.PAYMENT_SUCCESS,
-      page: () => const PaymentSuccessView(),
+      page: () => PaymentSuccessView(),
       binding: PaymentSuccessBinding(),
+    ),
+    GetPage(
+      name: _Paths.CONSULTATION_HISTORY,
+      page: () => const ConsultationHistoryView(),
+      binding: ConsultationHistoryBinding(),
     ),
   ];
 }

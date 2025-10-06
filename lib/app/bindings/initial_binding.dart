@@ -13,6 +13,7 @@ import '../data/repositories/abstract/investment_repository.dart';
 import '../data/repositories/abstract/order_repository.dart';
 import '../data/repositories/abstract/pakar_profile_repository.dart';
 import '../data/repositories/abstract/kyc_repository.dart';
+import '../data/repositories/abstract/payout_repository.dart';
 import '../data/repositories/abstract/project_repository.dart';
 import '../data/repositories/abstract/store_repository.dart';
 import '../data/repositories/abstract/tender_repository.dart';
@@ -29,6 +30,7 @@ import '../data/repositories/implementations/fake_investment_repository.dart';
 import '../data/repositories/implementations/fake_kyc_repository.dart';
 import '../data/repositories/implementations/fake_order_repository.dart';
 import '../data/repositories/implementations/fake_pakar_profile_repository.dart';
+import '../data/repositories/implementations/fake_payout_repository.dart';
 import '../data/repositories/implementations/fake_project_repository.dart';
 import '../data/repositories/implementations/fake_store_repository.dart';
 import '../data/repositories/implementations/fake_tender_repository.dart';
@@ -56,6 +58,8 @@ class InitialBinding extends Bindings {
     Get.lazyPut<IPakarProfileRepository>(() => FakePakarProfileRepository(), fenix: true);
 
     Get.lazyPut<IBankAccountRepository>(() => FakeBankAccountRepository(), fenix: true);
+
+    Get.lazyPut<IPayoutRepository>(() => FakePayoutRepository(), fenix: true);
 
     Get.lazyPut<IConsultationRepository>(() => FakeConsultationRepository(), fenix: true);
 

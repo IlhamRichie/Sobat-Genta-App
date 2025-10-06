@@ -92,6 +92,18 @@ class FarmerApplyFundingFormController extends GetxController {
     }
   }
 
+  double calculateTotalRab() {
+    double total = 0.0;
+    for (var item in rabItemsList) {
+      final String costText = item['cost']!.text;
+      final double? cost = double.tryParse(costText);
+      if (cost != null) {
+        total += cost;
+      }
+    }
+    return total;
+  }
+
   /// Aksi utama submit proposal
   Future<void> submitProposal() async {
     if (!formKey.currentState!.validate()) {

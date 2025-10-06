@@ -11,7 +11,7 @@ class FakeWalletRepository implements IWalletRepository {
   // Sesuai Skenario 2 (Citra), dia top-up Rp 100 Juta
   final Map<String, dynamic> _mockWalletData = {
     "wallet_id": "W-USER-001",
-    "balance": 1250000.0 // Saldo Budi dari mock HomeDashboard
+    "balance": 11250000.0 // Saldo Budi dari mock HomeDashboard
   };
 
   final List<Map<String, dynamic>> _mockWalletHistoryDB = List.generate(40, (i) {

@@ -12,13 +12,12 @@ class HomeDashboardView extends GetView<HomeDashboardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background, // Set background color
       appBar: _buildAppBar(),
       body: RefreshIndicator(
-        // BEST PRACTICE: Tambahkan RefreshIndicator
         onRefresh: controller.fetchDashboardData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView( // Menggunakan SingleChildScrollView untuk fleksibilitas
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -28,7 +27,8 @@ class HomeDashboardView extends GetView<HomeDashboardController> {
               const SizedBox(height: 24),
               _buildAssetSummary(),
               const SizedBox(height: 24),
-              _buildPromoBanners(), // Placeholder
+              _buildPromoBanners(),
+              const SizedBox(height: 24), // Tambahan padding
             ],
           ),
         ),
@@ -36,7 +36,7 @@ class HomeDashboardView extends GetView<HomeDashboardController> {
     );
   }
 
-  /// AppBar Khusus untuk Halaman Home
+  // AppBar
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: AppColors.background,
@@ -46,13 +46,17 @@ class HomeDashboardView extends GetView<HomeDashboardController> {
         children: [
           Text(
             "Selamat Datang,",
-            style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+            style: Get.textTheme.bodyMedium?.copyWith(
+              color: AppColors.textLight,
+              fontSize: 14,
+            ),
           ),
           Text(
-            controller.userName, // "Budi (Petani)"
+            controller.userName,
             style: Get.textTheme.titleLarge?.copyWith(
-              color: AppColors.textDark, 
-              fontSize: 20,
+              color: AppColors.textDark,
+              fontSize: 22, // Ukuran font lebih besar
+              fontWeight: FontWeight.bold, // Bold untuk hierarki
             ),
           ),
         ],
@@ -67,145 +71,175 @@ class HomeDashboardView extends GetView<HomeDashboardController> {
     );
   }
 
-  /// Widget 1: Kartu Dompet
+  // Widget 1: Kartu Dompet (Diperbarui)
   Widget _buildWalletCard() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: AppColors.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Total Saldo Dompet",
-              style: Get.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(20), // Sudut lebih rounded
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 15, // Efek shadow yang lebih halus
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Total Saldo Dompet",
+            style: Get.textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withOpacity(0.8),
             ),
-            const SizedBox(height: 8),
-            // Dengarkan state isLoading dan walletBalance
-            Obx(() => controller.isLoading.value
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(color: Colors.white),
-                  )
-                : Text(
-                    controller.walletBalance.value,
-                    style: Get.textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontSize: 28,
-                    ),
-                  )),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
+          ),
+          const SizedBox(height: 8),
+          Obx(() => controller.isLoading.value
+              ? const SizedBox(
+                  height: 32,
+                  width: 32,
+                  child: CircularProgressIndicator(color: Colors.white),
+                )
+              : Text(
+                  controller.walletBalance.value,
+                  style: Get.textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )),
+          const SizedBox(height: 24), // Spasi lebih besar
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2), // Warna latar belakang semi-transparan
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withOpacity(0.4)),
+                  ),
+                  child: TextButton.icon(
                     onPressed: controller.goToWallet,
-                    icon: const FaIcon(FontAwesomeIcons.wallet, size: 16),
-                    label: const Text("Lihat Dompet"),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.white.withOpacity(0.1),
-                      side: const BorderSide(color: Colors.white),
+                    icon: const FaIcon(FontAwesomeIcons.wallet, size: 16, color: Colors.white),
+                    label: const Text(
+                      "Lihat Dompet",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: controller.goToWalletTopUp,
-                    icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
-                    label: const Text("Top Up"),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primary,
-                    ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => Get.toNamed('/wallet-top-up'),
+                  icon: const FaIcon(FontAwesomeIcons.plus, color: AppColors.primary, size: 16),
+                  label: const Text("Top Up"),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  /// Widget 2: Grid Shortcut
+  // Widget 2: Grid Shortcut (Diperbarui & Mengatasi Overflow)
   Widget _buildShortcutGrid() {
+    // Menghilangkan GridView.count dan menggantinya dengan Row + Column
+    // Ini lebih baik karena kita tidak perlu NeverScrollableScrollPhysics
+    // yang sering menjadi penyebab RenderFlex overflow.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Menu Utama", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+        Text(
+          "Menu Utama",
+          style: Get.textTheme.titleLarge?.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 16),
-        GridView.count(
-          crossAxisCount: 4,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildShortcutItem(
               icon: FontAwesomeIcons.store,
               label: "Toko",
               onTap: controller.goToStore,
-              color: Colors.orange.shade700,
+              color: AppColors.primary, // Menggunakan warna dari theme
             ),
             _buildShortcutItem(
               icon: FontAwesomeIcons.stethoscope,
               label: "Klinik",
               onTap: controller.goToClinic,
-              color: Colors.blue.shade700,
+              color: AppColors.primary,
             ),
             _buildShortcutItem(
               icon: FontAwesomeIcons.bullhorn,
               label: "Tender",
               onTap: controller.goToTender,
-              color: Colors.purple.shade700,
+              color: AppColors.primary,
             ),
             _buildShortcutItem(
               icon: FontAwesomeIcons.solidHeart,
               label: "Komunitas",
               onTap: () {},
-              color: Colors.red.shade700,
+              color: AppColors.primary,
             ),
           ],
         ),
       ],
     );
   }
-  
-  // Helper untuk item shortcut
+
+  // Helper untuk item shortcut (Diperbarui)
   Widget _buildShortcutItem({
     required IconData icon,
     required String label,
     required Color color,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+    return Expanded( // Gunakan Expanded agar item membagi ruang secara merata
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          children: [
+            Container(
+              width: 56, // Ukuran ikon lebih besar
+              height: 56,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: color, size: 28), // Ukuran ikon lebih besar
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 8),
-          Text(label, style: Get.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: Get.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  /// Widget 3: Ringkasan Aset Lahan
+  // Widget 3: Ringkasan Aset Lahan (Diperbarui)
   Widget _buildAssetSummary() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,51 +247,113 @@ class HomeDashboardView extends GetView<HomeDashboardController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Aset Anda", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+            Text(
+              "Aset Anda",
+              style: Get.textTheme.titleLarge?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             TextButton(
               onPressed: controller.goToManageAssets,
-              child: const Text("Lihat Semua"),
+              child: Text(
+                "Lihat Semua",
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Obx(() => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
-            : ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.grey.shade300),
+            : Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
                 ),
-                leading: FaIcon(FontAwesomeIcons.mapLocationDot, color: AppColors.primary),
-                title: Text("Total Lahan Terdaftar", style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text("Lahan Pertanian & Peternakan"),
-                trailing: Text(
-                  controller.landCount.value.toString(),
-                  style: Get.textTheme.titleLarge?.copyWith(color: AppColors.primary),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: FaIcon(FontAwesomeIcons.mapLocationDot, color: AppColors.primary, size: 20),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Total Lahan Terdaftar",
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            "Lahan Pertanian & Peternakan",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      controller.landCount.value.toString(),
+                      style: Get.textTheme.titleLarge?.copyWith(
+                        color: AppColors.primary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                onTap: controller.goToManageAssets,
-              ),
-        ),
+              )),
       ],
     );
   }
 
-  /// Widget 4: Placeholder untuk Banner/Artikel
+  // Widget 4: Placeholder untuk Banner/Artikel (Diperbarui)
   Widget _buildPromoBanners() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Info & Promo", style: Get.textTheme.titleLarge?.copyWith(fontSize: 18)),
+        Text(
+          "Info & Promo",
+          style: Get.textTheme.titleLarge?.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 16),
         Container(
-          height: 140,
+          height: 150, // Tinggi lebih proporsional
           width: double.infinity,
           decoration: BoxDecoration(
             color: AppColors.greyLight,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-          child: Center(
-            child: Text("Banner Promo Akan Tampil di Sini"),
+          child: const Center(
+            child: Text(
+              "Banner Promo Akan Tampil di Sini",
+              style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+            ),
           ),
         ),
       ],

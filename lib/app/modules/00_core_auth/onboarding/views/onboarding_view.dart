@@ -11,48 +11,66 @@ class OnboardingView extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          TextButton(
-            onPressed: controller.skip,
-            child: const Text(
-              "Lewati",
-              style: TextStyle(color: AppColors.textLight, fontSize: 16),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // 1. Konten Halaman Geser (Animasi)
+          // Latar Belakang Lingkaran Setengah
+          Positioned(
+            top: -100,
+            left: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // Tombol Lewati di pojok kanan atas
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            right: 16,
+            child: TextButton(
+              onPressed: controller.skip,
+              child: const Text(
+                "Lewati",
+                style: TextStyle(
+                  color: AppColors.textLight,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+
+          // Konten Halaman Geser (Animasi)
           PageView(
             controller: controller.pageController,
             onPageChanged: controller.onPageChanged,
             children: const [
               OnboardingPageContent(
-                image: '/assets/onboarding/onboarding_funding.png', // Ganti dengan path asset Anda
+                image: 'assets/onboarding/onboarding_funding.png',
                 title: 'Pendanaan Proyek Transparan',
                 description: 'Hubungkan lahan produktif Anda dengan investor terverifikasi.',
               ),
               OnboardingPageContent(
-                image: '/assets/onboarding/onboarding_market.png', // Ganti dengan path asset Anda
+                image: 'assets/onboarding/onboarding_market.png',
                 title: 'Toko Kebutuhan Tani',
                 description: 'Temukan bibit, pupuk, dan alat berkualitas langsung dari produsen.',
               ),
               OnboardingPageContent(
-                image: '/assets/onboarding/onboarding_clinic.png', // Ganti dengan path asset Anda
+                image: 'assets/onboarding/onboarding_clinic.png',
                 title: 'Klinik Tani & Pakar',
                 description: 'Dapatkan solusi instan dari pakar pertanian dan dokter hewan.',
               ),
             ],
           ),
 
-          // 2. Kontrol Bawah (Indikator & Tombol)
+          // Kontrol Bawah (Indikator & Tombol)
           Positioned(
-            bottom: 30,
+            bottom: 40,
             left: 24,
             right: 24,
             child: _buildBottomControls(),
@@ -83,6 +101,14 @@ class OnboardingView extends GetView<OnboardingController> {
         // Tombol Lanjut / Mulai
         FilledButton(
           onPressed: controller.nextPage,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
           child: Obx(
             () => Text(
               controller.currentPageIndex.value == controller.totalPages - 1
@@ -97,7 +123,6 @@ class OnboardingView extends GetView<OnboardingController> {
 
   // Widget untuk satu "dot" indikator
   Widget _buildDotIndicator({required int index, required bool isActive}) {
-    // Animasi perubahan warna dan ukuran
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.only(right: 8),
@@ -110,7 +135,6 @@ class OnboardingView extends GetView<OnboardingController> {
     );
   }
 }
-
 
 /// WIDGET REUSABLE: Konten untuk setiap halaman onboarding
 class OnboardingPageContent extends StatelessWidget {
@@ -131,22 +155,29 @@ class OnboardingPageContent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // TODO: Ganti Icon ini dengan Image.asset(image)
-          // Pastikan Anda sudah menambahkan folder 'assets/images/' di pubspec.yaml
-          Icon(Icons.image, size: Get.width * 0.6, color: AppColors.greyLight),
+          // Gambar Onboarding
+          Image.asset(
+            image,
+            width: Get.width * 0.7, // Ukuran gambar proporsional
+            fit: BoxFit.contain,
+          ),
           const SizedBox(height: 48),
           Text(
             title,
             textAlign: TextAlign.center,
-            // Font 'Inter' (titleLarge) otomatis diterapkan dari Theme
-            style: Get.textTheme.titleLarge?.copyWith(fontSize: 24),
+            style: Get.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             description,
             textAlign: TextAlign.center,
-            // Font 'Inter' (bodyMedium) otomatis diterapkan dari Theme
-            style: Get.textTheme.bodyMedium?.copyWith(fontSize: 16, height: 1.5),
+            style: Get.textTheme.bodyLarge?.copyWith(
+              color: AppColors.textLight,
+              height: 1.5,
+            ),
           ),
         ],
       ),

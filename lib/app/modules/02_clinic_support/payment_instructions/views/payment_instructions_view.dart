@@ -1,9 +1,12 @@
 // lib/app/modules/payment_instructions/views/payment_instructions_view.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 import '../../../../theme/app_colors.dart';
 import '../controllers/payment_instructions_controller.dart';
@@ -15,50 +18,61 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
 
   @override
   Widget build(BuildContext context) {
-    final trx = controller.transaction;
-
     return WillPopScope(
       onWillPop: () async {
         controller.cancelAndGoHome();
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Instruksi Pembayaran"),
-          leading: IconButton(
-            icon: const Icon(FontAwesomeIcons.xmark),
-            onPressed: controller.cancelAndGoHome,
-          ),
-        ),
+        backgroundColor: AppColors.background,
+        appBar: _buildAppBar(),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildExpiryHeader(),
               const SizedBox(height: 24),
               Text(
-                "Segera selesaikan pembayaran untuk:",
-                style: Get.textTheme.bodyMedium,
+                "Selesaikan pembayaran dalam waktu yang ditentukan untuk menjaga pesanan Anda. Salin detail di bawah dan lakukan pembayaran.",
+                style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+                textAlign: TextAlign.center,
               ),
-              Text(
-                trx.paymentProvider, // Cth: "BCA Virtual Account"
-                style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const Divider(height: 32),
+              const SizedBox(height: 32),
               
-              // Detail Instruksi
-              _buildInstructionRow("Nomor Virtual Account", trx.paymentCode, true),
-              _buildInstructionRow("Total Pembayaran", rupiahFormatter.format(trx.amount), true),
-              _buildInstructionRow("ID Transaksi", trx.transactionId, false),
+              _buildDetailSection(),
               
               const SizedBox(height: 32),
+              _buildPaymentInstructions(),
+              
+              const SizedBox(height: 40),
               // Tombol Aksi
               FilledButton(
                 onPressed: controller.checkPaymentStatus,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
                 child: Obx(() => controller.isCheckingStatus.value
-                  ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white))
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                    )
                   : const Text("Saya Sudah Bayar, Cek Status")),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: controller.cancelAndGoHome,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textLight,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: AppColors.greyLight),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text("Batalkan"),
               ),
             ],
           ),
@@ -67,31 +81,54 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
     );
   }
 
-  /// Header Countdown Waktu
+  /// AppBar Kustom
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      leading: IconButton(
+        icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+        onPressed: controller.cancelAndGoHome,
+      ),
+      title: Text(
+        "Pembayaran",
+        style: Get.textTheme.headlineSmall?.copyWith(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      centerTitle: false,
+    );
+  }
+
+  /// Header Countdown Waktu (Didesain Ulang)
   Widget _buildExpiryHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.shade300)
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Batas Akhir Pembayaran", style: TextStyle(fontWeight: FontWeight.bold)),
-              Text("Selesaikan sebelum kedaluwarsa"),
-            ],
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            "Batas Akhir Pembayaran",
+            style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
           Obx(() => Text(
             controller.countdownText.value,
-            style: Get.textTheme.titleLarge?.copyWith(
-              color: Colors.orange.shade800,
+            style: Get.textTheme.headlineMedium?.copyWith(
+              color: AppColors.textDark,
               fontWeight: FontWeight.bold,
-              fontFamily: 'monospace'
+              fontFamily: 'monospace',
             ),
           )),
         ],
@@ -99,27 +136,118 @@ class PaymentInstructionsView extends GetView<PaymentInstructionsController> {
     );
   }
 
-  /// Baris untuk instruksi (Nomor VA, Total, dll)
-  Widget _buildInstructionRow(String label, String value, bool isImportant) {
+  /// Bagian Detail Pembayaran (Baru)
+  Widget _buildDetailSection() {
+    final trx = controller.transaction;
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            trx.paymentProvider,
+            style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+          const SizedBox(height: 12),
+          _buildInstructionRow("Nomor Virtual Account", trx.paymentCode),
+          _buildInstructionRow("Total Pembayaran", rupiahFormatter.format(trx.amount)),
+          _buildInstructionRow("ID Transaksi", trx.transactionId),
+        ],
+      ),
+    );
+  }
+
+  /// Widget baris instruksi yang disederhanakan
+  Widget _buildInstructionRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight)),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                value,
+                style: Get.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              if (label != "ID Transaksi") // Tombol Salin hanya untuk VA dan Total
+                TextButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: value)).then((_) {
+                      showTopSnackBar(
+                        Overlay.of(Get.context!),
+                        CustomSnackBar.success(message: "$label berhasil disalin!"),
+                      );
+                    });
+                  },
+                  icon: const FaIcon(FontAwesomeIcons.copy, size: 14),
+                  label: const Text("Salin"),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Bagian Metode Pembayaran (Baru)
+  Widget _buildPaymentInstructions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Cara Pembayaran",
+          style: Get.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Daftar langkah-langkah, bisa dari API atau hardcoded
+        _buildInstructionStep("1. Buka aplikasi M-Banking atau E-Wallet Anda."),
+        _buildInstructionStep("2. Pilih menu transfer atau pembayaran."),
+        _buildInstructionStep("3. Masukkan Nomor Virtual Account di atas."),
+        _buildInstructionStep("4. Pastikan nominal pembayaran sudah sesuai."),
+        _buildInstructionStep("5. Selesaikan transaksi."),
+      ],
+    );
+  }
+
+  /// Widget untuk satu langkah instruksi
+  Widget _buildInstructionStep(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            value,
-            style: Get.textTheme.titleLarge?.copyWith(
-              fontSize: isImportant ? 20 : 16,
-              fontWeight: isImportant ? FontWeight.bold : FontWeight.normal,
+            text.split(".")[0] + ".",
+            style: Get.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
             ),
           ),
-          if (isImportant)
-            OutlinedButton.icon(
-              onPressed: () { /* TODO: Copy to Clipboard */ },
-              icon: const FaIcon(FontAwesomeIcons.copy, size: 14),
-              label: Text("Salin Kode"),
-            )
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text.substring(text.indexOf(".") + 2),
+              style: Get.textTheme.bodyLarge,
+            ),
+          ),
         ],
       ),
     );
