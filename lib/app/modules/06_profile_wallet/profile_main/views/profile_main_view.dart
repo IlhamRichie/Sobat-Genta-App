@@ -72,7 +72,7 @@ class ProfileMainView extends GetView<ProfileMainController> {
     );
   }
 
-  /// 1. Widget Header Profil (Diperbarui)
+  /// 1. Widget Header Profil
   Widget _buildProfileHeader() {
     final user = controller.currentUser;
     if (user == null) return const Center(child: Text("Gagal memuat data user."));
@@ -161,7 +161,7 @@ class ProfileMainView extends GetView<ProfileMainController> {
     );
   }
 
-  /// Helper untuk membuat blok menu yang modern (Diperbarui)
+  /// Helper untuk membuat blok menu yang modern
   Widget _buildMenuItems(List<Widget> items) {
     return Container(
       decoration: BoxDecoration(
@@ -197,7 +197,7 @@ class ProfileMainView extends GetView<ProfileMainController> {
     );
   }
 
-  /// 2. Widget Builder Menu Dinamis (Diperbarui)
+  /// 2. Widget Builder Menu Dinamis
   List<Widget> _buildRoleSpecificMenu() {
     final role = controller.userRole;
     List<Widget> menuItems = [];
@@ -237,7 +237,7 @@ class ProfileMainView extends GetView<ProfileMainController> {
     ];
   }
 
-  /// Helper Judul Section (Diperbarui)
+  /// Helper Judul Section
   Widget _buildSectionTitle(String title) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -255,10 +255,10 @@ class ProfileMainView extends GetView<ProfileMainController> {
     );
   }
 
-  /// Tombol Logout (Diperbarui)
+  /// Tombol Logout (Diperbarui untuk memanggil Dialog Kustom)
   Widget _buildLogoutButton() {
     return TextButton.icon(
-      onPressed: controller.logout,
+      onPressed: _showLogoutConfirmationDialog, // Memanggil dialog kustom
       icon: const FaIcon(FontAwesomeIcons.rightFromBracket, size: 20, color: Colors.red),
       label: const Text(
         "Keluar",
@@ -273,6 +273,74 @@ class ProfileMainView extends GetView<ProfileMainController> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+      ),
+    );
+  }
+
+  /// Dialog Konfirmasi Logout (BARU & MODERN)
+  void _showLogoutConfirmationDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20), // Sudut yang lebih membulat
+        ),
+        titlePadding: EdgeInsets.zero,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        
+        title: Center(
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              const FaIcon(FontAwesomeIcons.circleExclamation, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                "Konfirmasi Keluar",
+                style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        
+        content: Text(
+          "Apakah Anda yakin ingin keluar dari akun Anda?",
+          textAlign: TextAlign.center,
+          style: Get.textTheme.bodyLarge?.copyWith(color: AppColors.textDark),
+        ),
+        
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Get.back(), // Batal
+                  child: const Text("Batal", style: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.greyLight),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () {
+                    Get.back(); // Tutup dialog
+                    controller.logout(); // Lakukan aksi logout
+                  },
+                  child: const Text("Keluar", style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       ),
     );
   }

@@ -8,7 +8,7 @@ class FakeAuthRepository implements IAuthRepository {
   // --- Mock Data ---
   final Map<String, dynamic> _mockFarmerData = {
     "user_id": "farmer_123",
-    "full_name": "Budi (Petani)",
+    "full_name": "Rigan (Petani)",
     "email": "petani@genta.com",
     "role": "FARMER",
     "status": "PENDING_KYC" // Sesuai Skenario Budi

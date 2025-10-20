@@ -47,7 +47,7 @@ class HomeDashboardController extends GetxController {
     await Future.delayed(const Duration(seconds: 1));
     
     // 2. Set data palsu (sesuai Skenario Budi)
-    walletBalance.value = "Rp 1.250.000";
+    walletBalance.value = "Rp 31.256.430";
     landCount.value = 2; // "Lahan Bawang Kejayaan" + 1 lahan lain
 
     isLoading.value = false;

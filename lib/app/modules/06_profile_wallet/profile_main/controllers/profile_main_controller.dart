@@ -1,7 +1,6 @@
 // lib/app/modules/profile_main/controllers/profile_main_controller.dart
 
 import 'package:get/get.dart';
-
 import '../../../../data/models/user_model.dart';
 import '../../../../routes/app_pages.dart';
 import '../../../../services/session_service.dart';
@@ -15,18 +14,11 @@ class ProfileMainController extends GetxController {
   User? get currentUser => sessionService.currentUser.value;
   UserRole get userRole => sessionService.userRole;
 
-  /// Aksi Utama: Logout (Delegasikan ke Service)
+  /// Aksi Utama: Logout (DIPERBAIKI)
+  /// Fungsi ini HANYA memanggil service logout. Konfirmasi dialog
+  /// dilakukan di View untuk kontrol tampilan yang lebih baik.
   void logout() {
-    Get.defaultDialog(
-      title: "Konfirmasi Logout",
-      middleText: "Anda yakin ingin keluar dari akun Anda?",
-      textConfirm: "Ya, Logout",
-      textCancel: "Batal",
-      onConfirm: () {
-        Get.back(); // Tutup dialog
-        sessionService.logoutUser(); // Panggil logika logout terpusat
-      },
-    );
+    sessionService.logoutUser();
   }
 
   // --- NAVIGASI (Helper untuk menu dinamis) ---
