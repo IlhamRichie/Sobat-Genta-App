@@ -11,10 +11,8 @@ import 'app/theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // WAJIB ada di sini
-  // Muat data lokalisasi 'id_ID' (untuk format Rupiah & Tanggal)
   await initializeDateFormatting('id_ID', null); 
 
-  // Deklarasi tema di luar GetMaterialApp agar bisa diakses
   final baseTheme = ThemeData(
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.background,
