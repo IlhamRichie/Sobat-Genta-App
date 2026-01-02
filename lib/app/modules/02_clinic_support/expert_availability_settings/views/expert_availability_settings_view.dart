@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import '../../../../data/models/availability_slot_model.dart';
 import '../../../../theme/app_colors.dart';
 import '../controllers/expert_availability_settings_controller.dart';
@@ -18,23 +17,34 @@ class ExpertAvailabilitySettingsView
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
-      bottomNavigationBar: _buildBottomSaveButton(),
       body: Obx(() {
         if (controller.isLoadingPage.value) {
           return const Center(child: CircularProgressIndicator());
         }
         
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildFeeSection(),
-              const SizedBox(height: 24),
-              _buildScheduleSection(),
-              const SizedBox(height: 24),
-            ],
-          ),
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), // Padding bawah ekstra untuk tombol sticky
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildFeeSection(),
+                  const SizedBox(height: 32),
+                  _buildScheduleSection(),
+                ],
+              ),
+            ),
+            
+            // Sticky Bottom Button
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _buildBottomSaveButton(),
+            ),
+          ],
         );
       }),
     );
@@ -45,46 +55,46 @@ class ExpertAvailabilitySettingsView
     return AppBar(
       backgroundColor: AppColors.background,
       elevation: 0,
-      leading: BackButton(
-        color: AppColors.textDark,
+      centerTitle: true,
+      leading: IconButton(
+        icon: const FaIcon(FontAwesomeIcons.arrowLeft, color: AppColors.textDark),
         onPressed: () => Get.back(),
       ),
       title: Text(
         "Atur Jadwal & Tarif",
         style: Get.textTheme.headlineSmall?.copyWith(
           color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w800,
+          fontSize: 20,
         ),
       ),
-      centerTitle: false,
     );
   }
 
-  /// Bagian 1: Pengaturan Tarif (Didesain Ulang)
+  /// Bagian 1: Pengaturan Tarif (Clean Card)
   Widget _buildFeeSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           "Tarif Konsultasi",
-          style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
         ),
         const SizedBox(height: 8),
-        Text(
-          "Atur biaya yang akan dibayar pengguna untuk per sesi konsultasi.",
-          style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+        const Text(
+          "Tentukan biaya jasa Anda per sesi konsultasi.",
+          style: TextStyle(color: AppColors.textLight, fontSize: 14),
         ),
         const SizedBox(height: 16),
         Container(
-          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
+                color: Colors.grey.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -92,14 +102,19 @@ class ExpertAvailabilitySettingsView
             controller: controller.feeC,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: Get.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.primary),
             decoration: InputDecoration(
-              labelText: "Tarif per Sesi",
               prefixText: "Rp ",
-              prefixStyle: Get.textTheme.headlineSmall?.copyWith(color: AppColors.textLight),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.primary, width: 2)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.greyLight)),
+              prefixStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textDark),
+              labelText: "Nominal Tarif",
+              labelStyle: const TextStyle(color: AppColors.textLight),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             ),
           ),
         ),
@@ -107,100 +122,119 @@ class ExpertAvailabilitySettingsView
     );
   }
 
-  /// Bagian 2: Pengaturan Jadwal (Didesain Ulang)
+  /// Bagian 2: Pengaturan Jadwal
   Widget _buildScheduleSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Jam Ketersediaan (Praktik)",
-          style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        const Text(
+          "Jadwal Praktik",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
         ),
         const SizedBox(height: 8),
-        Text(
-          "Atur hari dan jam di mana Anda bersedia menerima konsultasi.",
-          style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
+        const Text(
+          "Pilih hari dan atur jam operasional Anda.",
+          style: TextStyle(color: AppColors.textLight, fontSize: 14),
         ),
         const SizedBox(height: 16),
-        Obx(() => ListView.builder(
-              itemCount: controller.scheduleList.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                final slot = controller.scheduleList[index];
-                return _buildDayRow(context, slot, index);
-              },
-            )),
+        Obx(() => ListView.separated(
+          itemCount: controller.scheduleList.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          separatorBuilder: (ctx, i) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final slot = controller.scheduleList[index];
+            return _buildDayRow(context, slot, index);
+          },
+        )),
       ],
     );
   }
 
-  /// Satu baris hari (Senin, Selasa, dst) (Didesain Ulang)
+  /// Kartu Hari (Expandable)
   Widget _buildDayRow(BuildContext context, AvailabilitySlot slot, int index) {
     return Obx(() {
       bool isActive = slot.isActive.value;
       return AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary.withOpacity(0.1) : Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? AppColors.primary : AppColors.greyLight,
-            width: isActive ? 1.5 : 1.0,
+            color: isActive ? AppColors.primary : Colors.transparent,
+            width: 1.5,
           ),
           boxShadow: [
-            if (isActive)
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
+            BoxShadow(
+              color: isActive ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      slot.dayName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: isActive ? AppColors.textDark : AppColors.textLight,
-                      ),
+            // Header Hari (Toggle)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    slot.dayName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: isActive ? AppColors.textDark : AppColors.textLight,
                     ),
-                  ],
-                ),
-                Switch(
-                  value: isActive,
-                  onChanged: (value) => controller.toggleDayActive(index, value),
-                  activeColor: AppColors.primary,
-                ),
-              ],
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              height: isActive ? 60 : 0,
-              curve: Curves.easeInOut,
-              child: SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildTimePickerButton(context, index, slot.startTime.value, true, isActive),
-                      const Text("-", style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildTimePickerButton(context, index, slot.endTime.value, false, isActive),
-                    ],
                   ),
-                ),
+                  Switch.adaptive(
+                    value: isActive,
+                    onChanged: (value) => controller.toggleDayActive(index, value),
+                    activeColor: AppColors.primary,
+                  ),
+                ],
               ),
+            ),
+            
+            // Body Jam (Expandable)
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              child: isActive 
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: Column(
+                      children: [
+                        const Divider(height: 1, color: AppColors.greyLight),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTimePicker(
+                                context, 
+                                "Mulai", 
+                                slot.startTime.value, 
+                                () => controller.selectTime(context, index, true),
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              child: Icon(Icons.arrow_forward, color: AppColors.textLight, size: 16),
+                            ),
+                            Expanded(
+                              child: _buildTimePicker(
+                                context, 
+                                "Selesai", 
+                                slot.endTime.value, 
+                                () => controller.selectTime(context, index, false),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ) 
+                : const SizedBox.shrink(),
             ),
           ],
         ),
@@ -208,29 +242,40 @@ class ExpertAvailabilitySettingsView
     });
   }
 
-  /// Tombol untuk memilih jam (Start atau End) (Didesain Ulang)
-  Widget _buildTimePickerButton(BuildContext context, int index, String time, bool isStartTime, bool isActive) {
+  /// Tombol Pilih Jam (Modern)
+  Widget _buildTimePicker(BuildContext context, String label, String time, VoidCallback onTap) {
     return InkWell(
-      onTap: isActive ? () => controller.selectTime(context, index, isStartTime) : null,
-      child: Column(
-        children: [
-          Text(
-            isStartTime ? "Mulai" : "Selesai",
-            style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
-          ),
-          Text(
-            time,
-            style: Get.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: isActive ? AppColors.primary : AppColors.textLight.withOpacity(0.5),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.greyLight.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.greyLight),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  time,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
+                ),
+                const FaIcon(FontAwesomeIcons.clock, size: 14, color: AppColors.primary),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
   
-  /// Tombol Simpan di Bawah (Didesain Ulang)
+  /// Sticky Save Button
   Widget _buildBottomSaveButton() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -240,24 +285,30 @@ class ExpertAvailabilitySettingsView
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
+            blurRadius: 20,
             offset: const Offset(0, -5),
           ),
         ],
       ),
-      child: Obx(() => FilledButton(
-        onPressed: controller.isSaving.value ? null : controller.saveSettings,
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 4,
+      child: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: Obx(() => ElevatedButton(
+            onPressed: controller.isSaving.value ? null : controller.saveSettings,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 4,
+              shadowColor: AppColors.primary.withOpacity(0.4),
+            ),
+            child: controller.isSaving.value
+                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : const Text("Simpan Perubahan", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          )),
         ),
-        child: controller.isSaving.value
-            ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : const Text("Simpan Pengaturan", style: TextStyle(fontWeight: FontWeight.bold)),
-      )),
+      ),
     );
   }
 }

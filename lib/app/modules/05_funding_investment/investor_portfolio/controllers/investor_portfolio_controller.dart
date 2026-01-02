@@ -54,7 +54,7 @@ class InvestorPortfolioController extends GetxController {
       tempTotal += inv.amountInvested;
       
       // Hitung estimasi return
-      tempReturn += inv.amountInvested * (inv.project.roiPercentage / 100);
+      tempReturn += inv.amountInvested * (inv.project.roiEstimate / 100);
       
       // Hitung proyek aktif
       if (inv.project.status == ProjectStatus.PUBLISHED || inv.project.status == ProjectStatus.FUNDED) {

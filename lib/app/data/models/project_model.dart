@@ -1,5 +1,4 @@
-// lib/data/models/project_model.dart
-// (Buat file baru atau update yang sebelumnya)
+// lib/app/data/models/project_model.dart
 
 import 'rab_item_model.dart';
 
@@ -16,9 +15,9 @@ class ProjectModel {
 
   final String description;
   final int durationDays;
-  final double roiPercentage;
-  final List<RabItemModel> rabItems; // <-- RAB yang sudah diparsing
-  final ProjectFarmerProfileModel farmerProfile; // <-- Info Petani
+  final double roiEstimate; // Diubah dari roiPercentage agar sesuai View
+  final List<RabItemModel> rabItems;
+  final ProjectFarmerProfileModel farmerProfile;
 
   ProjectModel({
     required this.projectId,
@@ -28,19 +27,23 @@ class ProjectModel {
     required this.status,
     required this.assetName,
     this.projectImageUrl,
-
     required this.description,
     required this.durationDays,
-    required this.roiPercentage,
+    required this.roiEstimate, // Update constructor
     required this.rabItems,
     required this.farmerProfile,
   });
 
   // Helper untuk progres bar (0.0 sampai 1.0)
-  double get fundingProgress => (collectedFund > 0 && targetFund > 0) ? (collectedFund / targetFund) : 0.0;
+  // Mencegah pembagian dengan nol atau nilai negatif
+  double get fundingProgress {
+    if (targetFund <= 0) return 0.0;
+    double progress = collectedFund / targetFund;
+    return progress > 1.0 ? 1.0 : progress; // Cap di 100%
+  }
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
-    // Parsing RAB
+    // Parsing RAB (Rencana Anggaran Biaya)
     List<RabItemModel> parsedRab = [];
     if (json['rab_details_json'] != null && json['rab_details_json'] is List) {
       parsedRab = (json['rab_details_json'] as List)
@@ -53,26 +56,27 @@ class ProjectModel {
     if (json['farmer_profile'] != null) {
       parsedProfile = ProjectFarmerProfileModel.fromJson(json['farmer_profile']);
     } else {
-      // Fallback jika data petani tidak di-JOIN
-      parsedProfile = ProjectFarmerProfileModel.fromJson({
-        'user_id': json['user_id']?.toString() ?? '0',
-        'full_name': 'Petani SobatGenta',
-        'total_projects': 1
-      });
+      // Data dummy/fallback jika join gagal
+      parsedProfile = ProjectFarmerProfileModel(
+        userId: json['user_id']?.toString() ?? '0',
+        fullName: 'Petani SobatGenta',
+        totalProjects: 1,
+        profilePictureUrl: null,
+      );
     }
 
     return ProjectModel(
       projectId: json['project_id'].toString(),
-      title: json['title'],
-      targetFund: (json['target_fund'] as num).toDouble(),
+      title: json['title'] ?? 'Tanpa Judul',
+      targetFund: (json['target_fund'] as num?)?.toDouble() ?? 0.0,
       collectedFund: (json['collected_fund'] as num?)?.toDouble() ?? 0.0,
       status: _parseStatus(json['status']),
-      assetName: json['asset_name'] ?? 'Nama Aset Tidak Ada',
+      assetName: json['asset_name'] ?? 'Aset Tani',
       projectImageUrl: json['project_image_url'],
-
-      description: json['description'] ?? 'Tidak ada deskripsi.',
+      description: json['description'] ?? 'Tidak ada deskripsi tersedia.',
       durationDays: (json['duration_days'] as num?)?.toInt() ?? 0,
-      roiPercentage: (json['roi_percentage'] as num?)?.toDouble() ?? 0.0,
+      // Mapping dari key JSON 'roi_percentage' ke field 'roiEstimate'
+      roiEstimate: (json['roi_percentage'] as num?)?.toDouble() ?? 0.0,
       rabItems: parsedRab,
       farmerProfile: parsedProfile,
     );

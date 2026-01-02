@@ -56,7 +56,7 @@ class InvestorPortfolioDetailView extends GetView<InvestorPortfolioDetailControl
             true
           ),
           _buildSummaryRow(
-            "Estimasi Return (${project.roiPercentage}%)",
+            "Estimasi Return (${project.roiEstimate}%)",
             rupiahFormatter.format(controller.estimatedReturnAmount),
             true
           ),

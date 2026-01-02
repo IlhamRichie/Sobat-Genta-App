@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/pakar_profile_model.dart';
-import '../../../../theme/app_colors.dart'; // Pastikan AppColors sudah didefinisikan dengan baik
+import '../../../../theme/app_colors.dart';
 import '../controllers/clinic_home_controller.dart';
 
 class ClinicHomeView extends GetView<ClinicHomeController> {
@@ -16,214 +16,289 @@ class ClinicHomeView extends GetView<ClinicHomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background, // Konsisten dengan HomeDashboard
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0, // AppBar modern umumnya tanpa shadow
-        title: Text(
-          "Klinik",
-          style: Get.textTheme.headlineSmall?.copyWith(
-            color: AppColors.textDark,
-            fontWeight: FontWeight.bold,
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // 1. BACKGROUND DECORATION (Consistent Theme)
+          Positioned(
+            top: -80,
+            right: -60,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.05), // Nuansa biru untuk medis/klinik
+                shape: BoxShape.circle,
+              ),
+            ),
           ),
-        ),
-        centerTitle: false, // Judul rata kiri
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16), // Padding konsisten
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 32), // Spasi lebih lega
-            _buildCategorySection(),
-            const SizedBox(height: 32),
-            _buildFeaturedPakarSection(),
-            const SizedBox(height: 32),
-            _buildDigitalLibrarySection(),
-            const SizedBox(height: 24), // Padding bawah
-          ],
-        ),
+          Positioned(
+            top: 150,
+            left: -80,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // 2. MAIN CONTENT
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildCustomAppBar(),
+                  const SizedBox(height: 24),
+                  
+                  _buildAiScanBanner(),
+                  const SizedBox(height: 32),
+                  
+                  _buildCategorySection(),
+                  const SizedBox(height: 32),
+                  
+                  _buildFeaturedPakarSection(),
+                  const SizedBox(height: 32),
+                  
+                  _buildDigitalLibrarySection(),
+                  const SizedBox(height: 100), // Bottom padding
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// Header dengan shortcut ke AI Scan (Diperbarui)
-  Widget _buildHeader() {
+  /// Custom AppBar
+  Widget _buildCustomAppBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Klinik Genta",
+              style: Get.textTheme.headlineSmall?.copyWith(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.w800,
+                fontSize: 24,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Solusi kesehatan tanaman & ternak",
+              style: Get.textTheme.bodyMedium?.copyWith(
+                color: AppColors.textLight,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const FaIcon(FontAwesomeIcons.userDoctor, size: 20, color: AppColors.primary),
+        ),
+      ],
+    );
+  }
+
+  /// Header AI Scan (Modern Gradient Card)
+  Widget _buildAiScanBanner() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24), // Padding lebih besar
       decoration: BoxDecoration(
-        color: AppColors.primary, // Menggunakan warna primary penuh untuk kesan premium
-        borderRadius: BorderRadius.circular(24), // Sudut lebih rounded
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, Color(0xFF4CAF50)], // Gradasi Hijau Segar
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: AppColors.primary.withOpacity(0.4),
             blurRadius: 20,
-            offset: const Offset(0, 10), // Shadow lebih menonjol
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start, // Align to top
+      child: Stack(
         children: [
-          Expanded(
+          // Dekorasi Background
+          Positioned(
+            right: -20,
+            bottom: -20,
+            child: Icon(
+              FontAwesomeIcons.robot,
+              size: 140,
+              color: Colors.white.withOpacity(0.15),
+            ),
+          ),
+          
+          Padding(
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Punya Masalah?",
-                  style: Get.textTheme.titleLarge?.copyWith(
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      FaIcon(FontAwesomeIcons.wandMagicSparkles, size: 12, color: Colors.white),
+                      SizedBox(width: 6),
+                      Text(
+                        "AI Diagnosis",
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "Tanaman Sakit?",
+                  style: TextStyle(
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white, // Teks putih di latar hijau
-                    fontSize: 20,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  "Coba scan hama atau penyakit tanaman/ternak Anda dengan AI untuk diagnosis cepat.",
-                  style: Get.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
+                  "Scan daun atau hewan untuk deteksi penyakit instan.",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.9),
+                    height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 20), // Spasi lebih lega
-                ElevatedButton.icon( // Menggunakan ElevatedButton untuk tampilan modern
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
                   onPressed: controller.goToAiScan,
                   icon: const FaIcon(FontAwesomeIcons.camera, size: 16, color: AppColors.primary),
-                  label: const Text(
-                    "Scan Sekarang",
-                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                  ),
+                  label: const Text("Scan Sekarang"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white, // Tombol putih
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    elevation: 5, // Shadow untuk tombol
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 16),
-          // Ikon robot lebih besar dan ditaruh di dalam Container dengan background ringan
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const FaIcon(FontAwesomeIcons.robot, size: 64, color: Colors.white),
-          ),
         ],
       ),
     );
   }
 
-  /// Bagian Kategori (Diperbarui)
+  /// Kategori (Clean Chips)
   Widget _buildCategorySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0), // Padding disesuaikan dengan SingleChildScrollView
-          child: Text(
-            "Cari Bantuan Ahli",
-            style: Get.textTheme.titleLarge?.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        _buildSectionHeader("Kategori Layanan", showViewAll: false),
         const SizedBox(height: 16),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround, // Atau spaceBetween jika ingin merapat ke tepi
           children: [
-            _buildCategoryButton(
-              "Pertanian",
-              FontAwesomeIcons.leaf,
-              Colors.green.shade700,
-              () => controller.goToPakarList('PERTANIAN'),
+            Expanded(
+              child: _buildCategoryCard(
+                "Pertanian",
+                FontAwesomeIcons.leaf,
+                AppColors.primary,
+                () => controller.goToPakarList('PERTANIAN'),
+              ),
             ),
-            _buildCategoryButton(
-              "Peternakan",
-              FontAwesomeIcons.cow,
-              Colors.brown.shade700,
-              () => controller.goToPakarList('PETERNAKAN'),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildCategoryCard(
+                "Peternakan",
+                FontAwesomeIcons.cow,
+                Colors.brown,
+                () => controller.goToPakarList('PETERNAKAN'),
+              ),
             ),
-            // Jika ada lebih banyak kategori, pertimbangkan GridView.builder
           ],
         ),
       ],
     );
   }
 
-  /// Helper untuk Category Button (Diperbarui)
-  Widget _buildCategoryButton(String label, IconData icon, Color color, VoidCallback onTap) {
-    return Expanded( // Menggunakan Expanded agar responsif terhadap lebar layar
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 12), // Padding lebih besar
-          margin: const EdgeInsets.symmetric(horizontal: 8), // Margin antar tombol
-          decoration: BoxDecoration(
-            color: Colors.white, // Latar belakang putih
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
+  Widget _buildCategoryCard(String label, IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.greyLight),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
-          child: Column(
-            children: [
-              FaIcon(icon, size: 36, color: color), // Ikon lebih besar
-              const SizedBox(height: 16), // Spasi lebih besar
-              Text(
-                label,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16, // Ukuran font lebih besar
-                ),
-                textAlign: TextAlign.center,
+              child: FaIcon(icon, size: 24, color: color),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+                fontSize: 15,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Bagian Pakar Unggulan (Diperbarui)
+  /// Featured Pakar (Horizontal List)
   Widget _buildFeaturedPakarSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Pakar Online",
-                style: Get.textTheme.titleLarge?.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () => controller.goToPakarList('ALL'),
-                child: Text(
-                  "Lihat Semua",
-                  style: TextStyle(color: AppColors.primary),
-                ),
-              ),
-            ],
-          ),
+        _buildSectionHeader(
+          "Pakar Rekomendasi", 
+          onViewAll: () => controller.goToPakarList('ALL')
         ),
         const SizedBox(height: 16),
         Obx(() {
@@ -231,15 +306,16 @@ class ClinicHomeView extends GetView<ClinicHomeController> {
             return const Center(child: CircularProgressIndicator());
           }
           if (controller.featuredPakarList.isEmpty) {
-            return const Center(child: Text("Belum ada pakar tersedia."));
+            return _buildEmptyState("Belum ada pakar tersedia.");
           }
 
           return SizedBox(
-            height: 240, // Tinggi card disesuaikan
-            child: ListView.builder(
+            height: 260, // Tinggi area scroll
+            child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 0), // Padding dihapus di sini karena sudah ada di _buildPakarCard
+              physics: const BouncingScrollPhysics(),
               itemCount: controller.featuredPakarList.length,
+              separatorBuilder: (ctx, i) => const SizedBox(width: 16),
               itemBuilder: (context, index) {
                 final pakar = controller.featuredPakarList[index];
                 return _buildPakarCard(pakar);
@@ -251,214 +327,244 @@ class ClinicHomeView extends GetView<ClinicHomeController> {
     );
   }
 
-  /// Kartu untuk satu Pakar (Diperbarui)
   Widget _buildPakarCard(PakarProfileModel pakar) {
     bool isOnline = pakar.isAvailable;
     return Container(
-      width: 180, // Lebar card sedikit lebih besar
-      margin: const EdgeInsets.only(right: 16), // Margin antar card
+      width: 170,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20), // Sudut lebih rounded
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: InkWell(
-        onTap: () => controller.goToPakarDetail(pakar),
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Foto & Status Online
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), // Hanya bagian atas
-                  child: pakar.user.profilePictureUrl != null && pakar.user.profilePictureUrl!.isNotEmpty
-                      ? Image.network(
-                          pakar.user.profilePictureUrl!,
-                          height: 120, // Tinggi gambar lebih besar
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            height: 120,
-                            width: double.infinity,
-                            color: AppColors.greyLight,
-                            child: const Center(child: FaIcon(FontAwesomeIcons.userDoctor, color: Colors.grey, size: 40)),
-                          ),
-                        )
-                      : Container(
-                          height: 120,
-                          width: double.infinity,
-                          color: AppColors.greyLight,
-                          child: const Center(child: FaIcon(FontAwesomeIcons.userDoctor, color: Colors.grey, size: 40)),
-                        ),
-                ),
-                Positioned(
-                  top: 12, right: 12, // Posisi sedikit lebih masuk
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: isOnline ? Colors.green : Colors.grey.shade600, // Warna lebih kuat
-                      borderRadius: BorderRadius.circular(16), // Rounded lebih besar
-                    ),
-                    child: Text(
-                      isOnline ? "Online" : "Offline",
-                      style: Get.textTheme.bodySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
-            // Info
-            Padding(
-              padding: const EdgeInsets.all(16.0), // Padding lebih besar
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: InkWell(
+          onTap: () => controller.goToPakarDetail(pakar),
+          borderRadius: BorderRadius.circular(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image & Badge Container
+              Stack(
                 children: [
-                  Text(
-                    pakar.user.fullName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    child: Container(
+                      height: 120,
+                      width: double.infinity,
+                      color: AppColors.greyLight,
+                      child: pakar.user.profilePictureUrl != null && pakar.user.profilePictureUrl!.isNotEmpty
+                          ? Image.network(
+                              pakar.user.profilePictureUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (c, e, s) => const Icon(Icons.person, color: Colors.grey),
+                            )
+                          : const Center(child: FaIcon(FontAwesomeIcons.userDoctor, color: Colors.grey)),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    pakar.specialization,
-                    style: Get.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textLight,
-                      fontSize: 12,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    rupiahFormatter.format(pakar.consultationFee),
-                    style: Get.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                      fontSize: 16,
+                  // Online Status Badge
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isOnline ? Colors.green : Colors.grey,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6, height: 6,
+                            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isOnline ? "Online" : "Offline",
+                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Bagian Artikel Perpustakaan Digital (Diperbarui)
-  Widget _buildDigitalLibrarySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Perpustakaan Digital",
-                style: Get.textTheme.titleLarge?.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: controller.goToDigitalLibrary,
-                child: Text(
-                  "Lihat Semua",
-                  style: TextStyle(color: AppColors.primary),
+              
+              // Info
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      pakar.user.fullName,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      pakar.specialization,
+                      style: const TextStyle(color: AppColors.textLight, fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          rupiahFormatter.format(pakar.consultationFee),
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.primary),
+                        )
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Digital Library (Vertical List)
+  Widget _buildDigitalLibrarySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          "Perpustakaan Digital",
+          onViewAll: controller.goToDigitalLibrary,
+        ),
         const SizedBox(height: 16),
-        // Menggunakan ListView.builder untuk daftar artikel agar lebih dinamis
-        // dan bisa di-scroll jika artikel terlalu banyak, atau diganti dengan Column jika selalu sedikit
+        
+        // List Item
         Column(
-          children: controller.featuredArticles.map((article) => Padding(
-            padding: const EdgeInsets.only(bottom: 12), // Jarak antar item
-            child: _buildArticleListItem(article),
-          )).toList(),
+          children: controller.featuredArticles.map((article) => _buildLibraryItem(article)).toList(),
         ),
       ],
     );
   }
 
-  /// Helper untuk Item Artikel (Diperbarui)
-  Widget _buildArticleListItem(Map<String, String> article) {
-    return InkWell(
-      onTap: () { /* TODO: Navigasi ke detail artikel */ },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
+  Widget _buildLibraryItem(Map<String, String> article) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(12),
+        onTap: () { /* TODO: Detail Article */ },
+        leading: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: AppColors.greyLight,
+            borderRadius: BorderRadius.circular(12),
+            // image: DecorationImage(...) // Jika ada gambar
+          ),
+          child: const Center(child: FaIcon(FontAwesomeIcons.bookOpen, color: Colors.grey, size: 20)),
         ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: 70,
-                height: 70,
-                color: AppColors.greyLight,
-                child: const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey, size: 28)), // Placeholder
-                // Jika ada gambar, gunakan Image.network:
-                // child: Image.network(
-                //   article['imageUrl']!, // Pastikan ada imageUrl di model
-                //   fit: BoxFit.cover,
-                //   errorBuilder: (context, error, stackTrace) => const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey)),
-                // ),
+        title: Text(
+          article['title']!,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  article['category']!,
+                  style: const TextStyle(fontSize: 10, color: AppColors.textDark, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+      ),
+    );
+  }
+
+  /// Helper untuk Section Header
+  Widget _buildSectionHeader(String title, {VoidCallback? onViewAll, bool showViewAll = true}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textDark,
+          ),
+        ),
+        if (showViewAll && onViewAll != null)
+          GestureDetector(
+            onTap: onViewAll,
+            child: const Text(
+              "Lihat Semua",
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    article['title']!,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    article['category']!,
-                    style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.greyLight.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Center(
+        child: Text(
+          message,
+          style: const TextStyle(color: Colors.grey),
         ),
       ),
     );

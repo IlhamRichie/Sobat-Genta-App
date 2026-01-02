@@ -8,8 +8,7 @@ import '../../../../data/models/project_model.dart';
 import '../../../../theme/app_colors.dart';
 import '../controllers/investor_funding_marketplace_controller.dart';
 
-class InvestorFundingMarketplaceView
-    extends GetView<InvestorFundingMarketplaceController> {
+class InvestorFundingMarketplaceView extends GetView<InvestorFundingMarketplaceController> {
   InvestorFundingMarketplaceView({Key? key}) : super(key: key);
 
   final rupiahFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
@@ -18,180 +17,154 @@ class InvestorFundingMarketplaceView
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
-      body: RefreshIndicator(
-        onRefresh: controller.fetchPublishedProjects,
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          
-          if (controller.projectList.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            itemCount: controller.projectList.length,
-            itemBuilder: (context, index) {
-              final project = controller.projectList[index];
-              return _buildProjectCard(project);
-            },
-          );
-        }),
-      ),
-    );
-  }
-
-  /// AppBar Kustom
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      title: Text(
-        "Marketplace Proyek",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      centerTitle: false,
-      actions: [
-        IconButton(
-          onPressed: () { /* TODO: Buka Halaman Filter */ },
-          icon: const FaIcon(FontAwesomeIcons.filter, color: AppColors.iconSecondary),
-        ),
-        const SizedBox(width: 8),
-      ],
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const FaIcon(FontAwesomeIcons.storeSlash, size: 96, color: AppColors.greyLight),
-            const SizedBox(height: 32),
-            Text(
-              "Belum Ada Proyek Tersedia",
-              style: Get.textTheme.titleLarge?.copyWith(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+      body: Stack(
+        children: [
+          // 1. BACKGROUND DECORATION
+          Positioned(
+            top: -100,
+            left: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.05), // Nuansa biru untuk investasi/bisnis
+                shape: BoxShape.circle,
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
-            Text(
-              "Saat ini belum ada proposal proyek yang dipublikasikan. Silakan cek kembali nanti.",
-              style: Get.textTheme.bodyMedium?.copyWith(
-                fontSize: 16,
-                color: AppColors.textLight,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Kartu untuk menampilkan satu proyek (Didesain Ulang)
-  Widget _buildProjectCard(ProjectModel project) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
           ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => controller.goToProjectDetail(project),
-        borderRadius: BorderRadius.circular(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
+          Positioned(
+            top: 150,
+            right: -80,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // 2. MAIN CONTENT
+          SafeArea(
+            child: Column(
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  child: project.projectImageUrl != null && project.projectImageUrl!.isNotEmpty
-                      ? Image.network(
-                          project.projectImageUrl!,
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            height: 180,
-                            color: AppColors.greyLight,
-                            child: const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey)),
-                          ),
-                        )
-                      : Container(
-                          height: 180,
-                          color: AppColors.greyLight,
-                          child: const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey)),
-                        ),
-                ),
-                Positioned(
-                  top: 12, left: 12,
-                  child: _buildProjectStatusBadge(project.status),
+                _buildCustomAppBar(),
+                
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: controller.fetchPublishedProjects,
+                    color: AppColors.primary,
+                    child: Obx(() {
+                      if (controller.isLoading.value) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      
+                      if (controller.projectList.isEmpty) {
+                        return _buildEmptyState();
+                      }
+
+                      return ListView.separated(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        itemCount: controller.projectList.length,
+                        separatorBuilder: (ctx, i) => const SizedBox(height: 20),
+                        itemBuilder: (context, index) {
+                          final project = controller.projectList[index];
+                          return _buildProjectCard(project);
+                        },
+                      );
+                    }),
+                  ),
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    project.title,
-                    style: Get.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Aset: ${project.assetName}", // Menggunakan `assetName` yang sudah ada di model
-                    style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight, fontStyle: FontStyle.italic),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Terkumpul: ${rupiahFormatter.format(project.collectedFund)}",
-                    style: Get.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Target: ${rupiahFormatter.format(project.targetFund)}",
-                    style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
-                  ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: project.fundingProgress,
-                    backgroundColor: AppColors.greyLight,
-                    color: AppColors.primary,
-                    minHeight: 8,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "${(project.fundingProgress * 100).toStringAsFixed(0)}% Terkumpul",
-                    style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
-                  ),
-                ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Custom AppBar
+  Widget _buildCustomAppBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Marketplace Investasi",
+                style: Get.textTheme.headlineSmall?.copyWith(
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                ),
               ),
+              const SizedBox(height: 4),
+              Text(
+                "Temukan proyek potensial",
+                style: Get.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textLight,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: IconButton(
+              onPressed: () { /* TODO: Filter */ },
+              icon: const FaIcon(FontAwesomeIcons.sliders, size: 18, color: AppColors.textDark),
+              splashRadius: 24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Empty State Modern
+  Widget _buildEmptyState() {
+    return Center(
+      child: SingleChildScrollView( // Agar bisa di-scroll to refresh
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: AppColors.greyLight.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              child: const FaIcon(FontAwesomeIcons.magnifyingGlassChart, size: 64, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Belum Ada Proyek",
+              style: Get.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "Saat ini belum ada proyek yang dibuka untuk pendanaan.\nSilakan cek kembali nanti.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textLight),
             ),
           ],
         ),
@@ -199,33 +172,227 @@ class InvestorFundingMarketplaceView
     );
   }
 
-  /// Badge untuk status proyek (Didesain Ulang)
-  Widget _buildProjectStatusBadge(ProjectStatus status) {
-    Color color; String text; IconData icon;
+  /// Modern Project Card
+  Widget _buildProjectCard(ProjectModel project) {
+    // Hitung persentase untuk progress bar
+    double progress = project.fundingProgress;
+    if (progress > 1.0) progress = 1.0;
+    if (progress < 0.0) progress = 0.0;
 
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+        child: InkWell(
+          onTap: () => controller.goToProjectDetail(project),
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Image Header
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                    child: Container(
+                      height: 180,
+                      width: double.infinity,
+                      color: AppColors.greyLight,
+                      child: (project.projectImageUrl != null && project.projectImageUrl!.isNotEmpty)
+                          ? Image.network(
+                              project.projectImageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (c, e, s) => const Center(child: Icon(Icons.image, color: Colors.grey)),
+                            )
+                          : const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey)),
+                    ),
+                  ),
+                  // Gradient Overlay
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.4),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Status Badge
+                  Positioned(
+                    top: 16, left: 16,
+                    child: _buildStatusBadge(project.status),
+                  ),
+                  // ROI Badge (Bottom Right Image)
+                  Positioned(
+                    bottom: 16, right: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const FaIcon(FontAwesomeIcons.arrowTrendUp, size: 12, color: Colors.green),
+                          const SizedBox(width: 6),
+                          Text(
+                            "${project.roiEstimate}% ROI", // Pastikan ada field roiEstimate di model, atau hitung manual
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              // 2. Content Body
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      project.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                        height: 1.3,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const FaIcon(FontAwesomeIcons.locationDot, size: 12, color: AppColors.textLight),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            "Lokasi: ${project.assetName}", // Mengasumsikan assetName berisi info lokasi/lahan
+                            style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Funding Progress
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Terkumpul", style: TextStyle(fontSize: 11, color: AppColors.textLight)),
+                            const SizedBox(height: 2),
+                            Text(
+                              rupiahFormatter.format(project.collectedFund),
+                              style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text("Target", style: TextStyle(fontSize: 11, color: AppColors.textLight)),
+                            const SizedBox(height: 2),
+                            Text(
+                              rupiahFormatter.format(project.targetFund),
+                              style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8,
+                        backgroundColor: AppColors.greyLight,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "${(progress * 100).toStringAsFixed(0)}% Terpenuhi",
+                        style: const TextStyle(fontSize: 11, color: AppColors.textLight, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Status Badge Helper
+  Widget _buildStatusBadge(ProjectStatus status) {
+    Color color;
+    String text;
+    
     switch (status) {
       case ProjectStatus.PUBLISHED:
-        color = AppColors.primary; text = "Galang Dana"; icon = FontAwesomeIcons.bullhorn; break;
+        color = AppColors.primary; text = "Galang Dana"; break;
       case ProjectStatus.FUNDED:
-        color = Colors.green; text = "Didanai Penuh"; icon = FontAwesomeIcons.solidCircleCheck; break;
+        color = Colors.blue; text = "Didanai"; break;
       case ProjectStatus.COMPLETED:
-        color = AppColors.textDark; text = "Selesai"; icon = FontAwesomeIcons.flagCheckered; break;
-      case ProjectStatus.REJECTED:
-        color = Colors.red; text = "Ditolak"; icon = FontAwesomeIcons.solidCircleXmark; break;
+        color = Colors.grey; text = "Selesai"; break;
       default:
-        color = Colors.orange; text = "Menunggu Moderasi"; icon = FontAwesomeIcons.clock; break;
+        color = Colors.orange; text = "Proses"; break;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FaIcon(icon, size: 12, color: color),
-          const SizedBox(width: 6),
-          Text(text, style: Get.textTheme.bodySmall?.copyWith(color: color, fontWeight: FontWeight.bold)),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
         ],
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+        ),
       ),
     );
   }

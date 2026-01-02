@@ -1,4 +1,4 @@
-// lib/app/modules/profile_main/views/profile_main_view.dart
+// lib/app/modules/06_profile_wallet/profile_main/views/profile_main_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,117 +13,184 @@ class ProfileMainView extends GetView<ProfileMainController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background, // Latar belakang abu-abu muda
-      appBar: _buildAppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20), // Padding konsisten
-          child: Column(
-            children: [
-              _buildProfileHeader(),
-              const SizedBox(height: 24),
-              ..._buildRoleSpecificMenu(),
-              const SizedBox(height: 24),
-              
-              _buildSectionTitle("Akun & Keamanan"),
-              _buildMenuItems([
-                _ProfileMenuItem(
-                  title: "Ubah Password",
-                  icon: FontAwesomeIcons.lock,
-                  onTap: controller.goToChangePassword,
-                ),
-                _ProfileMenuItem(
-                  title: "Pengaturan Notifikasi",
-                  icon: FontAwesomeIcons.solidBell,
-                  onTap: () {},
-                ),
-                _ProfileMenuItem(
-                  title: "Pusat Bantuan",
-                  icon: FontAwesomeIcons.solidCircleQuestion,
-                  onTap: () {},
-                ),
-              ]),
-              
-              const SizedBox(height: 32),
-              
-              _buildLogoutButton(),
-              
-              const SizedBox(height: 32),
-            ],
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // 1. BACKGROUND DECORATION
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // 2. MAIN CONTENT
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Column(
+                children: [
+                  _buildAppBar(),
+                  const SizedBox(height: 24),
+                  
+                  _buildProfileHeader(),
+                  const SizedBox(height: 24),
+                  
+                  // Menu Khusus Role (Petani/Investor/Pakar)
+                  ..._buildRoleSpecificMenu(),
+                  
+                  // Menu Umum
+                  const SizedBox(height: 24),
+                  _buildSectionTitle("Akun & Keamanan"),
+                  _buildMenuContainer([
+                    _ProfileMenuItem(
+                      title: "Ubah Password",
+                      icon: FontAwesomeIcons.lock,
+                      onTap: controller.goToChangePassword,
+                    ),
+                    _ProfileMenuItem(
+                      title: "Pengaturan Notifikasi",
+                      icon: FontAwesomeIcons.solidBell,
+                      onTap: () {}, // TODO: Implement Notification Settings
+                    ),
+                    _ProfileMenuItem(
+                      title: "Pusat Bantuan",
+                      icon: FontAwesomeIcons.circleQuestion,
+                      onTap: () {}, // TODO: Implement Help Center
+                    ),
+                  ]),
+                  
+                  const SizedBox(height: 32),
+                  _buildLogoutButton(),
+                  const SizedBox(height: 40),
+                  
+                  // Version Info
+                  const Text(
+                    "Versi Aplikasi 1.0.0",
+                    style: TextStyle(color: AppColors.textLight, fontSize: 12),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Custom AppBar
+  Widget _buildAppBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Profil Saya",
+          style: Get.textTheme.headlineSmall?.copyWith(
+            color: AppColors.textDark,
+            fontWeight: FontWeight.w800,
+            fontSize: 24,
           ),
         ),
-      ),
-    );
-  }
-
-  /// AppBar Kustom
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      title: Text(
-        "Profil Saya",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const FaIcon(FontAwesomeIcons.gear, size: 20, color: AppColors.textDark),
         ),
-      ),
-      centerTitle: false,
+      ],
     );
   }
 
-  /// 1. Widget Header Profil
+  /// 1. Profile Header Card
   Widget _buildProfileHeader() {
+    // Ambil data user dari controller (pastikan tidak null)
     final user = controller.currentUser;
-    if (user == null) return const Center(child: Text("Gagal memuat data user."));
+    if (user == null) {
+        return const SizedBox(
+            height: 100, 
+            child: Center(child: Text("Silakan login kembali"))
+        );
+    }
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      margin: const EdgeInsets.only(top: 16), // Beri jarak dari AppBar
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 36,
-            backgroundColor: AppColors.greyLight,
-            backgroundImage: user.profilePictureUrl != null && user.profilePictureUrl!.isNotEmpty
-                ? NetworkImage(user.profilePictureUrl!)
-                : null,
-            child: user.profilePictureUrl == null || user.profilePictureUrl!.isEmpty
-                ? const FaIcon(FontAwesomeIcons.solidUser, size: 40, color: Colors.grey)
-                : null,
+          // Avatar
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.greyLight, width: 2),
+            ),
+            child: CircleAvatar(
+              radius: 35,
+              backgroundColor: AppColors.greyLight,
+              backgroundImage: (user.profilePictureUrl != null && user.profilePictureUrl!.isNotEmpty)
+                  ? NetworkImage(user.profilePictureUrl!)
+                  : null,
+              child: (user.profilePictureUrl == null || user.profilePictureUrl!.isEmpty)
+                  ? const FaIcon(FontAwesomeIcons.user, size: 30, color: Colors.grey)
+                  : null,
+            ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
+          
+          // Info Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   user.fullName,
-                  style: Get.textTheme.titleLarge?.copyWith(
+                  style: const TextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    fontSize: 20,
+                    color: AppColors.textDark,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 4),
                 Text(
                   user.email,
-                  style: Get.textTheme.bodyMedium?.copyWith(
+                  style: const TextStyle(
+                    fontSize: 14,
                     color: AppColors.textLight,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
-                _buildKycChip(user.kycStatus),
+                const SizedBox(height: 12),
+                _buildKycBadge(user.kycStatus),
               ],
             ),
           ),
@@ -132,28 +199,30 @@ class ProfileMainView extends GetView<ProfileMainController> {
     );
   }
 
-  Widget _buildKycChip(KycStatus status) {
+  /// KYC Status Badge
+  Widget _buildKycBadge(KycStatus status) {
     bool isVerified = status == KycStatus.VERIFIED;
+    Color color = isVerified ? Colors.green : Colors.orange;
+    String text = isVerified ? "Terverifikasi" : "Belum Verifikasi";
+    IconData icon = isVerified ? FontAwesomeIcons.check : FontAwesomeIcons.triangleExclamation;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: isVerified ? Colors.green.shade100 : Colors.orange.shade100,
-        borderRadius: BorderRadius.circular(16),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FaIcon(
-            isVerified ? FontAwesomeIcons.solidCircleCheck : FontAwesomeIcons.solidCircleXmark,
-            size: 12,
-            color: isVerified ? Colors.green.shade900 : Colors.orange.shade900,
-          ),
+          FaIcon(icon, size: 10, color: color),
           const SizedBox(width: 6),
           Text(
-            isVerified ? "Akun Terverifikasi" : "Belum Verifikasi (KYC)",
-            style: Get.textTheme.bodySmall?.copyWith(
-              color: isVerified ? Colors.green.shade900 : Colors.orange.shade900,
+            text,
+            style: TextStyle(
+              color: color,
               fontWeight: FontWeight.bold,
+              fontSize: 11,
             ),
           ),
         ],
@@ -161,93 +230,90 @@ class ProfileMainView extends GetView<ProfileMainController> {
     );
   }
 
-  /// Helper untuk membuat blok menu yang modern
-  Widget _buildMenuItems(List<Widget> items) {
+  /// 2. Menu Builder Helper
+  List<Widget> _buildRoleSpecificMenu() {
+    final role = controller.userRole;
+    List<Widget> menuItems = [];
+    String title = "";
+
+    switch (role) {
+      case UserRole.FARMER:
+        title = "Layanan Petani";
+        menuItems = [
+          _ProfileMenuItem(title: "Dompet & Saldo", icon: FontAwesomeIcons.wallet, onTap: controller.goToWallet),
+          _ProfileMenuItem(title: "Kelola Aset (Lahan)", icon: FontAwesomeIcons.tractor, onTap: controller.goToManageAssets),
+          _ProfileMenuItem(title: "Riwayat Transaksi", icon: FontAwesomeIcons.clockRotateLeft, onTap: controller.goToOrderHistory),
+        ];
+        break;
+      case UserRole.INVESTOR:
+        title = "Layanan Investor";
+        menuItems = [
+          _ProfileMenuItem(title: "Dompet Investasi", icon: FontAwesomeIcons.wallet, onTap: controller.goToWallet),
+          _ProfileMenuItem(title: "Portofolio Saya", icon: FontAwesomeIcons.chartPie, onTap: controller.goToPortfolio),
+          _ProfileMenuItem(title: "Rekening Pencairan", icon: FontAwesomeIcons.buildingColumns, onTap: controller.goToBankAccounts),
+        ];
+        break;
+      case UserRole.EXPERT:
+        title = "Layanan Pakar";
+        menuItems = [
+          _ProfileMenuItem(title: "Penghasilan", icon: FontAwesomeIcons.moneyBillTrendUp, onTap: controller.goToPayout),
+          _ProfileMenuItem(title: "Jadwal & Tarif", icon: FontAwesomeIcons.calendarDay, onTap: controller.goToAvailability),
+          _ProfileMenuItem(title: "Rekening Bank", icon: FontAwesomeIcons.buildingColumns, onTap: controller.goToBankAccounts),
+        ];
+        break;
+      default:
+        return [];
+    }
+
+    return [
+      _buildSectionTitle(title),
+      _buildMenuContainer(menuItems),
+    ];
+  }
+
+  /// Wrapper untuk item menu (Card Style)
+  Widget _buildMenuContainer(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
-        children: List.generate(
-          items.length,
-          (index) {
-            final item = items[index];
-            return Column(
-              children: [
-                item,
-                if (index < items.length - 1)
-                  const Divider(
-                    height: 1,
-                    indent: 64, // Indentasi agar tidak memotong ikon
-                    endIndent: 16,
-                  ),
-              ],
-            );
-          },
-        ),
+        children: List.generate(children.length, (index) {
+          return Column(
+            children: [
+              children[index],
+              if (index != children.length - 1) // Divider kecuali item terakhir
+                Padding(
+                  padding: const EdgeInsets.only(left: 56, right: 20),
+                  child: Divider(height: 1, color: AppColors.greyLight.withOpacity(0.5)),
+                ),
+            ],
+          );
+        }),
       ),
     );
   }
 
-  /// 2. Widget Builder Menu Dinamis
-  List<Widget> _buildRoleSpecificMenu() {
-    final role = controller.userRole;
-    List<Widget> menuItems = [];
-    String title = "";
-
-    if (role == UserRole.FARMER) {
-      title = "Menu Petani";
-      menuItems = [
-        _ProfileMenuItem(title: "Dompet Saya", icon: FontAwesomeIcons.wallet, onTap: controller.goToWallet),
-        _ProfileMenuItem(title: "Aset Saya (Lahan/Ternak)", icon: FontAwesomeIcons.mapLocationDot, onTap: controller.goToManageAssets),
-        _ProfileMenuItem(title: "Riwayat Pesanan Toko", icon: FontAwesomeIcons.receipt, onTap: controller.goToOrderHistory),
-      ];
-    } else if (role == UserRole.INVESTOR) {
-      title = "Menu Investor";
-      menuItems = [
-        _ProfileMenuItem(title: "Dompet Saya", icon: FontAwesomeIcons.wallet, onTap: controller.goToWallet),
-        _ProfileMenuItem(title: "Portofolio Investasi Saya", icon: FontAwesomeIcons.chartLine, onTap: controller.goToPortfolio),
-        _ProfileMenuItem(title: "Rekening Bank (Payout)", icon: FontAwesomeIcons.buildingColumns, onTap: controller.goToBankAccounts),
-        _ProfileMenuItem(title: "Riwayat Pesanan Toko", icon: FontAwesomeIcons.receipt, onTap: controller.goToOrderHistory),
-      ];
-    } else if (role == UserRole.EXPERT) {
-      title = "Menu Pakar";
-      menuItems = [
-        _ProfileMenuItem(title: "Penghasilan & Payout", icon: FontAwesomeIcons.sackDollar, onTap: controller.goToPayout),
-        _ProfileMenuItem(title: "Atur Jadwal & Tarif", icon: FontAwesomeIcons.calendarCheck, onTap: controller.goToAvailability),
-        _ProfileMenuItem(title: "Rekening Bank (Payout)", icon: FontAwesomeIcons.buildingColumns, onTap: controller.goToBankAccounts),
-      ];
-    }
-
-    if (menuItems.isEmpty) {
-      return [];
-    }
-    
-    return [
-      _buildSectionTitle(title),
-      _buildMenuItems(menuItems),
-    ];
-  }
-
-  /// Helper Judul Section
+  /// Section Title
   Widget _buildSectionTitle(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      child: Align(
+        alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: Get.textTheme.bodySmall?.copyWith(
+          style: const TextStyle(
+            fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: AppColors.textLight.withOpacity(0.8),
+            color: AppColors.textLight,
             letterSpacing: 0.5,
           ),
         ),
@@ -255,98 +321,103 @@ class ProfileMainView extends GetView<ProfileMainController> {
     );
   }
 
-  /// Tombol Logout (Diperbarui untuk memanggil Dialog Kustom)
+  /// Logout Button with Confirmation
   Widget _buildLogoutButton() {
-    return TextButton.icon(
-      onPressed: _showLogoutConfirmationDialog, // Memanggil dialog kustom
-      icon: const FaIcon(FontAwesomeIcons.rightFromBracket, size: 20, color: Colors.red),
-      label: const Text(
-        "Keluar",
-        style: TextStyle(
-          color: Colors.red,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
+    return TextButton(
+      onPressed: _showLogoutDialog,
       style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.red.withOpacity(0.05), // Merah sangat muda
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.logout_rounded, color: Colors.red),
+          SizedBox(width: 8),
+          Text(
+            "Keluar Aplikasi",
+            style: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// Dialog Konfirmasi Logout (BARU & MODERN)
-  void _showLogoutConfirmationDialog() {
+  /// Modern Dialog
+  void _showLogoutDialog() {
     Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20), // Sudut yang lebih membulat
-        ),
-        titlePadding: EdgeInsets.zero,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        
-        title: Center(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 16),
-              const FaIcon(FontAwesomeIcons.circleExclamation, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                "Konfirmasi Keluar",
-                style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const FaIcon(FontAwesomeIcons.rightFromBracket, color: Colors.red, size: 28),
               ),
+              const SizedBox(height: 16),
+              const Text(
+                "Ingin Keluar?",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textDark),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "Anda harus login kembali untuk mengakses akun Anda.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textLight),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("Batal", style: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back();
+                        controller.logout();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: const Text("Keluar", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                    ),
+                  ),
+                ],
+              )
             ],
           ),
         ),
-        
-        content: Text(
-          "Apakah Anda yakin ingin keluar dari akun Anda?",
-          textAlign: TextAlign.center,
-          style: Get.textTheme.bodyLarge?.copyWith(color: AppColors.textDark),
-        ),
-        
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Get.back(), // Batal
-                  child: const Text("Batal", style: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.bold)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.greyLight),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  onPressed: () {
-                    Get.back(); // Tutup dialog
-                    controller.logout(); // Lakukan aksi logout
-                  },
-                  child: const Text("Keluar", style: TextStyle(fontWeight: FontWeight.bold)),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.red.shade700,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       ),
     );
   }
 }
 
-/// WIDGET REUSABLE: Satu baris menu (Diperbarui)
+/// Helper: Single Menu Item
 class _ProfileMenuItem extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -363,22 +434,22 @@ class _ProfileMenuItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
           children: [
-            FaIcon(icon, size: 20, color: AppColors.textLight),
-            const SizedBox(width: 20),
+            FaIcon(icon, size: 20, color: AppColors.textLight), // Ikon abu-abu
+            const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
+                ),
               ),
             ),
-            const FaIcon(
-              FontAwesomeIcons.chevronRight,
-              size: 14,
-              color: AppColors.textLight,
-            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.greyLight),
           ],
         ),
       ),

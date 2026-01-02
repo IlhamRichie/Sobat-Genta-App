@@ -1,4 +1,4 @@
-// lib/app/modules/wallet_main/views/wallet_main_view.dart
+// lib/app/modules/06_profile_wallet/wallet_main/views/wallet_main_view.dart
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,188 +13,293 @@ class WalletMainView extends GetView<WalletMainController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
-      body: RefreshIndicator(
-        onRefresh: controller.fetchWalletData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildBalanceCard(),
-                const SizedBox(height: 24),
-                
-                _buildSectionTitle("Aksi Cepat"),
-                _buildMenuItems([
-                  _WalletMenuItem(
-                    title: "Top Up Saldo",
-                    subtitle: "Isi saldo via VA, QRIS, atau metode lain.",
-                    icon: FontAwesomeIcons.circleUp,
-                    color: Colors.green,
-                    onTap: controller.goToTopUp,
-                  ),
-                ]),
-                
-                if (controller.shouldShowWithdrawFeatures) ...[
-                  const SizedBox(height: 24),
-                  _buildSectionTitle("Penarikan (Investor)"),
-                  _buildMenuItems([
-                    _WalletMenuItem(
-                      title: "Tarik Dana",
-                      subtitle: "Tarik profit investasi Anda ke rekening bank.",
-                      icon: FontAwesomeIcons.moneyBillTransfer,
-                      color: Colors.blue,
-                      onTap: controller.goToWithdraw,
-                    ),
-                    _WalletMenuItem(
-                      title: "Kelola Rekening Bank",
-                      subtitle: "Atur rekening tujuan penarikan dana Anda.",
-                      icon: FontAwesomeIcons.buildingColumns,
-                      color: Colors.blueGrey,
-                      onTap: controller.goToBankAccounts,
-                    ),
-                  ]),
-                ],
-                
-                const SizedBox(height: 24),
-                _buildSectionTitle("Aktivitas"),
-                _buildMenuItems([
-                  _WalletMenuItem(
-                    title: "Riwayat Transaksi",
-                    subtitle: "Lihat semua riwayat Top Up, Pembayaran, dan Investasi.",
-                    icon: FontAwesomeIcons.receipt,
-                    color: AppColors.primary,
-                    onTap: controller.goToWalletHistory,
-                  ),
-                ]),
-                const SizedBox(height: 24),
-              ],
+      body: Stack(
+        children: [
+          // 1. BACKGROUND DECORATION
+          Positioned(
+            top: -100,
+            right: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
             ),
           ),
-        ),
+          Positioned(
+            top: 150,
+            left: -80,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // 2. MAIN CONTENT
+          SafeArea(
+            child: RefreshIndicator(
+              onRefresh: controller.fetchWalletData,
+              color: AppColors.primary,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  children: [
+                    _buildCustomAppBar(),
+                    const SizedBox(height: 24),
+                    
+                    _buildBalanceCard(),
+                    const SizedBox(height: 32),
+                    
+                    // Aksi Cepat (Top Up)
+                    _buildSectionTitle("Aksi Cepat"),
+                    _buildMenuContainer([
+                      _WalletMenuItem(
+                        title: "Isi Saldo (Top Up)",
+                        subtitle: "Transfer Bank, E-Wallet, atau QRIS",
+                        icon: FontAwesomeIcons.circlePlus,
+                        color: Colors.green,
+                        onTap: controller.goToTopUp,
+                      ),
+                    ]),
+                    
+                    // Fitur Khusus (Withdraw)
+                    if (controller.shouldShowWithdrawFeatures) ...[
+                      const SizedBox(height: 24),
+                      _buildSectionTitle("Penarikan Dana"),
+                      _buildMenuContainer([
+                        _WalletMenuItem(
+                          title: "Tarik Saldo",
+                          subtitle: "Cairkan profit ke rekening Anda",
+                          icon: FontAwesomeIcons.moneyBillTransfer,
+                          color: Colors.blue,
+                          onTap: controller.goToWithdraw,
+                        ),
+                        _WalletMenuItem(
+                          title: "Rekening Bank",
+                          subtitle: "Kelola tujuan pencairan dana",
+                          icon: FontAwesomeIcons.buildingColumns,
+                          color: Colors.blueGrey,
+                          onTap: controller.goToBankAccounts,
+                        ),
+                      ]),
+                    ],
+                    
+                    // Aktivitas
+                    const SizedBox(height: 24),
+                    _buildSectionTitle("Riwayat"),
+                    _buildMenuContainer([
+                      _WalletMenuItem(
+                        title: "Semua Transaksi",
+                        subtitle: "Lihat detail pemasukan & pengeluaran",
+                        icon: FontAwesomeIcons.clockRotateLeft, // Ikon history yang lebih umum
+                        color: Colors.orange,
+                        onTap: controller.goToWalletHistory,
+                      ),
+                    ]),
+                    
+                    const SizedBox(height: 100), // Bottom padding
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// AppBar Kustom
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      title: Text(
-        "Dompet Saya",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
+  /// Custom AppBar
+  Widget _buildCustomAppBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Dompet Digital",
+          style: Get.textTheme.headlineSmall?.copyWith(
+            color: AppColors.textDark,
+            fontWeight: FontWeight.w800,
+            fontSize: 24,
+          ),
         ),
-      ),
-      centerTitle: false,
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const FaIcon(FontAwesomeIcons.wallet, size: 20, color: AppColors.primary),
+        ),
+      ],
     );
   }
 
-  /// 1. Kartu Saldo (Didesain Ulang)
+  /// 1. Balance Card (Modern Gradient)
   Widget _buildBalanceCard() {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: AppColors.primary.withOpacity(0.4),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: Colors.white));
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Saldo Aktif Anda",
-              style: Get.textTheme.titleMedium?.copyWith(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 16,
-              ),
+      child: Stack(
+        children: [
+          // Background Pattern
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Icon(
+              FontAwesomeIcons.coins,
+              size: 100,
+              color: Colors.white.withOpacity(0.1),
             ),
-            Text(
-              controller.rupiahFormatter.format(controller.wallet.value?.balance ?? 0),
-              style: Get.textTheme.headlineLarge?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 32,
+          ),
+          
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      "GentaPay",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        );
-      }),
-    );
-  }
-
-  /// Helper untuk membuat blok menu (baru)
-  Widget _buildMenuItems(List<Widget> items) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+              const SizedBox(height: 16),
+              Text(
+                "Saldo Aktif",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Obx(() {
+                if (controller.isLoading.value) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 8.0),
+                    child: SizedBox(
+                      height: 24, 
+                      width: 24, 
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                    ),
+                  );
+                }
+                return Text(
+                  controller.rupiahFormatter.format(controller.wallet.value?.balance ?? 0),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 32,
+                    letterSpacing: 0.5,
+                  ),
+                );
+              }),
+              const SizedBox(height: 24),
+              const Text(
+                "Gunakan untuk belanja atau investasi.",
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
         ],
       ),
-      child: Column(
-        children: List.generate(
-          items.length,
-          (index) {
-            final item = items[index];
-            return Column(
-              children: [
-                item,
-                if (index < items.length - 1)
-                  const Divider(
-                    height: 1,
-                    indent: 72,
-                    endIndent: 16,
-                  ),
-              ],
-            );
-          },
-        ),
-      ),
     );
   }
 
-  /// Helper untuk judul section (Didesain Ulang)
+  /// 2. Helper Title
   Widget _buildSectionTitle(String title) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
-        padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
+        padding: const EdgeInsets.only(left: 4, bottom: 12),
         child: Text(
           title,
-          style: Get.textTheme.bodySmall?.copyWith(
+          style: const TextStyle(
+            fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: AppColors.textLight.withOpacity(0.8),
+            color: AppColors.textLight,
             letterSpacing: 0.5,
           ),
         ),
       ),
     );
   }
+
+  /// 3. Helper Menu Container (White Card)
+  Widget _buildMenuContainer(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: List.generate(children.length, (index) {
+          return Column(
+            children: [
+              children[index],
+              if (index != children.length - 1)
+                Padding(
+                  padding: const EdgeInsets.only(left: 72, right: 20),
+                  child: Divider(height: 1, color: AppColors.greyLight.withOpacity(0.5)),
+                ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
 }
 
-/// WIDGET REUSABLE: Satu baris menu (Didesain Ulang)
+/// Helper: Single Menu Item
 class _WalletMenuItem extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -214,18 +319,18 @@ class _WalletMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(24), // Match container radius
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.all(20),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(16),
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              child: FaIcon(icon, size: 24, color: color),
+              child: FaIcon(icon, size: 20, color: color),
             ),
             const SizedBox(width: 20),
             Expanded(
@@ -235,26 +340,25 @@ class _WalletMenuItem extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight),
-                    maxLines: 2,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textLight,
+                    ),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            const FaIcon(
-              FontAwesomeIcons.chevronRight,
-              size: 14,
-              color: AppColors.textLight,
-            ),
+            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.greyLight),
           ],
         ),
       ),

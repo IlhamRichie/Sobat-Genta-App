@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart'; // Untuk format tanggal
 import '../../../data/models/consultation_model.dart';
 import '../../../theme/app_colors.dart';
 import '../controllers/consultation_history_controller.dart';
@@ -14,164 +15,265 @@ class ConsultationHistoryView extends GetView<ConsultationHistoryController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (controller.consultationList.isEmpty) {
-          return _buildEmptyState();
-        }
-        
-        // Tampilkan List
-        return RefreshIndicator(
-          onRefresh: controller.fetchHistory,
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            itemCount: controller.consultationList.length,
-            itemBuilder: (context, index) {
-              final consultation = controller.consultationList[index];
-              return _buildConsultationCard(consultation);
-            },
+      body: Stack(
+        children: [
+          // 1. BACKGROUND DECORATION
+          Positioned(
+            top: -100,
+            left: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.05), // Nuansa biru chat
+                shape: BoxShape.circle,
+              ),
+            ),
           ),
-        );
-      }),
-    );
-  }
 
-  /// AppBar Kustom
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      title: Text(
-        "Riwayat Konsultasi",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
-        ),
+          // 2. MAIN CONTENT
+          SafeArea(
+            child: Column(
+              children: [
+                _buildCustomAppBar(),
+                
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (controller.consultationList.isEmpty) {
+                      return _buildEmptyState();
+                    }
+                    
+                    // Grouping atau Sorting bisa dilakukan di sini jika perlu
+                    // Saat ini kita tampilkan list flat saja
+                    return RefreshIndicator(
+                      onRefresh: controller.fetchHistory,
+                      color: AppColors.primary,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: controller.consultationList.length,
+                        separatorBuilder: (ctx, i) => const SizedBox(height: 16),
+                        itemBuilder: (context, index) {
+                          final consultation = controller.consultationList[index];
+                          return _buildConsultationCard(consultation);
+                        },
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      centerTitle: false,
-      automaticallyImplyLeading: false, // Pertahankan sebagai root tab
     );
   }
 
-  /// Empty State yang Didesain Ulang
+  /// Custom AppBar
+  Widget _buildCustomAppBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "Riwayat Chat",
+            style: Get.textTheme.headlineSmall?.copyWith(
+              color: AppColors.textDark,
+              fontWeight: FontWeight.w800,
+              fontSize: 24,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const FaIcon(FontAwesomeIcons.solidCommentDots, size: 20, color: AppColors.primary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Empty State Modern
   Widget _buildEmptyState() {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const FaIcon(FontAwesomeIcons.solidCommentDots, size: 96, color: AppColors.greyLight),
-            const SizedBox(height: 32),
-            Text(
-              "Belum Ada Riwayat Konsultasi",
-              style: Get.textTheme.titleLarge?.copyWith(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
-              ),
-              textAlign: TextAlign.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: AppColors.greyLight.withOpacity(0.5),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 12),
-            Text(
-              "Sesi konsultasi Anda yang sudah selesai akan muncul di sini.",
-              style: Get.textTheme.bodyMedium?.copyWith(
-                fontSize: 16,
-                color: AppColors.textLight,
-              ),
-              textAlign: TextAlign.center,
+            child: const FaIcon(FontAwesomeIcons.comments, size: 64, color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "Belum Ada Percakapan",
+            style: Get.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "Mulai konsultasi untuk melihat riwayat di sini.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textLight),
+          ),
+        ],
       ),
     );
   }
 
-  /// Kartu untuk satu sesi konsultasi (Didesain Ulang)
+  /// Modern Consultation Card
   Widget _buildConsultationCard(ConsultationModel consultation) {
-    final status = consultation.status;
+    bool isActive = consultation.status == ConsultationStatus.ACTIVE;
     
+    // Format Waktu (Dummy timestamp karena di model belum ada, gunakan now atau logic lain)
+    String timeString = DateFormat('HH:mm').format(DateTime.now()); 
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withOpacity(0.08),
             blurRadius: 15,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: InkWell(
-        onTap: () => controller.goToChatRoom(consultation),
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              const CircleAvatar(
-                backgroundColor: AppColors.greyLight,
-                child: FaIcon(FontAwesomeIcons.user, color: Colors.grey),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: InkWell(
+          onTap: () => controller.goToChatRoom(consultation),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                // Avatar dengan indikator status
+                Stack(
                   children: [
-                    Text(
-                      consultation.user.fullName, // Nama Petani
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: _getAvatarColor(consultation.user.fullName),
+                      child: Text(
+                        _getInitials(consultation.user.fullName),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Konsultasi Selesai", // Placeholder, seharusnya last_message
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
-                    ),
+                    if (isActive)
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-              _buildStatusChip(status),
-            ],
+                const SizedBox(width: 16),
+                
+                // Info Chat
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              consultation.user.fullName,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Text(
+                            timeString,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isActive ? Colors.green : AppColors.textLight,
+                              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (isActive) ...[
+                            const FaIcon(FontAwesomeIcons.pen, size: 10, color: AppColors.primary),
+                            const SizedBox(width: 4),
+                            const Text("Sedang berlangsung...", style: TextStyle(color: AppColors.primary, fontSize: 13)),
+                          ] else
+                            const Expanded(
+                              child: Text(
+                                "Sesi telah berakhir • Ketuk untuk lihat riwayat",
+                                style: TextStyle(color: AppColors.textLight, fontSize: 13),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-  
-  /// Chip Status (Didesain Ulang)
-  Widget _buildStatusChip(ConsultationStatus status) {
-    Color color;
-    String text;
-    
-    if (status == ConsultationStatus.ACTIVE) {
-      color = Colors.green;
-      text = "Aktif";
-    } else {
-      color = AppColors.textLight;
-      text = "Selesai";
+
+  // Helper untuk warna avatar random yang konsisten berdasarkan nama
+  Color _getAvatarColor(String name) {
+    final colors = [
+      Colors.blue, Colors.red, Colors.orange, Colors.purple, Colors.teal, 
+      Colors.pink, Colors.indigo, Colors.brown
+    ];
+    return colors[name.hashCode % colors.length].shade400;
+  }
+
+  // Helper Initials
+  String _getInitials(String name) {
+    List<String> names = name.split(" ");
+    String initials = "";
+    if (names.isNotEmpty) {
+      initials += names[0][0];
+      if (names.length > 1) initials += names[1][0];
     }
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
+    return initials.toUpperCase();
   }
 }

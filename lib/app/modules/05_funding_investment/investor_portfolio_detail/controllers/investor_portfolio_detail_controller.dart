@@ -20,7 +20,7 @@ class InvestorPortfolioDetailController extends GetxController {
 
   // Helper
   double get estimatedReturnAmount => 
-      investment.amountInvested * (investment.project.roiPercentage / 100);
+      investment.amountInvested * (investment.project.roiEstimate / 100);
 
   @override
   void onInit() {

@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../../../../data/models/bank_account_model.dart';
 import '../../../../theme/app_colors.dart';
 import '../controllers/expert_payout_controller.dart';
-import '../../../../routes/app_pages.dart';
 
 class ExpertPayoutView extends GetView<ExpertPayoutController> {
   ExpertPayoutView({Key? key}) : super(key: key);
@@ -18,307 +16,450 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
-      body: RefreshIndicator(
-        onRefresh: controller.fetchPayoutData,
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      body: Stack(
+        children: [
+          // 1. BACKGROUND DECORATION
+          Positioned(
+            top: -80,
+            right: -60,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.05), // Nuansa hijau uang
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 150,
+            left: -80,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // 2. MAIN CONTENT
+          SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildEarningsCard(),
-                const SizedBox(height: 24),
-                _buildBankAccountsSection(),
-                const SizedBox(height: 24),
-                _buildHistorySection(),
-                const SizedBox(height: 24),
+                _buildCustomAppBar(),
+                
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: controller.fetchPayoutData,
+                    color: AppColors.primary,
+                    child: Obx(() {
+                      if (controller.isLoading.value) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      
+                      return SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildEarningsCard(),
+                            const SizedBox(height: 24),
+                            
+                            _buildSectionTitle("Rekening Pencairan"),
+                            const SizedBox(height: 12),
+                            _buildBankAccountsSection(),
+                            
+                            const SizedBox(height: 24),
+                            _buildSectionTitle("Riwayat Transaksi"),
+                            const SizedBox(height: 12),
+                            _buildHistorySection(),
+                            
+                            const SizedBox(height: 40),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               ],
             ),
-          );
-        }),
+          ),
+        ],
       ),
     );
   }
 
-  /// AppBar Kustom
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      leading: BackButton(
-        color: AppColors.textDark,
-        onPressed: () => Get.back(),
+  /// Custom AppBar
+  Widget _buildCustomAppBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textDark),
+                  onPressed: () => Get.back(),
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Text(
+                "Keuangan",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ],
+          ),
+          // Ikon Bantuan atau Info
+          IconButton(
+            onPressed: () {}, 
+            icon: const FaIcon(FontAwesomeIcons.circleQuestion, color: AppColors.textLight),
+          ),
+        ],
       ),
-      title: Text(
-        "Penghasilan & Payout",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      centerTitle: false,
     );
   }
 
-  /// Kartu #1: Saldo Penghasilan (Didesain Ulang)
+  /// 1. Kartu Penghasilan (Premium Gradient)
   Widget _buildEarningsCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2E7D32), Color(0xFF43A047)], // Hijau tua ke hijau terang
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: Colors.green.withOpacity(0.4),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Obx(() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Text(
-            "Total Penghasilan (Dapat Ditarik)",
-            style: Get.textTheme.titleMedium?.copyWith(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 16,
+          // Pattern
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Icon(
+              FontAwesomeIcons.moneyBillWave,
+              size: 150,
+              color: Colors.white.withOpacity(0.1),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            rupiahFormatter.format(controller.wallet.value?.balance ?? 0),
-            style: Get.textTheme.headlineLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: controller.canWithdraw ? controller.goToWithdrawForm : null,
-            icon: const FaIcon(FontAwesomeIcons.moneyBillTransfer, size: 16),
-            label: const Text("Tarik Dana (Withdraw)"),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
-              disabledBackgroundColor: Colors.white.withOpacity(0.5),
-              disabledForegroundColor: AppColors.textLight.withOpacity(0.5),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              elevation: 4,
-            ),
-          ),
-          Obx(() => controller.accountList.isEmpty && !controller.isLoading.value
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(
-                    "* Anda harus menambah rekening bank terlebih dahulu.",
-                    style: Get.textTheme.bodySmall?.copyWith(color: Colors.white.withOpacity(0.8)),
+          
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        children: [
+                          FaIcon(FontAwesomeIcons.wallet, size: 12, color: Colors.white),
+                          SizedBox(width: 6),
+                          Text(
+                            "SALDO AKTIF",
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Obx(() => Text(
+                  rupiahFormatter.format(controller.wallet.value?.balance ?? 0),
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    height: 1.2,
                   ),
-                )
-              : const SizedBox.shrink()),
+                )),
+                const SizedBox(height: 4),
+                Text(
+                  "Total penghasilan siap tarik",
+                  style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+                ),
+                const SizedBox(height: 24),
+                
+                // Tombol Withdraw
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: controller.canWithdraw ? controller.goToWithdrawForm : null,
+                    icon: const FaIcon(FontAwesomeIcons.moneyBillTransfer, size: 16),
+                    label: const Text("Tarik Dana Sekarang"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF2E7D32),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
-      )),
+      ),
     );
   }
 
-  /// Bagian #2: Rekening Bank Terdaftar (Didesain Ulang)
+  /// 2. Rekening Bank (Card Style)
   Widget _buildBankAccountsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle("Rekening Bank Terdaftar"),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Obx(() {
-            if (controller.accountList.isEmpty) {
-              return _buildEmptyBankAccount();
-            }
-            final primaryAccount = controller.accountList.firstWhere(
-              (acc) => acc.isPrimary,
-              orElse: () => controller.accountList.first,
-            );
-            return _buildBankAccountCard(primaryAccount, true);
-          }),
-        ),
-      ],
-    );
-  }
-  
-  /// Kartu untuk satu rekening bank (Didesain Ulang)
-  Widget _buildBankAccountCard(BankAccountModel account, bool isPrimary) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            const CircleAvatar(
-              backgroundColor: AppColors.greyLight,
-              child: FaIcon(FontAwesomeIcons.buildingColumns, color: AppColors.textLight),
+    return Obx(() {
+      if (controller.accountList.isEmpty) {
+        return _buildEmptyBankAccount();
+      }
+      
+      // Ambil akun utama atau yang pertama
+      final account = controller.accountList.firstWhere(
+        (acc) => acc.isPrimary,
+        orElse: () => controller.accountList.first,
+      );
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.greyLight.withOpacity(0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(account.bankName.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(account.accountHolderName, style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight)),
-                  Text(account.accountNumber, style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight)),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 50, height: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: FaIcon(FontAwesomeIcons.buildingColumns, color: AppColors.primary, size: 24),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.bankName.toUpperCase(),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        account.accountNumber,
+                        style: const TextStyle(fontSize: 14, color: AppColors.textLight, fontFamily: 'monospace'),
+                      ),
+                      Text(
+                        account.accountHolderName,
+                        style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(height: 1, color: AppColors.greyLight),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: controller.goToManageAccounts,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text("Kelola Rekening", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14)),
+                  SizedBox(width: 4),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.primary),
                 ],
               ),
             ),
-            if (isPrimary)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  "Utama",
-                  style: Get.textTheme.bodySmall?.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
-                ),
-              ),
           ],
         ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: controller.goToManageAccounts,
-              child: const Text("Kelola Rekening", style: TextStyle(color: AppColors.primary)),
-            ),
-          ],
-        ),
-      ],
-    );
+      );
+    });
   }
 
-  /// Tampilan jika belum ada rekening bank (Didesain Ulang)
   Widget _buildEmptyBankAccount() {
-    return Column(
-      children: [
-        const FaIcon(FontAwesomeIcons.buildingColumns, color: AppColors.greyLight, size: 48),
-        const SizedBox(height: 16),
-        const Text("Belum ada rekening bank terdaftar.", style: TextStyle(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Text(
-          "Daftarkan rekening Anda untuk proses penarikan dana.",
-          style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        TextButton.icon(
-          onPressed: controller.goToManageAccounts,
-          icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
-          label: const Text("Tambah Rekening", style: TextStyle(fontWeight: FontWeight.bold)),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.greyLight, style: BorderStyle.solid),
+      ),
+      child: Column(
+        children: [
+          const FaIcon(FontAwesomeIcons.creditCard, size: 40, color: AppColors.greyLight),
+          const SizedBox(height: 16),
+          const Text(
+            "Belum Ada Rekening",
+            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
           ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          const Text(
+            "Tambahkan rekening untuk menerima pembayaran.",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: AppColors.textLight),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: controller.goToManageAccounts,
+            icon: const FaIcon(FontAwesomeIcons.plus, size: 14),
+            label: const Text("Tambah Rekening"),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: const BorderSide(color: AppColors.primary),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  /// Placeholder Riwayat Transaksi (Didesain Ulang)
+  /// 3. Riwayat Transaksi (Timeline Style)
   Widget _buildHistorySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle("Riwayat Payout"),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
+    // Mock Data (Ganti dengan controller.historyList jika sudah ada)
+    // Saat ini kita hardcode 1 item contoh seperti request sebelumnya
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5)),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildHistoryItem(
+            title: "Penarikan Dana",
+            date: "15 Sep 2025, 10:00",
+            amount: -1200000,
+            status: "Berhasil",
           ),
-          child: Column(
-            children: [
-              _buildHistoryItem(
-                title: "Penarikan Dana (Selesai)",
-                subtitle: "15 September 2025",
-                amount: 1200000,
-                isCredit: true,
-              ),
-            ],
+          const Divider(height: 1, indent: 70, endIndent: 20, color: AppColors.greyLight),
+          _buildHistoryItem(
+            title: "Konsultasi #TRX-998",
+            date: "14 Sep 2025, 14:30",
+            amount: 150000,
+            status: "Masuk",
           ),
-        ),
-      ],
+          // Tambahkan tombol "Lihat Semua" jika perlu
+        ],
+      ),
     );
   }
 
-  /// Helper untuk satu item riwayat
   Widget _buildHistoryItem({
     required String title,
-    required String subtitle,
+    required String date,
     required double amount,
-    required bool isCredit,
+    required String status,
   }) {
-    Color color = isCredit ? Colors.green.shade700 : Colors.red.shade700;
-    IconData icon = isCredit ? FontAwesomeIcons.arrowUp : FontAwesomeIcons.arrowDown;
-    String sign = isCredit ? "+" : "-";
-
+    bool isCredit = amount > 0;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: color.withOpacity(0.1),
-            child: FaIcon(icon, size: 16, color: color),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isCredit ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: FaIcon(
+              isCredit ? FontAwesomeIcons.arrowDown : FontAwesomeIcons.arrowUp, // Arrow logic: Down=Masuk, Up=Keluar
+              color: isCredit ? Colors.green : Colors.orange,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(subtitle, style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight)),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textDark)),
+                const SizedBox(height: 4),
+                Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
               ],
             ),
           ),
-          Text(
-            "$sign ${rupiahFormatter.format(amount)}",
-            style: TextStyle(fontWeight: FontWeight.bold, color: color),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "${isCredit ? '+' : ''} ${rupiahFormatter.format(amount)}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: isCredit ? Colors.green : Colors.orange,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                status,
+                style: TextStyle(fontSize: 11, color: isCredit ? Colors.green : AppColors.textLight, fontWeight: FontWeight.w500),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: Get.textTheme.titleLarge?.copyWith(
+      style: const TextStyle(
+        fontSize: 18,
         fontWeight: FontWeight.bold,
-        fontSize: 20,
         color: AppColors.textDark,
       ),
     );

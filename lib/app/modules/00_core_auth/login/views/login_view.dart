@@ -14,55 +14,118 @@ class LoginView extends GetView<LoginController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: BackButton(color: AppColors.textDark),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-        child: Form(
-          key: controller.formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 48),
-              _buildEmailField(),
-              const SizedBox(height: 16),
-              _buildPasswordField(),
-              const SizedBox(height: 12),
-              _buildForgotPasswordLink(),
-              const SizedBox(height: 32),
-              _buildLoginButton(),
-              const SizedBox(height: 24),
-              _buildRegisterLink(),
-            ],
+      body: Stack(
+        children: [
+          // 1. BACKGROUND ORNAMENTS (Aesthetic Blobs)
+          Positioned(
+            top: -60,
+            right: -60,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+            ),
           ),
-        ),
+          Positioned(
+            top: 150,
+            left: -80,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                color: AppColors.accent.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+
+          // 2. MAIN CONTENT
+          SafeArea(
+            child: Center( // Center content vertically for better focus
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
+                child: Form(
+                  key: controller.formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 48),
+                      
+                      // Label & Inputs
+                      _buildLabel("Email Address"),
+                      _buildEmailField(),
+                      const SizedBox(height: 20),
+                      
+                      _buildLabel("Password"),
+                      _buildPasswordField(),
+                      const SizedBox(height: 10),
+                      
+                      _buildForgotPasswordLink(),
+                      const SizedBox(height: 32),
+                      
+                      _buildLoginButton(),
+                      const SizedBox(height: 32),
+                      
+                      _buildRegisterLink(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// Header (Didesain Ulang)
+  /// Header Section with "Hello" Vibe
   Widget _buildHeader() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Logo atau Ikon Kunci/Gembok
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: const FaIcon(
+            FontAwesomeIcons.lockOpen, 
+            size: 32, 
+            color: AppColors.primary
+          ),
+        ),
+        const SizedBox(height: 24),
         Text(
-          "Selamat Datang Kembali",
+          "Selamat Datang Kembali! 👋",
           style: Get.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
             color: AppColors.textDark,
+            fontSize: 24,
+            letterSpacing: -0.5,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          "Login untuk melanjutkan ke akun Anda.",
-          style: Get.textTheme.bodyLarge?.copyWith(
+          "Silakan masuk untuk melanjutkan aktivitas Anda di Genta.",
+          style: Get.textTheme.bodyMedium?.copyWith(
             color: AppColors.textLight,
-            fontSize: 16,
+            fontSize: 15,
+            height: 1.5,
           ),
           textAlign: TextAlign.center,
         ),
@@ -70,135 +133,191 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
-  /// Field Email (Didesain Ulang)
+  /// Label Text Helper
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: AppColors.textDark,
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+
+  /// Field Email (Filled Style)
   Widget _buildEmailField() {
     return TextFormField(
       controller: controller.emailC,
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
-      decoration: _inputDecoration(
-        'Email',
-        'contoh: budi@petani.com',
-        FontAwesomeIcons.solidEnvelope,
+      style: const TextStyle(color: AppColors.textDark),
+      decoration: _modernInputDecoration(
+        'Masukkan email Anda',
+        FontAwesomeIcons.envelope,
       ),
       validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Email tidak boleh kosong';
-        }
-        if (!GetUtils.isEmail(value)) {
-          return 'Format email tidak valid';
-        }
+        if (value == null || value.isEmpty) return 'Email wajib diisi';
+        if (!GetUtils.isEmail(value)) return 'Format email tidak valid';
         return null;
       },
     );
   }
 
-  /// Field Password (Didesain Ulang)
+  /// Field Password (Filled Style)
   Widget _buildPasswordField() {
     return Obx(() => TextFormField(
       controller: controller.passwordC,
-      autocorrect: false,
       obscureText: controller.isPasswordHidden.value,
-      decoration: _inputDecoration(
-        'Password',
-        'Minimal 6 karakter',
+      autocorrect: false,
+      style: const TextStyle(color: AppColors.textDark),
+      decoration: _modernInputDecoration(
+        'Masukkan password',
         FontAwesomeIcons.lock,
         suffixIcon: IconButton(
           icon: FaIcon(
             controller.isPasswordHidden.value
                 ? FontAwesomeIcons.eyeSlash
                 : FontAwesomeIcons.eye,
-            size: 20,
+            size: 18,
             color: AppColors.textLight,
           ),
           onPressed: controller.togglePasswordVisibility,
         ),
       ),
       validator: (value) {
-        if (value == null || value.length < 6) {
-          return 'Password minimal 6 karakter';
-        }
+        if (value == null || value.isEmpty) return 'Password wajib diisi';
         return null;
       },
     ));
   }
 
-  /// Tautan Lupa Password (Didesain Ulang)
+  /// Forgot Password Link
   Widget _buildForgotPasswordLink() {
     return Align(
       alignment: Alignment.centerRight,
       child: TextButton(
-        onPressed: () {
-          Get.toNamed(Routes.FORGOT_PASSWORD);
-        },
+        onPressed: () => Get.toNamed(Routes.FORGOT_PASSWORD),
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         child: const Text(
           'Lupa Password?',
-          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: AppColors.primary, 
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
         ),
       ),
     );
   }
 
-  /// Tombol Login (Didesain Ulang)
+  /// Tombol Login Utama
   Widget _buildLoginButton() {
-    return Obx(() => FilledButton(
-      onPressed: controller.isLoading.value ? null : controller.login,
-      style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 4,
+    return Obx(() => Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
-      child: controller.isLoading.value
-          ? const SizedBox(
-              height: 24,
-              width: 24,
-              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-            )
-          : const Text(
-              'Login',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+      child: FilledButton(
+        onPressed: controller.isLoading.value ? null : controller.login,
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 0,
+        ),
+        child: controller.isLoading.value
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+              )
+            : const Text(
+                'Masuk',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+      ),
     ));
   }
 
-  /// Tautan Daftar (Didesain Ulang)
+  /// Footer Register
   Widget _buildRegisterLink() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Belum punya akun?', style: Get.textTheme.bodyMedium),
-        TextButton(
-          onPressed: () {
-            Get.toNamed(Routes.REGISTER_ROLE_CHOOSER);
-          },
-          child: const Text(
-            'Daftar di sini',
-            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+        const Text(
+          'Belum punya akun?',
+          style: TextStyle(color: AppColors.textLight),
+        ),
+        GestureDetector(
+          onTap: () => Get.toNamed(Routes.REGISTER_ROLE_CHOOSER),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+            child: Text(
+              'Daftar Sekarang',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  /// Custom InputDecoration untuk konsistensi (Baru)
-  InputDecoration _inputDecoration(
-    String labelText,
+  /// Modern Input Decoration (Reused Style)
+  InputDecoration _modernInputDecoration(
     String hintText,
     IconData prefixIcon, {
     Widget? suffixIcon,
   }) {
     return InputDecoration(
-      labelText: labelText,
-      labelStyle: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
       hintText: hintText,
-      hintStyle: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
-      prefixIcon: FaIcon(prefixIcon, size: 20, color: AppColors.textLight),
+      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+      filled: true,
+      fillColor: AppColors.greyLight, // Warna latar abu muda
+      
+      prefixIcon: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        child: Icon(prefixIcon, size: 18, color: AppColors.textLight),
+      ),
+      prefixIconConstraints: const BoxConstraints(minWidth: 50),
       suffixIcon: suffixIcon,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.greyLight)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.primary, width: 2)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.greyLight)),
+      
+      // Border States
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.transparent),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+      ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
     );
   }
 }
