@@ -130,7 +130,7 @@ class FarmerAssetDetailView extends GetView<FarmerAssetDetailController> {
             asset.assetType.capitalizeFirst!,
           ),
           _buildInfoRow(FontAwesomeIcons.rulerCombined, "Luas Aset", asset.areaSize),
-          // Tambahkan row dinamis
+          
           if (asset.assetType == 'PETERNAKAN')
             _buildInfoRow(FontAwesomeIcons.hippo, "Jenis Ternak", asset.assetDetails!),
           if (asset.assetType == 'PERTANIAN')
