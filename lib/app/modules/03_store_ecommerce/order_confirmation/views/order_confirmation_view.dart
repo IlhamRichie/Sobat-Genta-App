@@ -1,6 +1,5 @@
-// lib/app/modules/order_confirmation/views/order_confirmation_view.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import '../../../../theme/app_colors.dart';
@@ -11,32 +10,56 @@ class OrderConfirmationView extends GetView<OrderConfirmationController> {
 
   @override
   Widget build(BuildContext context) {
-    // ARSITEKTUR: Kita bungkus dengan WillPopScope untuk mencegat
-    // tombol 'back' fisik Android. Pengguna tidak boleh kembali dari sini,
-    // mereka harus memilih aksi (ke Home atau ke Riwayat).
+    // Bikin status bar jadi terang biar bersih
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+
+    // Cegah tombol back fisik
     return WillPopScope(
       onWillPop: () async {
-        controller.goToHome(); // Jika ditekan back, paksa ke Home
-        return false; // Jangan biarkan pop default terjadi
+        controller.goToHome();
+        return false;
       },
       child: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildSuccessIcon(),
-                  const SizedBox(height: 24),
-                  _buildSuccessText(),
-                  const SizedBox(height: 32),
-                  _buildOrderSummary(),
-                  const SizedBox(height: 48),
-                  _buildActionButtons(),
-                ],
-              ),
+        backgroundColor: Colors.white,
+        body: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 60),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 40), // Spacer atas
+                _buildSuccessAnimation(),
+                const SizedBox(height: 32),
+                
+                Text(
+                  "Pembayaran Berhasil!",
+                  style: Get.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Terima kasih, Sobat Genta!\nPesanan Anda telah kami terima dan akan segera diproses oleh penjual.",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey.shade500,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 40),
+                _buildOrderReceiptCard(),
+                
+                const SizedBox(height: 50),
+                _buildActionButtons(),
+              ],
             ),
           ),
         ),
@@ -44,96 +67,142 @@ class OrderConfirmationView extends GetView<OrderConfirmationController> {
     );
   }
 
-  /// Icon Sukses
-  Widget _buildSuccessIcon() {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.green.shade700,
-        shape: BoxShape.circle,
-      ),
-      child: const Center(
-        child: FaIcon(FontAwesomeIcons.check, size: 50, color: Colors.white),
-      ),
-    );
-  }
-
-  /// Teks Sukses
-  Widget _buildSuccessText() {
-    return Column(
+  /// Icon Sukses dengan Efek Ring (Lebih Mewah)
+  Widget _buildSuccessAnimation() {
+    return Stack(
+      alignment: Alignment.center,
       children: [
-        Text(
-          "Pembayaran Berhasil!",
-          style: Get.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
+        // Ring Luar (Transparan Pudar)
+        Container(
+          width: 140,
+          height: 140,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          "Pesanan Anda sedang diproses. Terima kasih telah berbelanja.",
-          style: Get.textTheme.bodyLarge?.copyWith(color: AppColors.textLight),
-          textAlign: TextAlign.center,
+        // Ring Tengah (Transparan)
+        Container(
+          width: 110,
+          height: 110,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.2),
+            shape: BoxShape.circle,
+          ),
+        ),
+        // Lingkaran Utama Solid
+        Container(
+          width: 80,
+          height: 80,
+          decoration: const BoxDecoration(
+            color: AppColors.primary,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 20,
+                offset: Offset(0, 10),
+              )
+            ],
+          ),
+          child: const Center(
+            child: FaIcon(FontAwesomeIcons.check, size: 40, color: Colors.white),
+          ),
         ),
       ],
     );
   }
 
-  /// Ringkasan Order
-  Widget _buildOrderSummary() {
+  /// Card Informasi Order (Style Struk Belanja)
+  Widget _buildOrderReceiptCard() {
     final order = controller.confirmedOrder;
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFF9F9F9), // Abu sangat muda
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         children: [
-          _buildSummaryRow("Order ID", order.orderId),
-          _buildSummaryRow("Total Pembayaran", controller.rupiahFormatter.format(order.grandTotal)),
-          _buildSummaryRow("Status", order.status, isStatus: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryRow(String label, String value, {bool isStatus = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(color: AppColors.textLight)),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold, 
-              color: isStatus ? Colors.green.shade700 : AppColors.textDark
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Kode Pesanan", style: TextStyle(color: Colors.grey)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  "#${order.orderId.substring(0, 8).toUpperCase()}", // Potong ID biar pendek
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 16),
+          Divider(height: 1), // Garis putus-putus (Simulasi struk)
+          const SizedBox(height: 16),
+          _buildSummaryRow("Status", order.status, isStatus: true),
+          const SizedBox(height: 12),
+          _buildSummaryRow("Total Bayar", controller.rupiahFormatter.format(order.grandTotal), isBold: true),
         ],
       ),
     );
   }
 
-  /// Tombol Aksi (CTA)
+  Widget _buildSummaryRow(String label, String value, {bool isStatus = false, bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: (isBold || isStatus) ? FontWeight.bold : FontWeight.normal,
+            fontSize: isBold ? 18 : 14,
+            color: isStatus 
+                ? Colors.green.shade700 
+                : (isBold ? AppColors.primary : Colors.black87),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Tombol CTA
   Widget _buildActionButtons() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // 1. Tombol Lacak Pesanan
-        FilledButton(
-          onPressed: controller.goToOrderHistory,
-          child: const Text("Lacak Pesanan Saya"),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton(
+            onPressed: controller.goToOrderHistory,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0, // Flat design modern
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: const Text("Lacak Pesanan Saya", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          ),
         ),
-        const SizedBox(height: 12),
-        // 2. Tombol Kembali ke Beranda
-        OutlinedButton(
-          onPressed: controller.goToHome,
-          child: const Text("Kembali ke Beranda"),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            side: const BorderSide(color: AppColors.primary),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: OutlinedButton(
+            onPressed: controller.goToHome,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.grey.shade600,
+              side: BorderSide(color: Colors.grey.shade300),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: const Text("Kembali ke Beranda", style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ),
       ],

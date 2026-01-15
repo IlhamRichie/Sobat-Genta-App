@@ -1,6 +1,5 @@
-// lib/app/modules/register_role_chooser/views/register_role_chooser_view.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import '../../../../theme/app_colors.dart';
@@ -11,178 +10,178 @@ class RegisterRoleChooserView extends GetView<RegisterRoleChooserController> {
 
   @override
   Widget build(BuildContext context) {
+    // Set status bar icons to dark
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+
     return Scaffold(
-      backgroundColor: AppColors.background, // Pastikan background putih bersih
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       body: SafeArea(
         child: Column(
           children: [
-            // Bagian Scrollable (Header + Cards)
+            // Bagian Utama (Scrollable)
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header Text
+                    const SizedBox(height: 10),
                     Text(
                       "Pilih Peran Anda",
-                      style: Get.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800, // Lebih tebal dikit biar tegas
-                        fontSize: 26,
-                        color: AppColors.textDark,
-                        letterSpacing: -0.5,
+                      style: Get.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF2D3436),
+                        fontSize: 28,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
-                      "Silakan pilih peran yang sesuai untuk menikmati fitur dan manfaat ekosistem Genta.",
-                      style: Get.textTheme.bodyMedium?.copyWith(
-                        fontSize: 15,
-                        height: 1.5, // Jarak antar baris lebih lega
-                        color: AppColors.textLight,
+                      "Tentukan bagaimana Anda ingin berkontribusi dalam ekosistem Genta.",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade500,
+                        height: 1.5,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
 
-                    // --- Card 1: Petani ---
+                    // --- Pilihan Peran ---
+                    
+                    // 1. Petani (Primary Green)
                     _buildRoleCard(
-                      icon: FontAwesomeIcons.seedling, // Ikon lebih spesifik
-                      role: "Saya Petani",
-                      description: "Ajukan modal, kelola lahan, dan akses pasar digital.",
-                      themeColor: AppColors.primary,
+                      title: "Saya Petani",
+                      desc: "Ajukan pendanaan, kelola lahan, dan jual hasil panen.",
+                      icon: FontAwesomeIcons.seedling,
+                      color: AppColors.primary,
                       onTap: controller.navigateToFarmerRegistration,
                     ),
                     const SizedBox(height: 16),
 
-                    // --- Card 2: Investor ---
+                    // 2. Investor (Gold/Amber)
                     _buildRoleCard(
-                      icon: FontAwesomeIcons.arrowTrendUp, // Ikon grafik naik
-                      role: "Saya Investor",
-                      description: "Investasi pada proyek riil & pantau ROI secara transparan.",
-                      themeColor: AppColors.accent, // Warna Emas/Kuning
+                      title: "Saya Investor",
+                      desc: "Investasi pada proyek riil & pantau ROI secara transparan.",
+                      icon: FontAwesomeIcons.chartLine,
+                      color: const Color(0xFFF39C12), // Amber/Gold
                       onTap: controller.navigateToInvestorRegistration,
                     ),
                     const SizedBox(height: 16),
 
-                    // --- Card 3: Pakar ---
+                    // 3. Pakar (Blue)
                     _buildRoleCard(
+                      title: "Saya Pakar",
+                      desc: "Buka jasa konsultasi & bagikan keahlian pertanian.",
                       icon: FontAwesomeIcons.userDoctor,
-                      role: "Saya Pakar",
-                      description: "Buka konsultasi berbayar & bagikan keahlian Anda.",
-                      themeColor: Colors.blue.shade600,
+                      color: const Color(0xFF3498DB), // Blue
                       onTap: controller.navigateToExpertRegistration,
                     ),
+                    
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
             ),
 
             // Footer (Login Redirect)
-            _buildLoginRedirect(),
+            _buildLoginFooter(),
           ],
         ),
       ),
     );
   }
 
-  /// AppBar Minimalis
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       elevation: 0,
-      centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-        color: AppColors.textDark,
+        icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black),
         onPressed: () => Get.back(),
       ),
     );
   }
 
-  /// Modern Card Design
+  /// Kartu Peran dengan Desain Modern
   Widget _buildRoleCard({
+    required String title,
+    required String desc,
     required IconData icon,
-    required String role,
-    required String description,
-    required Color themeColor,
+    required Color color,
     required VoidCallback onTap,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        splashColor: themeColor.withOpacity(0.1),
-        highlightColor: themeColor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        splashColor: color.withOpacity(0.1),
+        highlightColor: color.withOpacity(0.05),
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.greyLight, width: 1), // Border tipis rapi
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade200, width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFE0E0E0).withOpacity(0.5),
-                blurRadius: 20,
-                offset: const Offset(0, 10), // Shadow lembut ke bawah
+                color: const Color(0xFFE0E0E0).withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Icon Container (Badge Style)
+              // Icon Badge
               Container(
-                width: 56,
-                height: 56,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  color: themeColor.withOpacity(0.1), // Background transparan warna role
-                  borderRadius: BorderRadius.circular(16),
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Center(
-                  child: FaIcon(icon, color: themeColor, size: 26),
+                  child: FaIcon(icon, color: color, size: 22),
                 ),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 16),
               
               // Text Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 4), // Visual alignment dengan ikon
                     Text(
-                      role,
+                      title,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 17,
-                        color: AppColors.textDark,
+                        color: Color(0xFF2D3436),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      description,
-                      style: const TextStyle(
+                      desc,
+                      style: TextStyle(
                         fontSize: 13,
+                        color: Colors.grey.shade600,
                         height: 1.4,
-                        color: AppColors.textLight,
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // Arrow Icon (Center Vertically)
+              
+              // Chevron Icon (Center Vertically)
               Padding(
-                padding: const EdgeInsets.only(top: 16.0), // Agak turun biar center visual
+                padding: const EdgeInsets.only(top: 12),
                 child: Icon(
-                  Icons.arrow_forward_rounded,
-                  color: AppColors.textLight.withOpacity(0.5),
-                  size: 20,
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: Colors.grey.shade300,
                 ),
               ),
             ],
@@ -192,38 +191,25 @@ class RegisterRoleChooserView extends GetView<RegisterRoleChooserController> {
     );
   }
 
-  /// Footer yang menyatu tapi distinct
-  Widget _buildLoginRedirect() {
+  /// Footer Login
+  Widget _buildLoginFooter() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: AppColors.greyLight, width: 1),
-        ),
+        border: Border(top: BorderSide(color: Colors.grey.shade100)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            'Sudah punya akun Sobat Genta?',
-            style: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 14,
-            ),
-          ),
+          Text("Sudah punya akun? ", style: TextStyle(color: Colors.grey.shade600)),
           GestureDetector(
             onTap: controller.navigateToLogin,
-            child: const Padding(
-              padding: EdgeInsets.only(left: 6.0),
-              child: Text(
-                'Masuk',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+            child: const Text(
+              "Masuk",
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

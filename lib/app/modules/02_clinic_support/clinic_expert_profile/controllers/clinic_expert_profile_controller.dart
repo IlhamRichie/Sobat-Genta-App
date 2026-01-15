@@ -1,5 +1,3 @@
-// lib/app/modules/clinic_expert_profile/controllers/clinic_expert_profile_controller.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
@@ -23,52 +21,57 @@ class ClinicExpertProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Ambil data pakar lengkap dari halaman list
     pakar = Get.arguments as PakarProfileModel;
   }
 
-  /// Aksi utama: Memulai Konsultasi (Bayar & Masuk Ruangan)
-  /// (Langkah I5 & I6 Skenario 3)
   Future<void> startConsultation() async {
-    if (!pakar.isAvailable) return; // Pengaman ganda
+    if (!pakar.isAvailable) return;
 
     isProcessingPayment.value = true;
     
     try {
-      // 1. Panggil repo transaksi
-      // Repo ini akan (secara palsu) cek dompet, mendebit, dan membuat sesi
+      // 1. Proses Transaksi
       final newConsultation = await _consultationRepo.createConsultationSession(
         pakar.pakarId,
         pakar.consultationFee,
       );
 
-      showTopSnackBar(
-        Overlay.of(Get.context!),
-        CustomSnackBar.success(
-          message: "Pembayaran berhasil! Menghubungkan ke ${pakar.user.fullName}...",
-          backgroundColor: Colors.green.shade700,
-        ),
-      );
+      // --- PERBAIKAN DI SINI (SUKSES) ---
+      // Gunakan Get.overlayContext! agar Overlay ditemukan
+      if (Get.overlayContext != null) {
+        showTopSnackBar(
+          Overlay.of(Get.overlayContext!), 
+          CustomSnackBar.success(
+            message: "Pembayaran berhasil! Menghubungkan ke ${pakar.user.fullName}...",
+            backgroundColor: Colors.green.shade700,
+          ),
+        );
+      }
       
-      // 2. NAVIGASI KE RUANG CHAT (Flow C)
-      // Kita gunakan offNamed agar user tidak bisa 'back' ke profil
+      // 2. Navigasi ke Ruang Chat
       Get.offNamed(
         Routes.CONSULTATION_CHAT_ROOM,
-        arguments: newConsultation, // Kirim data sesi yang baru dibuat
+        arguments: newConsultation,
       );
       
     } catch (e) {
       String errorMessage = e.toString().replaceAll("Exception: ", "");
       
-      showTopSnackBar(
-        Overlay.of(Get.context!),
-        CustomSnackBar.error(message: errorMessage),
-      );
+      // --- PERBAIKAN DI SINI (ERROR) ---
+      // Ini juga harus diganti biar kalau error gak bikin crash aplikasi
+      if (Get.overlayContext != null) {
+        showTopSnackBar(
+          Overlay.of(Get.overlayContext!),
+          CustomSnackBar.error(message: errorMessage),
+        );
+      } else {
+        // Fallback kalau overlay tetap gak ketemu (jarang terjadi)
+        Get.snackbar("Error", errorMessage, backgroundColor: Colors.red, colorText: Colors.white);
+      }
       
-      // ARSITEKTUR PENTING: Jika error-nya karena saldo, arahkan ke Top Up
       if (errorMessage.contains("Saldo Dompet tidak cukup")) {
         await Future.delayed(const Duration(seconds: 1));
-        Get.toNamed(Routes.WALLET_TOP_UP); // Navigasi ke top up
+        Get.toNamed(Routes.WALLET_TOP_UP);
       }
       
     } finally {

@@ -1,6 +1,5 @@
-// lib/app/modules/login/views/login_view.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import '../../../../routes/app_pages.dart';
@@ -12,69 +11,72 @@ class LoginView extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
+    // Bikin status bar menyatu dengan background
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // 1. BACKGROUND ORNAMENTS (Aesthetic Blobs)
+          // 1. BACKGROUND ORNAMENTS (Lebih Soft & Artistik)
           Positioned(
-            top: -60,
-            right: -60,
+            top: -100,
+            right: -100,
             child: Container(
-              width: 250,
-              height: 250,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: AppColors.primary.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
             ),
           ),
           Positioned(
-            top: 150,
+            top: 100,
             left: -80,
             child: Container(
-              width: 180,
-              height: 180,
+              width: 200,
+              height: 200,
               decoration: BoxDecoration(
-                color: AppColors.accent.withOpacity(0.08),
+                color: Colors.blueAccent.withOpacity(0.05), // Sedikit variasi warna
                 shape: BoxShape.circle,
               ),
             ),
           ),
 
           // 2. MAIN CONTENT
-          SafeArea(
-            child: Center( // Center content vertically for better focus
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
-                child: Form(
-                  key: controller.formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildHeader(),
-                      const SizedBox(height: 48),
-                      
-                      // Label & Inputs
-                      _buildLabel("Email Address"),
-                      _buildEmailField(),
-                      const SizedBox(height: 20),
-                      
-                      _buildLabel("Password"),
-                      _buildPasswordField(),
-                      const SizedBox(height: 10),
-                      
-                      _buildForgotPasswordLink(),
-                      const SizedBox(height: 32),
-                      
-                      _buildLoginButton(),
-                      const SizedBox(height: 32),
-                      
-                      _buildRegisterLink(),
-                    ],
-                  ),
+          Center(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Form(
+                key: controller.formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildBrandLogo(),
+                    const SizedBox(height: 40),
+                    _buildWelcomeText(),
+                    const SizedBox(height: 40),
+                    
+                    // Inputs
+                    _buildInputLabel("Email Address"),
+                    _buildEmailField(),
+                    const SizedBox(height: 20),
+                    
+                    _buildInputLabel("Password"),
+                    _buildPasswordField(),
+                    const SizedBox(height: 12),
+                    
+                    _buildForgotPasswordLink(),
+                    const SizedBox(height: 32),
+                    
+                    _buildLoginButton(),
+                    const SizedBox(height: 40),
+                    
+                    _buildRegisterLink(),
+                  ],
                 ),
               ),
             ),
@@ -84,47 +86,61 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
-  /// Header Section with "Hello" Vibe
-  Widget _buildHeader() {
+  /// Logo Brand Besar di Tengah
+  Widget _buildBrandLogo() {
     return Column(
       children: [
-        // Logo atau Ikon Kunci/Gembok
         Container(
-          padding: const EdgeInsets.all(16),
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: AppColors.primary.withOpacity(0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
             ],
           ),
-          child: const FaIcon(
-            FontAwesomeIcons.lockOpen, 
-            size: 32, 
-            color: AppColors.primary
+          child: const Center(
+            child: FaIcon(FontAwesomeIcons.leaf, size: 40, color: Colors.white),
           ),
         ),
-        const SizedBox(height: 24),
-        Text(
-          "Selamat Datang Kembali! 👋",
-          style: Get.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: AppColors.textDark,
+        const SizedBox(height: 16),
+        const Text(
+          "GENTA",
+          style: TextStyle(
             fontSize: 24,
-            letterSpacing: -0.5,
+            fontWeight: FontWeight.w900,
+            color: AppColors.primary,
+            letterSpacing: 2,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Teks Sapaan
+  Widget _buildWelcomeText() {
+    return Column(
+      children: [
+        const Text(
+          "Selamat Datang Kembali!",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2D3436),
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         Text(
-          "Silakan masuk untuk melanjutkan aktivitas Anda di Genta.",
-          style: Get.textTheme.bodyMedium?.copyWith(
-            color: AppColors.textLight,
-            fontSize: 15,
+          "Masuk untuk mengelola pertanian dan\ninvestasi Anda dengan mudah.",
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade500,
             height: 1.5,
           ),
           textAlign: TextAlign.center,
@@ -133,147 +149,121 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
-  /// Label Text Helper
-  Widget _buildLabel(String text) {
+  Widget _buildInputLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
-        text,
+        label,
         style: const TextStyle(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.w600,
           fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF2D3436),
         ),
       ),
     );
   }
 
-  /// Field Email (Filled Style)
+  /// Field Email dengan Style Modern
   Widget _buildEmailField() {
     return TextFormField(
       controller: controller.emailC,
       keyboardType: TextInputType.emailAddress,
-      autocorrect: false,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontWeight: FontWeight.w600),
       decoration: _modernInputDecoration(
-        'Masukkan email Anda',
-        FontAwesomeIcons.envelope,
+        hintText: "nama@email.com",
+        icon: FontAwesomeIcons.envelope,
       ),
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Email wajib diisi';
-        if (!GetUtils.isEmail(value)) return 'Format email tidak valid';
+        if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
+        if (!GetUtils.isEmail(value)) return 'Format email salah';
         return null;
       },
     );
   }
 
-  /// Field Password (Filled Style)
+  /// Field Password dengan Toggle Visibility
   Widget _buildPasswordField() {
     return Obx(() => TextFormField(
       controller: controller.passwordC,
       obscureText: controller.isPasswordHidden.value,
-      autocorrect: false,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontWeight: FontWeight.w600),
       decoration: _modernInputDecoration(
-        'Masukkan password',
-        FontAwesomeIcons.lock,
+        hintText: "••••••••",
+        icon: FontAwesomeIcons.lock,
         suffixIcon: IconButton(
-          icon: FaIcon(
-            controller.isPasswordHidden.value
-                ? FontAwesomeIcons.eyeSlash
-                : FontAwesomeIcons.eye,
-            size: 18,
-            color: AppColors.textLight,
+          icon: Icon(
+            controller.isPasswordHidden.value ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey.shade400,
+            size: 20,
           ),
           onPressed: controller.togglePasswordVisibility,
         ),
       ),
       validator: (value) {
-        if (value == null || value.isEmpty) return 'Password wajib diisi';
+        if (value == null || value.isEmpty) return 'Password tidak boleh kosong';
         return null;
       },
     ));
   }
 
-  /// Forgot Password Link
   Widget _buildForgotPasswordLink() {
     return Align(
       alignment: Alignment.centerRight,
-      child: TextButton(
-        onPressed: () => Get.toNamed(Routes.FORGOT_PASSWORD),
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
+      child: GestureDetector(
+        onTap: () => Get.toNamed(Routes.FORGOT_PASSWORD),
         child: const Text(
-          'Lupa Password?',
+          "Lupa Password?",
           style: TextStyle(
-            color: AppColors.primary, 
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
           ),
         ),
       ),
     );
   }
 
-  /// Tombol Login Utama
+  /// Tombol Login Besar
   Widget _buildLoginButton() {
-    return Obx(() => Container(
+    return Obx(() => SizedBox(
       width: double.infinity,
       height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: FilledButton(
+      child: ElevatedButton(
         onPressed: controller.isLoading.value ? null : controller.login,
-        style: FilledButton.styleFrom(
+        style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
+          elevation: 10,
+          shadowColor: AppColors.primary.withOpacity(0.4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 0,
         ),
         child: controller.isLoading.value
             ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                height: 24, 
+                width: 24, 
+                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)
               )
             : const Text(
-                'Masuk',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                "Masuk Sekarang",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
       ),
     ));
   }
 
-  /// Footer Register
+  /// Footer Daftar
   Widget _buildRegisterLink() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
-          'Belum punya akun?',
-          style: TextStyle(color: AppColors.textLight),
-        ),
+        Text("Belum punya akun? ", style: TextStyle(color: Colors.grey.shade600)),
         GestureDetector(
           onTap: () => Get.toNamed(Routes.REGISTER_ROLE_CHOOSER),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
-            child: Text(
-              'Daftar Sekarang',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w800,
-              ),
+          child: const Text(
+            "Daftar",
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
@@ -281,43 +271,39 @@ class LoginView extends GetView<LoginController> {
     );
   }
 
-  /// Modern Input Decoration (Reused Style)
-  InputDecoration _modernInputDecoration(
-    String hintText,
-    IconData prefixIcon, {
+  /// Dekorasi Input yang Clean
+  InputDecoration _modernInputDecoration({
+    required String hintText,
+    required IconData icon,
     Widget? suffixIcon,
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+      hintStyle: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.normal),
       filled: true,
-      fillColor: AppColors.greyLight, // Warna latar abu muda
-      
+      fillColor: const Color(0xFFF9F9F9), // Abu sangat muda
       prefixIcon: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Icon(prefixIcon, size: 18, color: AppColors.textLight),
+        padding: const EdgeInsets.all(14),
+        child: FaIcon(icon, size: 18, color: Colors.grey.shade400),
       ),
-      prefixIconConstraints: const BoxConstraints(minWidth: 50),
       suffixIcon: suffixIcon,
-      
-      // Border States
+      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.transparent),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
       ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
     );
   }
 }

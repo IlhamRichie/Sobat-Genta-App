@@ -1,5 +1,3 @@
-// lib/app/modules/00_core_auth/auth_base/base_register_form.dart
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -20,7 +18,6 @@ class BaseRegisterForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Menggunakan SingleChildScrollView agar aman saat keyboard muncul
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
@@ -29,13 +26,13 @@ class BaseRegisterForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header Text (Opsional, jika ingin text spesifik di dalam form)
+            // Header Text (Optional)
             if (headerText.isNotEmpty) ...[
               Text(
                 headerText,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
-                  color: AppColors.textLight,
+                  color: Colors.grey.shade600,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -43,47 +40,51 @@ class BaseRegisterForm extends StatelessWidget {
               const SizedBox(height: 32),
             ],
             
-            _buildLabel("Nama Lengkap"),
-            _buildNameField(),
+            // --- FORM FIELDS ---
+            _buildInputGroup("Nama Lengkap", _buildNameField()),
             const SizedBox(height: 20),
             
-            _buildLabel("Email Address"),
-            _buildEmailField(),
+            _buildInputGroup("Email Address", _buildEmailField()),
             const SizedBox(height: 20),
             
-            _buildLabel("Nomor WhatsApp"),
-            _buildPhoneField(),
+            _buildInputGroup("Nomor WhatsApp", _buildPhoneField()),
             const SizedBox(height: 20),
             
-            _buildLabel("Password"),
-            _buildPasswordField(),
+            _buildInputGroup("Password", _buildPasswordField()),
             const SizedBox(height: 20),
             
-            _buildLabel("Konfirmasi Password"),
-            _buildConfirmPasswordField(),
+            _buildInputGroup("Konfirmasi Password", _buildConfirmPasswordField()),
             const SizedBox(height: 40),
             
+            // --- ACTION BUTTON ---
             _buildRegisterButton(),
-            const SizedBox(height: 30), // Bottom padding extra
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
-  // --- HELPER WIDGETS ---
-  
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
+  // --- HELPER BUILDERS ---
+
+  /// Membungkus Label + Input Field agar rapi
+  Widget _buildInputGroup(String label, Widget field) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: Color(0xFF2D3436), // Warna teks label dark grey
+            ),
+          ),
         ),
-      ),
+        field,
+      ],
     );
   }
 
@@ -91,7 +92,7 @@ class BaseRegisterForm extends StatelessWidget {
     return TextFormField(
       controller: controller.nameC,
       keyboardType: TextInputType.name,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF2D3436)),
       decoration: _modernInputDecoration(nameHint, FontAwesomeIcons.user),
       validator: (value) => (value == null || value.isEmpty) ? 'Nama wajib diisi' : null,
     );
@@ -101,7 +102,7 @@ class BaseRegisterForm extends StatelessWidget {
     return TextFormField(
       controller: controller.emailC,
       keyboardType: TextInputType.emailAddress,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF2D3436)),
       decoration: _modernInputDecoration(emailHint, FontAwesomeIcons.envelope),
       validator: (value) => (value == null || !GetUtils.isEmail(value)) ? 'Email tidak valid' : null,
     );
@@ -111,7 +112,7 @@ class BaseRegisterForm extends StatelessWidget {
     return TextFormField(
       controller: controller.phoneC,
       keyboardType: TextInputType.phone,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF2D3436)),
       decoration: _modernInputDecoration('0812xxxx', FontAwesomeIcons.whatsapp),
       validator: (value) => (value == null || !GetUtils.isPhoneNumber(value)) ? 'Nomor tidak valid' : null,
     );
@@ -121,7 +122,7 @@ class BaseRegisterForm extends StatelessWidget {
     return Obx(() => TextFormField(
       controller: controller.passwordC,
       obscureText: controller.isPasswordHidden.value,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF2D3436)),
       decoration: _modernInputDecoration(
         'Minimal 6 karakter',
         FontAwesomeIcons.lock,
@@ -137,7 +138,7 @@ class BaseRegisterForm extends StatelessWidget {
     return Obx(() => TextFormField(
       controller: controller.confirmPasswordC,
       obscureText: controller.isConfirmPasswordHidden.value,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF2D3436)),
       decoration: _modernInputDecoration(
         'Ulangi password',
         FontAwesomeIcons.lock,
@@ -166,13 +167,13 @@ class BaseRegisterForm extends StatelessWidget {
           ),
         ],
       ),
-      child: FilledButton(
+      child: ElevatedButton(
         onPressed: controller.isLoading.value ? null : controller.register,
-        style: FilledButton.styleFrom(
+        style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 0, // Shadow dihandle container
+          elevation: 0,
         ),
         child: controller.isLoading.value
             ? const SizedBox(
@@ -198,21 +199,20 @@ class BaseRegisterForm extends StatelessWidget {
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
       filled: true,
-      fillColor: AppColors.greyLight, // Latar abu muda (Modern Style)
+      fillColor: const Color(0xFFF9F9F9), // Abu sangat muda
       
       prefixIcon: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Icon(prefixIcon, size: 18, color: AppColors.textLight),
+        padding: const EdgeInsets.all(14),
+        child: FaIcon(prefixIcon, size: 18, color: Colors.grey.shade400),
       ),
-      prefixIconConstraints: const BoxConstraints(minWidth: 50),
       
       suffixIcon: isPassword
           ? IconButton(
               icon: Icon(
                 isHidden ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: AppColors.textLight,
+                color: Colors.grey.shade400,
                 size: 20,
               ),
               onPressed: onToggle,
@@ -221,20 +221,20 @@ class BaseRegisterForm extends StatelessWidget {
           
       // Border States
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none, // Hilangkan border default
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.transparent),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
       ),
       contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
     );

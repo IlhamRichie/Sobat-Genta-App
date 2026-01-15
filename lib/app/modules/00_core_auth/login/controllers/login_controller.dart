@@ -53,13 +53,13 @@ class LoginController extends GetxController {
     isLoading.value = true;
 
     try {
-      // 3. Panggil repository (FakeAuthRepository)
+      // 3. Panggil repository
       final user = await _authRepo.login(emailC.text, passwordC.text);
 
       // 4. Jika sukses, simpan data user ke SessionService
       _sessionService.setCurrentUser(user);
 
-      // 5. Tampilkan notifikasi sukses (sesuai request)
+      // 5. Tampilkan notifikasi sukses
 
       Get.snackbar(
         "Login Berhasil", // Judul
@@ -77,17 +77,15 @@ class LoginController extends GetxController {
       // 6. Navigasi ke Halaman Utama.
       //    Kita gunakan offAllNamed agar user tidak bisa "back" ke login.
     } catch (e) {
-      // --- Perbaikan Snackbar Error ---
       Get.snackbar(
         "Login Gagal", // Judul
-        e.toString().replaceAll("Exception: ", ""), // Pesan
+        e.toString().replaceAll("Exception: ", ""),
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red.shade700,
         colorText: Colors.white,
         margin: const EdgeInsets.all(12),
         borderRadius: 8,
       );
-      // --------------------------------
     }
   }
 }

@@ -1,5 +1,3 @@
-// lib/app/modules/cart/views/cart_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -13,7 +11,7 @@ class CartView extends GetView<CartController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF5F6F8), // Background abu sangat muda
       appBar: _buildAppBar(),
       bottomNavigationBar: _buildCheckoutBar(),
       body: Obx(() {
@@ -21,9 +19,10 @@ class CartView extends GetView<CartController> {
           return _buildEmptyState();
         }
         
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           itemCount: controller.items.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 16),
           itemBuilder: (context, index) {
             final item = controller.items[index];
             return _buildCartItemCard(item);
@@ -33,49 +32,216 @@ class CartView extends GetView<CartController> {
     );
   }
 
-  /// AppBar Kustom
+  /// AppBar Minimalis & Clean
   AppBar _buildAppBar() {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       elevation: 0,
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black),
+        onPressed: () => Get.back(),
+      ),
       title: Text(
         "Keranjang Saya",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
+        style: Get.textTheme.titleLarge?.copyWith(
+          color: Colors.black,
           fontWeight: FontWeight.bold,
+          fontSize: 18,
         ),
       ),
-      centerTitle: false,
+      actions: [
+        // Indikator jumlah items
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Obx(() => Text(
+              "${controller.items.length} Item",
+              style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+            )),
+          ),
+        )
+      ],
     );
   }
 
-  /// Empty State yang Didesain Ulang
+  /// Empty State yang Lebih Menarik Visualnya
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const FaIcon(FontAwesomeIcons.cartArrowDown, size: 96, color: AppColors.greyLight),
-            const SizedBox(height: 32),
-            Text(
-              "Keranjang Anda Kosong",
-              style: Get.textTheme.titleLarge?.copyWith(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+            Container(
+              padding: const EdgeInsets.all(30),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
               ),
-              textAlign: TextAlign.center,
+              child: const FaIcon(FontAwesomeIcons.basketShopping, size: 60, color: AppColors.primary),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Keranjang Masih Kosong",
+              style: Get.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
             const SizedBox(height: 12),
-            Text(
-              "Yuk, jelajahi toko kami dan temukan produk menarik!",
-              style: Get.textTheme.bodyMedium?.copyWith(
-                fontSize: 16,
-                color: AppColors.textLight,
-              ),
+            const Text(
+              "Sepertinya kamu belum menambahkan produk apapun. Yuk mulai belanja kebutuhan tanimu!",
               textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey, height: 1.5),
+            ),
+            const SizedBox(height: 32),
+            OutlinedButton(
+              onPressed: () => Get.back(), // Asumsi back ke Store
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.primary),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              child: const Text("Mulai Belanja", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Kartu Item Keranjang - Versi Josjis
+  Widget _buildCartItemCard(CartItemModel item) {
+    return Dismissible(
+      key: Key(item.cartItemId.toString()),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: Colors.red.shade100,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: FaIcon(FontAwesomeIcons.trashCan, color: Colors.red.shade700),
+      ),
+      confirmDismiss: (direction) async {
+        controller.removeItem(item); // Panggil fungsi hapus
+        return false; // Return false biar UI direfresh via Obx controller aja
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Gambar Produk dengan ClipRRect
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 90,
+                height: 90,
+                color: Colors.grey.shade100,
+                child: (item.product.imageUrl != null && item.product.imageUrl!.isNotEmpty)
+                    ? Image.network(
+                        item.product.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, err, stack) => const Center(child: FaIcon(FontAwesomeIcons.image, size: 30, color: Colors.grey)),
+                      )
+                    : const Center(child: FaIcon(FontAwesomeIcons.image, size: 30, color: Colors.grey)),
+              ),
+            ),
+            const SizedBox(width: 16),
+            
+            // 2. Detail Produk
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.product.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                      // Tombol Hapus Kecil
+                      InkWell(
+                        onTap: () => controller.removeItem(item),
+                        child: Icon(Icons.close, size: 18, color: Colors.grey.shade400),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // Kategori atau Info tambahan (Opsional)
+                  Text(
+                    "Stok Tersedia: ${item.product.stockQuantity}",
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // 3. Harga & Kontrol Kuantitas
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        controller.rupiahFormatter.format(item.product.price),
+                        style: const TextStyle(
+                          color: AppColors.primary, 
+                          fontWeight: FontWeight.w800, 
+                          fontSize: 15
+                        ),
+                      ),
+                      
+                      // Widget Plus Minus
+                      Container(
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF5F6F8),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            _buildQtyBtn(
+                              icon: Icons.remove, 
+                              onTap: () => controller.decrementQuantity(item),
+                              isActive: item.quantity > 1
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(
+                                "${item.quantity}",
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            _buildQtyBtn(
+                              icon: Icons.add, 
+                              onTap: () => controller.incrementQuantity(item),
+                              isActive: true,
+                              isPlus: true
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -83,139 +249,84 @@ class CartView extends GetView<CartController> {
     );
   }
 
-  /// Kartu untuk satu item di keranjang (Didesain Ulang)
-  Widget _buildCartItemCard(CartItemModel item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+  Widget _buildQtyBtn({required IconData icon, required VoidCallback onTap, required bool isActive, bool isPlus = false}) {
+    return InkWell(
+      onTap: isActive ? onTap : null,
+      child: Container(
+        width: 32,
+        height: 32,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isPlus ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.horizontal(
+            left: isPlus ? Radius.zero : const Radius.circular(7),
+            right: isPlus ? const Radius.circular(7) : Radius.zero,
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Gambar
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: AppColors.greyLight,
-              borderRadius: BorderRadius.circular(16),
-              image: item.product.imageUrl != null && item.product.imageUrl!.isNotEmpty
-                  ? DecorationImage(image: NetworkImage(item.product.imageUrl!), fit: BoxFit.cover)
-                  : null,
-            ),
-            child: item.product.imageUrl == null || item.product.imageUrl!.isEmpty
-                ? const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey))
-                : null,
-          ),
-          const SizedBox(width: 16),
-          // Info & Kuantitas
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.product.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  controller.rupiahFormatter.format(item.product.price),
-                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 12),
-                // Kontrol Kuantitas & Hapus
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.greyLight,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: () => controller.decrementQuantity(item),
-                            icon: FaIcon(FontAwesomeIcons.minus, size: 16, color: item.quantity > 1 ? AppColors.textDark : Colors.grey),
-                          ),
-                          Text(item.quantity.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                          IconButton(
-                            onPressed: () => controller.incrementQuantity(item),
-                            icon: const FaIcon(FontAwesomeIcons.plus, size: 16, color: AppColors.primary),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: FaIcon(FontAwesomeIcons.trashCan, color: Colors.red.shade700, size: 20),
-                      onPressed: () => controller.removeItem(item),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          )
-        ],
+        ),
+        child: Icon(
+          icon, 
+          size: 14, 
+          color: isPlus ? Colors.white : (isActive ? Colors.black87 : Colors.grey)
+        ),
       ),
     );
   }
 
-  /// Bar Checkout di bagian bawah (Didesain Ulang)
+  /// Checkout Bar Melayang
   Widget _buildCheckoutBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
+            blurRadius: 20,
             offset: const Offset(0, -5),
           ),
         ],
       ),
       child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Total Harga
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            // Row Total
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Total Harga:", style: TextStyle(color: AppColors.textLight)),
+                const Text("Total Pembayaran", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
                 Obx(() => Text(
-                      controller.rupiahFormatter.format(controller.totalPrice.value),
-                      style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
-                    )),
-              ],
-            ),
-            // Tombol Checkout
-            Obx(() => FilledButton(
-                  onPressed: controller.items.isEmpty ? null : controller.goToCheckout,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: controller.items.isEmpty ? AppColors.greyLight : AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text(
-                    "Checkout",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  controller.rupiahFormatter.format(controller.totalPrice.value),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
                   ),
                 )),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            // Tombol Checkout Lebar
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: Obx(() => ElevatedButton(
+                onPressed: controller.items.isEmpty ? null : controller.goToCheckout,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text(
+                  "Checkout Sekarang",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              )),
+            ),
           ],
         ),
       ),
