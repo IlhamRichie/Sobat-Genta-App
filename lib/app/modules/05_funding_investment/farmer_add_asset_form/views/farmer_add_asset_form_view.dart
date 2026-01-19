@@ -1,5 +1,3 @@
-// lib/app/modules/farmer_add_asset_form/views/farmer_add_asset_form_view.dart
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,35 +12,114 @@ class FarmerAddAssetFormView extends GetView<FarmerAddAssetFormController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          "Tambah Aset Baru",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+      ),
+      bottomNavigationBar: _buildBottomSubmitBar(),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(24),
         child: Form(
           key: controller.formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle("Jenis Aset"),
-              const SizedBox(height: 12),
+              _buildSectionHeader("Kategori Aset"),
+              const SizedBox(height: 16),
               _buildAssetTypeSelector(),
+              
               const SizedBox(height: 32),
-              
-              _buildSectionTitle("Informasi Utama"),
-              const SizedBox(height: 16),
-              _buildCommonFields(),
+              _buildSectionHeader("Detail Aset"),
               const SizedBox(height: 16),
               
-              Obx(() => _buildDynamicField()),
+              _buildInputLabel("Nama Aset"),
+              _buildTextField(
+                controller: controller.nameC,
+                hint: "Contoh: Lahan Cabai Magelang",
+                icon: FontAwesomeIcons.penToSquare,
+                validator: (v) => (v == null || v.isEmpty) ? "Nama aset wajib diisi" : null,
+              ),
+              const SizedBox(height: 20),
+              
+              _buildInputLabel("Lokasi"),
+              _buildTextField(
+                controller: controller.locationC,
+                hint: "Kabupaten/Kota",
+                icon: FontAwesomeIcons.locationDot,
+                validator: (v) => (v == null || v.isEmpty) ? "Lokasi wajib diisi" : null,
+              ),
+              const SizedBox(height: 20),
+              
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInputLabel("Luas (m²/Ekor)"),
+                        _buildTextField(
+                          controller: controller.areaC,
+                          hint: "0",
+                          icon: FontAwesomeIcons.rulerCombined,
+                          keyboardType: TextInputType.number,
+                          validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Obx(() => _buildInputLabel(
+                          controller.selectedAssetType.value == 'PERTANIAN' ? "Komoditas" : "Jenis Ternak"
+                        )),
+                        Obx(() => _buildTextField(
+                          controller: controller.selectedAssetType.value == 'PERTANIAN' 
+                              ? controller.cropTypeC 
+                              : controller.livestockTypeC,
+                          hint: controller.selectedAssetType.value == 'PERTANIAN' ? "Padi/Jagung" : "Sapi/Kambing",
+                          icon: controller.selectedAssetType.value == 'PERTANIAN' 
+                              ? FontAwesomeIcons.seedling 
+                              : FontAwesomeIcons.cow,
+                          validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
+                        )),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              
               const SizedBox(height: 32),
-              
-              _buildSectionTitle("Dokumen & Foto"),
+              _buildSectionHeader("Dokumen Pendukung"),
               const SizedBox(height: 16),
-              _buildImageUploaders(),
               
-              const SizedBox(height: 48),
-              _buildSubmitButton(),
-              const SizedBox(height: 24),
+              Obx(() => _buildPhotoUploadCard(
+                title: "Foto Aset/Lahan",
+                file: controller.landPhotoFile.value,
+                onTap: () => _showImagePicker(controller.landPhotoFile),
+              )),
+              const SizedBox(height: 16),
+              Obx(() => _buildPhotoUploadCard(
+                title: "Foto Sertifikat/Surat",
+                file: controller.certificateFile.value,
+                onTap: () => _showImagePicker(controller.certificateFile),
+              )),
+              
+              // Spacer
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -50,254 +127,196 @@ class FarmerAddAssetFormView extends GetView<FarmerAddAssetFormController> {
     );
   }
 
-  /// AppBar Kustom
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      title: Text(
-        "Daftarkan Aset",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
-        ),
+  /// Header Section (Judul Kecil)
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title.toUpperCase(),
+      style: TextStyle(
+        color: Colors.grey.shade500,
+        fontWeight: FontWeight.bold,
+        fontSize: 12,
+        letterSpacing: 1.0,
       ),
-      centerTitle: false,
     );
   }
 
-  /// Pilihan Tipe Aset (Pertanian / Peternakan)
-  Widget _buildAssetTypeSelector() {
-    return Obx(() => Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: SegmentedButton<String>(
-        style: SegmentedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          selectedBackgroundColor: AppColors.primary.withOpacity(0.1),
-          selectedForegroundColor: AppColors.primary,
-          // Hapus border luar
-          side: const BorderSide(style: BorderStyle.none),
-          // Hapus efek shadow
-          elevation: 0,
-        ),
-        segments: const [
-          ButtonSegment(
-            value: 'PERTANIAN',
-            label: Text("Pertanian"),
-            icon: FaIcon(FontAwesomeIcons.leaf),
-          ),
-          ButtonSegment(
-            value: 'PETERNAKAN',
-            label: Text("Peternakan"),
-            icon: FaIcon(FontAwesomeIcons.cow),
-          ),
-        ],
-        selected: {controller.selectedAssetType.value},
-        onSelectionChanged: (Set<String> newSelection) {
-          controller.setAssetType(newSelection.first);
-        },
-      ),
-    ));
-  }
-
-  /// Field yang selalu ada
-  Widget _buildCommonFields() {
-    return Column(
-      children: [
-        _buildTextFormField(
-          controller: controller.nameC,
-          label: 'Nama Aset (Lahan/Kandang)',
-          icon: FontAwesomeIcons.signature,
-          validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-        ),
-        const SizedBox(height: 16),
-        _buildTextFormField(
-          controller: controller.locationC,
-          label: 'Lokasi (Kabupaten/Kota)',
-          icon: FontAwesomeIcons.mapLocationDot,
-          validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-        ),
-        const SizedBox(height: 16),
-        _buildTextFormField(
-          controller: controller.areaC,
-          label: 'Luas (Hektar / m²)',
-          icon: FontAwesomeIcons.rulerCombined,
-          keyboardType: TextInputType.number,
-          validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-        ),
-      ],
-    );
-  }
-
-  /// Field yang berubah berdasarkan Tipe Aset
-  Widget _buildDynamicField() {
-    if (controller.selectedAssetType.value == 'PERTANIAN') {
-      return _buildTextFormField(
-        controller: controller.cropTypeC,
-        label: 'Jenis Tanaman (cth: Bawang Merah)',
-        icon: FontAwesomeIcons.seedling,
-        validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-      );
-    } else {
-      return _buildTextFormField(
-        controller: controller.livestockTypeC,
-        label: 'Jenis Ternak (cth: Sapi Perah)',
-        icon: FontAwesomeIcons.hippo,
-        validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-      );
-    }
-  }
-
-  /// Bagian Upload Foto
-  Widget _buildImageUploaders() {
-    return Column(
-      children: [
-        Obx(() => _buildImagePickerBox(
-              label: "Foto Lahan / Kandang",
-              file: controller.landPhotoFile.value,
-              onTap: () => _showImagePickerModal(controller.landPhotoFile),
-            )),
-        const SizedBox(height: 16),
-        Obx(() => _buildImagePickerBox(
-              label: "Foto Sertifikat / Surat Garapan",
-              file: controller.certificateFile.value,
-              onTap: () => _showImagePickerModal(controller.certificateFile),
-            )),
-      ],
-    );
-  }
-
-  /// Tombol Submit
-  Widget _buildSubmitButton() {
-    return Obx(() => FilledButton(
-          onPressed: controller.isLoading.value ? null : controller.submitAsset,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          ),
-          child: controller.isLoading.value
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                )
-              : const Text(
-                  'Simpan Aset',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-        ));
-  }
-
-  // --- HELPER WIDGETS (Didesain Ulang) ---
-  
-  Widget _buildSectionTitle(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
+  /// Label Input
+  Widget _buildInputLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
-        title,
-        style: Get.textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: AppColors.textLight.withOpacity(0.8),
-          letterSpacing: 0.5,
-        ),
+        label,
+        style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF2D3436), fontSize: 14),
       ),
     );
   }
-  
-  Widget _buildTextFormField({
+
+  /// Custom Text Field Modern
+  Widget _buildTextField({
     required TextEditingController controller,
-    required String label,
+    required String hint,
     required IconData icon,
-    required String? Function(String?) validator,
     TextInputType? keyboardType,
+    String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      style: const TextStyle(fontWeight: FontWeight.w600),
       decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: FaIcon(icon, size: 20, color: AppColors.textLight),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.greyLight)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.primary, width: 2)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.greyLight)),
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.normal),
+        filled: true,
+        fillColor: const Color(0xFFF9F9F9),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.all(12),
+          child: FaIcon(icon, size: 18, color: Colors.grey.shade400),
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14), 
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5)
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14), 
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       ),
       validator: validator,
     );
   }
-  
-  Widget _buildImagePickerBox({
-    required String label,
-    required File? file,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        height: 180,
-        width: double.infinity,
+
+  /// Toggle Button untuk Tipe Aset
+  Widget _buildAssetTypeSelector() {
+    return Obx(() {
+      bool isFarming = controller.selectedAssetType.value == 'PERTANIAN';
+      return Container(
+        height: 55,
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: const Color(0xFFF0F0F0),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+        ),
+        child: Row(
+          children: [
+            Expanded(child: _buildToggleItem("Pertanian", FontAwesomeIcons.wheatAwn, isFarming, () => controller.setAssetType('PERTANIAN'))),
+            Expanded(child: _buildToggleItem("Peternakan", FontAwesomeIcons.cow, !isFarming, () => controller.setAssetType('PETERNAKAN'))),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildToggleItem(String label, IconData icon, bool isActive, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isActive ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))] : [],
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(icon, size: 16, color: isActive ? AppColors.primary : Colors.grey),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isActive ? Colors.black87 : Colors.grey,
+              ),
             ),
           ],
-          image: file != null
+        ),
+      ),
+    );
+  }
+
+  /// Upload Card (Dashed Border)
+  Widget _buildPhotoUploadCard({required String title, required File? file, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 160,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: file != null ? Colors.white : const Color(0xFFF9F9F9),
+          borderRadius: BorderRadius.circular(16),
+          border: file != null 
+              ? Border.all(color: Colors.grey.shade300)
+              : Border.all(color: Colors.grey.shade300, style: BorderStyle.solid), // Harusnya dashed, tapi solid fine
+          image: file != null 
               ? DecorationImage(image: FileImage(file), fit: BoxFit.cover)
               : null,
         ),
         child: file == null
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const FaIcon(FontAwesomeIcons.camera, color: AppColors.textLight, size: 36),
-                    const SizedBox(height: 12),
-                    Text(
-                      label,
-                      style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
+                    child: Icon(Icons.camera_alt_rounded, color: Colors.grey.shade500),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(title, style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w600)),
+                ],
               )
             : Align(
-                alignment: Alignment.bottomCenter,
+                alignment: Alignment.topRight,
                 child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
-                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
-                  ),
-                  child: Text(
-                    "Gambar terpilih",
-                    style: Get.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
+                  margin: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  child: const Icon(Icons.edit, size: 16, color: Colors.black87),
                 ),
               ),
       ),
     );
   }
 
-  void _showImagePickerModal(Rx<File?> targetFile) {
+  /// Sticky Bottom Bar
+  Widget _buildBottomSubmitBar() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: Obx(() => ElevatedButton(
+            onPressed: controller.isLoading.value ? null : controller.submitAsset,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
+            ),
+            child: controller.isLoading.value
+                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                : const Text("Simpan & Daftarkan", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          )),
+        ),
+      ),
+    );
+  }
+
+  void _showImagePicker(Rx<File?> target) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
@@ -307,26 +326,20 @@ class FarmerAddAssetFormView extends GetView<FarmerAddAssetFormController> {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Pilih Sumber Gambar",
-              style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
             ListTile(
-              leading: const FaIcon(FontAwesomeIcons.camera, color: AppColors.primary),
-              title: const Text('Kamera'),
+              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              title: const Text("Ambil Foto"),
               onTap: () {
-                controller.pickImage(ImageSource.camera, targetFile);
+                controller.pickImage(ImageSource.camera, target);
                 Get.back();
               },
             ),
             ListTile(
-              leading: const FaIcon(FontAwesomeIcons.solidImage, color: AppColors.primary),
-              title: const Text('Galeri'),
+              leading: const Icon(Icons.photo_library, color: AppColors.primary),
+              title: const Text("Pilih dari Galeri"),
               onTap: () {
-                controller.pickImage(ImageSource.gallery, targetFile);
+                controller.pickImage(ImageSource.gallery, target);
                 Get.back();
               },
             ),

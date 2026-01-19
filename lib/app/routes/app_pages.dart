@@ -120,6 +120,8 @@ import '../modules/06_profile_wallet/wallet_top_up/bindings/wallet_top_up_bindin
 import '../modules/06_profile_wallet/wallet_top_up/views/wallet_top_up_view.dart';
 import '../modules/06_profile_wallet/wallet_withdraw/bindings/wallet_withdraw_binding.dart';
 import '../modules/06_profile_wallet/wallet_withdraw/views/wallet_withdraw_view.dart';
+import '../modules/07_community/bindings/community_binding.dart';
+import '../modules/07_community/views/community_view.dart';
 import '../modules/consultation_history/bindings/consultation_history_binding.dart';
 import '../modules/consultation_history/views/consultation_history_view.dart';
 
@@ -435,6 +437,11 @@ class AppPages {
       name: _Paths.CONSULTATION_HISTORY,
       page: () => const ConsultationHistoryView(),
       binding: ConsultationHistoryBinding(),
+    ),
+    GetPage(
+      name: _Paths.COMMUNITY,
+      page: () => const CommunityView(),
+      binding: CommunityBinding(),
     ),
   ];
 }

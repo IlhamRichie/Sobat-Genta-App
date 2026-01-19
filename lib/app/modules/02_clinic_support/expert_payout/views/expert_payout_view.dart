@@ -1,5 +1,3 @@
-// lib/app/modules/expert_payout/views/expert_payout_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -15,18 +13,18 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF5F6F8), // Background abu soft
       body: Stack(
         children: [
-          // 1. BACKGROUND DECORATION
+          // 1. BACKGROUND DECORATION (Modern Blobs)
           Positioned(
-            top: -80,
-            right: -60,
+            top: -100,
+            right: -50,
             child: Container(
-              width: 250,
-              height: 250,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.05), // Nuansa hijau uang
+                color: Colors.green.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -38,7 +36,7 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
               width: 200,
               height: 200,
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
+                color: Colors.blue.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
             ),
@@ -59,27 +57,24 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       
-                      return SingleChildScrollView(
+                      return ListView(
                         physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildEarningsCard(),
-                            const SizedBox(height: 24),
-                            
-                            _buildSectionTitle("Rekening Pencairan"),
-                            const SizedBox(height: 12),
-                            _buildBankAccountsSection(),
-                            
-                            const SizedBox(height: 24),
-                            _buildSectionTitle("Riwayat Transaksi"),
-                            const SizedBox(height: 12),
-                            _buildHistorySection(),
-                            
-                            const SizedBox(height: 40),
-                          ],
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                        children: [
+                          _buildEarningsCard(),
+                          const SizedBox(height: 24),
+                          
+                          _buildSectionTitle("Rekening Pencairan"),
+                          const SizedBox(height: 12),
+                          _buildBankAccountsSection(),
+                          
+                          const SizedBox(height: 24),
+                          _buildSectionTitle("Riwayat Transaksi"),
+                          const SizedBox(height: 12),
+                          _buildHistorySection(), // Menggunakan data dummy di controller/view ini
+                          
+                          const SizedBox(height: 40),
+                        ],
                       );
                     }),
                   ),
@@ -95,7 +90,7 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
   /// Custom AppBar
   Widget _buildCustomAppBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -114,7 +109,7 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
                   ],
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textDark),
+                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.black),
                   onPressed: () => Get.back(),
                 ),
               ),
@@ -124,15 +119,14 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.textDark,
+                  color: Color(0xFF2D3436),
                 ),
               ),
             ],
           ),
-          // Ikon Bantuan atau Info
           IconButton(
             onPressed: () {}, 
-            icon: const FaIcon(FontAwesomeIcons.circleQuestion, color: AppColors.textLight),
+            icon: const FaIcon(FontAwesomeIcons.circleQuestion, color: Colors.grey),
           ),
         ],
       ),
@@ -145,14 +139,14 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF2E7D32), Color(0xFF43A047)], // Hijau tua ke hijau terang
+          colors: [Color(0xFF1B5E20), Color(0xFF43A047)], // Hijau Tua ke Terang
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.4),
+            color: Colors.green.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -203,7 +197,7 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
                   rupiahFormatter.format(controller.wallet.value?.balance ?? 0),
                   style: const TextStyle(
                     fontSize: 32,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
                     color: Colors.white,
                     height: 1.2,
                   ),
@@ -225,7 +219,7 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
                     label: const Text("Tarik Dana Sekarang"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF2E7D32),
+                      foregroundColor: const Color(0xFF1B5E20),
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
@@ -259,10 +253,9 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.greyLight.withOpacity(0.5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.05),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),
@@ -276,10 +269,10 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
                   width: 50, height: 50,
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Center(
-                    child: FaIcon(FontAwesomeIcons.buildingColumns, color: AppColors.primary, size: 24),
+                    child: FaIcon(FontAwesomeIcons.buildingColumns, color: AppColors.primary, size: 22),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -289,25 +282,25 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
                     children: [
                       Text(
                         account.bankName.toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3436)),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         account.accountNumber,
-                        style: const TextStyle(fontSize: 14, color: AppColors.textLight, fontFamily: 'monospace'),
+                        style: const TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'monospace', letterSpacing: 1),
                       ),
                       Text(
                         account.accountHolderName,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                const Icon(Icons.check_circle, color: Colors.green, size: 24),
               ],
             ),
             const SizedBox(height: 16),
-            const Divider(height: 1, color: AppColors.greyLight),
+            const Divider(height: 1, color: Color(0xFFEEEEEE)),
             const SizedBox(height: 12),
             InkWell(
               onTap: controller.goToManageAccounts,
@@ -332,21 +325,25 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.greyLight, style: BorderStyle.solid),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         children: [
-          const FaIcon(FontAwesomeIcons.creditCard, size: 40, color: AppColors.greyLight),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
+            child: const FaIcon(FontAwesomeIcons.creditCard, size: 30, color: Colors.grey),
+          ),
           const SizedBox(height: 16),
           const Text(
             "Belum Ada Rekening",
-            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
           ),
           const SizedBox(height: 4),
           const Text(
             "Tambahkan rekening untuk menerima pembayaran.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: AppColors.textLight),
+            style: TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -366,14 +363,13 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
 
   /// 3. Riwayat Transaksi (Timeline Style)
   Widget _buildHistorySection() {
-    // Mock Data (Ganti dengan controller.historyList jika sudah ada)
-    // Saat ini kita hardcode 1 item contoh seperti request sebelumnya
+    // Mock Data Statis (Karena di controller mungkin belum ada list history khusus view ini)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5)),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5)),
         ],
       ),
       child: Column(
@@ -384,14 +380,13 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
             amount: -1200000,
             status: "Berhasil",
           ),
-          const Divider(height: 1, indent: 70, endIndent: 20, color: AppColors.greyLight),
+          const Divider(height: 1, indent: 70, endIndent: 20, color: Color(0xFFF5F5F5)),
           _buildHistoryItem(
             title: "Konsultasi #TRX-998",
             date: "14 Sep 2025, 14:30",
             amount: 150000,
             status: "Masuk",
           ),
-          // Tambahkan tombol "Lihat Semua" jika perlu
         ],
       ),
     );
@@ -403,7 +398,8 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
     required double amount,
     required String status,
   }) {
-    bool isCredit = amount > 0;
+    bool isCredit = amount > 0; // Uang masuk (Positif)
+    
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -415,7 +411,7 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: FaIcon(
-              isCredit ? FontAwesomeIcons.arrowDown : FontAwesomeIcons.arrowUp, // Arrow logic: Down=Masuk, Up=Keluar
+              isCredit ? FontAwesomeIcons.arrowDown : FontAwesomeIcons.arrowUp, // Down = Masuk ke dompet
               color: isCredit ? Colors.green : Colors.orange,
               size: 18,
             ),
@@ -425,9 +421,9 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textDark)),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF2D3436))),
                 const SizedBox(height: 4),
-                Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+                Text(date, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
               ],
             ),
           ),
@@ -439,13 +435,17 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
-                  color: isCredit ? Colors.green : Colors.orange,
+                  color: isCredit ? Colors.green.shade700 : Colors.orange.shade800,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 status,
-                style: TextStyle(fontSize: 11, color: isCredit ? Colors.green : AppColors.textLight, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 11, 
+                  color: isCredit ? Colors.green : Colors.grey, 
+                  fontWeight: FontWeight.w600
+                ),
               ),
             ],
           ),
@@ -460,7 +460,7 @@ class ExpertPayoutView extends GetView<ExpertPayoutController> {
       style: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
-        color: AppColors.textDark,
+        color: Color(0xFF2D3436),
       ),
     );
   }

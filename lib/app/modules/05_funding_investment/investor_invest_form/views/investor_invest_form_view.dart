@@ -1,5 +1,3 @@
-// lib/app/modules/investor_invest_form/views/investor_invest_form_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,32 +12,52 @@ class InvestorInvestFormView extends GetView<InvestorInvestFormController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
+      backgroundColor: Colors.white, // Background putih bersih
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          "Investasi Baru",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+      ),
       bottomNavigationBar: _buildSubmitButtonSection(),
       body: Obx(() {
         if (controller.isLoadingPage.value) {
           return const Center(child: CircularProgressIndicator());
         }
         return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildSectionTitle("Ringkasan Proyek"),
-              const SizedBox(height: 12),
-              _buildProjectSummary(),
-              const SizedBox(height: 24),
-              _buildSectionTitle("Saldo Dompet"),
-              const SizedBox(height: 12),
-              _buildWalletSummary(),
-              const SizedBox(height: 24),
-              _buildSectionTitle("Jumlah Investasi"),
-              const SizedBox(height: 12),
-              _buildAmountForm(),
+              // 1. Info Proyek (Minimalis)
+              _buildProjectInfo(),
+              const SizedBox(height: 40),
+              
+              // 2. Input Nominal Besar
+              Text(
+                "Masukkan Nominal",
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 14, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 16),
-              _buildQuickChips(),
-              const SizedBox(height: 24),
+              _buildBigAmountInput(),
+              
+              const SizedBox(height: 32),
+              
+              // 3. Quick Chips (Scrollable)
+              _buildQuickAmountChips(),
+              
+              const SizedBox(height: 40),
+              
+              // 4. Info Saldo & Estimasi
+              _buildWalletInfoCard(),
             ],
           ),
         );
@@ -47,77 +65,169 @@ class InvestorInvestFormView extends GetView<InvestorInvestFormController> {
     );
   }
 
-  /// AppBar Kustom
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      leading: BackButton(
-        color: AppColors.textDark,
-        onPressed: () => Get.back(),
+  /// 1. Info Proyek yang sedang didanai
+  Widget _buildProjectInfo() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F6F8),
+        borderRadius: BorderRadius.circular(30),
       ),
-      title: Text(
-        "Investasi",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      centerTitle: false,
-    );
-  }
-  
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: Get.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.bold,
-        fontSize: 20,
-        color: AppColors.textDark,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const FaIcon(FontAwesomeIcons.leaf, size: 14, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              controller.project.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2D3436),
+                fontSize: 14
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// 1. Ringkasan Proyek
-  Widget _buildProjectSummary() {
+  /// 2. Input Nominal Besar (Hero)
+  Widget _buildBigAmountInput() {
+    return IntrinsicWidth(
+      child: TextField(
+        controller: controller.amountC,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 40,
+          fontWeight: FontWeight.w900,
+          color: AppColors.primary,
+        ),
+        decoration: InputDecoration(
+          prefixText: "Rp ",
+          prefixStyle: const TextStyle(
+            fontSize: 40,
+            fontWeight: FontWeight.w900,
+            color: AppColors.primary,
+          ),
+          hintText: "0",
+          hintStyle: TextStyle(
+            fontSize: 40,
+            fontWeight: FontWeight.w900,
+            color: Colors.grey.shade300,
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+    );
+  }
+
+  /// 3. Quick Chips (Scrollable Horizontal)
+  Widget _buildQuickAmountChips() {
+    final List<double> quickAmounts = [500000, 1000000, 2000000, 5000000];
+    final rupiahFormatter = NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0);
+
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        physics: const BouncingScrollPhysics(),
+        itemCount: quickAmounts.length + 1, // +1 button max
+        separatorBuilder: (ctx, i) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          if (index == quickAmounts.length) {
+            // Tombol Max
+            return _buildChip(
+              label: "Maksimal",
+              onTap: controller.setMaxAmount,
+              isPrimary: true,
+            );
+          }
+          final amount = quickAmounts[index];
+          return _buildChip(
+            label: rupiahFormatter.format(amount),
+            onTap: () => controller.setAmountFromChip(amount),
+            isPrimary: false,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildChip({required String label, required VoidCallback onTap, bool isPrimary = false}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isPrimary ? AppColors.primary.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isPrimary ? AppColors.primary : Colors.grey.shade300,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isPrimary ? AppColors.primary : Colors.grey.shade600,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 4. Info Saldo & Estimasi ROI
+  Widget _buildWalletInfoCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 15,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Anda berinvestasi pada:", style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight)),
-          const SizedBox(height: 4),
-          Text(
-            controller.project.title,
-            style: Get.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
+          // Row Saldo
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const FaIcon(FontAwesomeIcons.bullseye, color: AppColors.primary, size: 20),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Sisa Kebutuhan Dana", style: Get.textTheme.bodySmall?.copyWith(color: AppColors.textLight)),
-                  const SizedBox(height: 4),
-                  Text(
-                    controller.rupiahFormatter.format(controller.remainingNeeded),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
-                  ),
-                ],
+              const Text("Saldo Tersedia", style: TextStyle(color: Colors.grey)),
+              Text(
+                controller.rupiahFormatter.format(controller.availableBalance),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1),
+          ),
+          // Row Estimasi ROI
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Estimasi ROI (12%)", style: TextStyle(color: Colors.grey)),
+              const Text(
+                "Tahun Pertama",
+                style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -126,185 +236,38 @@ class InvestorInvestFormView extends GetView<InvestorInvestFormController> {
     );
   }
 
-  /// 2. Ringkasan Dompet
-  Widget _buildWalletSummary() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3))
-      ),
-      child: Row(
-        children: [
-          const FaIcon(FontAwesomeIcons.wallet, color: AppColors.primary, size: 24),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Saldo Dompet Anda", style: Get.textTheme.bodyMedium?.copyWith(color: AppColors.textLight)),
-                Text(
-                  controller.rupiahFormatter.format(controller.availableBalance),
-                  style: Get.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  /// 3. Form Input Jumlah
-  Widget _buildAmountForm() {
-    return Form(
-      key: controller.formKey,
-      child: TextFormField(
-        controller: controller.amountC,
-        keyboardType: TextInputType.number,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        textAlign: TextAlign.center,
-        style: Get.textTheme.headlineMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          fontSize: 36,
-          color: AppColors.primary,
-        ),
-        decoration: InputDecoration(
-          prefixText: "Rp ",
-          prefixStyle: Get.textTheme.headlineMedium?.copyWith(
-            color: AppColors.primary,
-            fontSize: 36,
-          ),
-          hintText: "0",
-          hintStyle: Get.textTheme.headlineMedium?.copyWith(
-            color: AppColors.textLight.withOpacity(0.5),
-            fontSize: 36,
-          ),
-          border: InputBorder.none,
-          focusedBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: AppColors.primary, width: 2.0),
-          ),
-          enabledBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: AppColors.greyLight),
-          ),
-          errorBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.red),
-          ),
-          focusedErrorBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.red, width: 2.0),
-          ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 8),
-        ),
-        validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
-      ),
-    );
-  }
-
-  /// 4. Chip Pilihan Cepat (Diperbaiki)
-  Widget _buildQuickChips() {
-    final List<double> quickAmounts = [1000000, 5000000, 10000000];
-    final rupiahFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-
-    return Wrap(
-      spacing: 12.0,
-      runSpacing: 12.0,
-      children: [
-        ...quickAmounts.map((amount) => GestureDetector(
-          onTap: () => controller.setAmountFromChip(amount),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.greyLight,
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.greyLight.withOpacity(0.2),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Text(
-              rupiahFormatter.format(amount),
-              style: Get.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
-              ),
-            ),
-          ),
-        )).toList(),
-        // Tombol maksimal
-        GestureDetector(
-          onTap: controller.setMaxAmount,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.2),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Text(
-              "Maksimal",
-              style: Get.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Tombol Submit di Bawah
+  /// Tombol Submit (Sticky)
   Widget _buildSubmitButtonSection() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
+            blurRadius: 20,
             offset: const Offset(0, -5),
           ),
         ],
       ),
-      child: Obx(() => FilledButton(
-        onPressed: controller.isLoading.value ? null : controller.submitInvestment,
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 4,
+      child: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: Obx(() => ElevatedButton(
+            onPressed: controller.isLoading.value ? null : controller.submitInvestment,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+            child: controller.isLoading.value
+                ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                : const Text("Konfirmasi Investasi", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          )),
         ),
-        child: controller.isLoading.value
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-              )
-            : const Text(
-                'Konfirmasi Investasi',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-      )),
+      ),
     );
   }
 }

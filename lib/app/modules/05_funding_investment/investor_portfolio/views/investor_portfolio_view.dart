@@ -1,5 +1,3 @@
-// lib/app/modules/investor_portfolio/views/investor_portfolio_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -17,63 +15,67 @@ class InvestorPortfolioView extends GetView<InvestorPortfolioController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF5F6F8), // Background abu soft
       body: Stack(
         children: [
-          // 1. BACKGROUND DECORATION
+          // 1. Header Background Hijau
+          Container(
+            height: 280,
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF1B5E20), AppColors.primary], // Hijau Tua ke Muda
+                begin: Alignment.bottomLeft,
+                end: Alignment.topRight,
+              ),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+            ),
+          ),
+          
+          // 2. Dekorasi Background (Lingkaran)
           Positioned(
-            top: -100,
+            top: -50,
             right: -50,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
-                shape: BoxShape.circle,
-              ),
-            ),
+            child: CircleAvatar(radius: 100, backgroundColor: Colors.white.withOpacity(0.05)),
           ),
-          Positioned(
-            top: 150,
-            left: -80,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.05),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-
-          // 2. MAIN CONTENT
+          
+          // 3. Konten Utama
           SafeArea(
             child: Column(
               children: [
-                _buildCustomAppBar(),
+                _buildAppBar(),
+                const SizedBox(height: 20),
                 
+                // Ringkasan Aset (Card Melayang)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: _buildPortfolioSummaryCard(),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // List Investasi
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: controller.fetchMyPortfolio,
-                    color: AppColors.primary,
                     child: Obx(() {
-                      if (controller.isLoading.value && controller.investmentList.isEmpty) {
+                      if (controller.isLoading.value) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       
-                      return ListView(
+                      if (controller.investmentList.isEmpty) {
+                        return _buildEmptyState();
+                      }
+                      
+                      return ListView.separated(
                         physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        children: [
-                          _buildPortfolioHeader(),
-                          const SizedBox(height: 24),
-                          
-                          _buildSectionTitle("Aset Investasi"),
-                          const SizedBox(height: 16),
-                          
-                          ..._buildInvestmentList(),
-                          const SizedBox(height: 20),
-                        ],
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                        itemCount: controller.investmentList.length,
+                        separatorBuilder: (c, i) => const SizedBox(height: 16),
+                        itemBuilder: (context, index) {
+                          final item = controller.investmentList[index];
+                          return _buildInvestmentItem(item);
+                        },
                       );
                     }),
                   ),
@@ -86,10 +88,9 @@ class InvestorPortfolioView extends GetView<InvestorPortfolioController> {
     );
   }
 
-  /// Custom AppBar
-  Widget _buildCustomAppBar() {
+  Widget _buildAppBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -98,17 +99,17 @@ class InvestorPortfolioView extends GetView<InvestorPortfolioController> {
             children: [
               Text(
                 "Portofolio Saya",
-                style: Get.textTheme.headlineSmall?.copyWith(
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.w800,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                "Pantau pertumbuhan aset Anda",
-                style: Get.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textLight,
+                "Pantau aset masa depanmu",
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
                   fontSize: 14,
                 ),
               ),
@@ -116,20 +117,12 @@ class InvestorPortfolioView extends GetView<InvestorPortfolioController> {
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              onPressed: () { /* TODO: History/Log */ },
-              icon: const FaIcon(FontAwesomeIcons.chartPie, size: 20, color: AppColors.primary),
-              splashRadius: 24,
+              onPressed: () { /* History Log */ },
+              icon: const FaIcon(FontAwesomeIcons.clockRotateLeft, color: Colors.white, size: 20),
             ),
           ),
         ],
@@ -137,314 +130,176 @@ class InvestorPortfolioView extends GetView<InvestorPortfolioController> {
     );
   }
 
-  /// 1. Header Ringkasan Portofolio (Gradient)
-  Widget _buildPortfolioHeader() {
+  /// Card Ringkasan Aset (Total & ROI)
+  Widget _buildPortfolioSummaryCard() {
     return Container(
-      width: double.infinity,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, Color(0xFF1B5E20)], // Hijau ke Hijau Tua
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.4),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Stack(
+      child: Obx(() => Column(
         children: [
-          // Dekorasi
-          Positioned(
-            right: -20,
-            top: -20,
-            child: Icon(
-              FontAwesomeIcons.seedling,
-              size: 120,
-              color: Colors.white.withOpacity(0.1),
+          const Text("Total Nilai Investasi", style: TextStyle(color: Colors.grey, fontSize: 12)),
+          const SizedBox(height: 8),
+          Text(
+            rupiahFormatter.format(controller.totalInvestment.value),
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
             ),
           ),
-          Positioned(
-            bottom: -30,
-            left: 20,
-            child: CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.white.withOpacity(0.1),
-            ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              _buildSummaryStat("Proyek Aktif", "${controller.activeProjectsCount.value}", FontAwesomeIcons.layerGroup, Colors.blue),
+              Container(width: 1, height: 40, color: Colors.grey.shade200),
+              _buildSummaryStat("Estimasi Cuan", rupiahFormatter.format(controller.estimatedReturn.value), FontAwesomeIcons.arrowTrendUp, Colors.green),
+            ],
           ),
+        ],
+      )),
+    );
+  }
 
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Obx(() => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        "TOTAL INVESTASI",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  rupiahFormatter.format(controller.totalInvestment.value),
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    _buildHeaderStatItem(
-                      "Proyek Aktif", 
-                      "${controller.activeProjectsCount.value} Unit",
-                      FontAwesomeIcons.layerGroup
-                    ),
-                    const SizedBox(width: 24),
-                    _buildHeaderStatItem(
-                      "Estimasi Return", 
-                      rupiahFormatter.format(controller.estimatedReturn.value),
-                      FontAwesomeIcons.arrowTrendUp
-                    ),
-                  ],
-                ),
-              ],
-            )),
+  Widget _buildSummaryStat(String label, String value, IconData icon, Color color) {
+    return Expanded(
+      child: Column(
+        children: [
+          FaIcon(icon, size: 20, color: color),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderStatItem(String label, String value, IconData icon) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            FaIcon(icon, size: 12, color: Colors.white70),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+  /// Item List Investasi
+  Widget _buildInvestmentItem(InvestmentModel investment) {
+    final project = investment.project;
+    return GestureDetector(
+      onTap: () => controller.goToPortfolioDetail(investment),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: AppColors.textDark,
-      ),
-    );
-  }
-
-  /// 2. Daftar Investasi
-  List<Widget> _buildInvestmentList() {
-    if (controller.investmentList.isEmpty) {
-      return [_buildEmptyState()];
-    }
-    
-    return controller.investmentList.map((investment) {
-      return _buildInvestmentCard(investment);
-    }).toList();
-  }
-
-  /// Empty State Modern
-  Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-      alignment: Alignment.center,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppColors.greyLight.withOpacity(0.5),
-              shape: BoxShape.circle,
+        child: Row(
+          children: [
+            // Thumbnail Proyek
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 60, height: 60,
+                color: Colors.grey.shade100,
+                child: (project.projectImageUrl != null)
+                    ? Image.network(
+                        project.projectImageUrl!, 
+                        fit: BoxFit.cover,
+                        errorBuilder: (c,e,s) => const Icon(Icons.image, color: Colors.grey),
+                      )
+                    : const Icon(Icons.image, color: Colors.grey),
+              ),
             ),
-            child: const FaIcon(FontAwesomeIcons.sackDollar, size: 48, color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            "Belum Ada Investasi",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            "Mulai mendanai proyek pertanian dan dapatkan imbal hasil.",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textLight),
-          ),
-          const SizedBox(height: 24),
-          OutlinedButton(
-            onPressed: () { 
-              // Navigasi ke marketplace (bisa pakai controller atau Get.find)
-              // Get.find<MainNavigationController>().changeTab(1); // Contoh
-            }, 
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text("Cari Proyek"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 3. Kartu Item Investasi
-  Widget _buildInvestmentCard(InvestmentModel investment) {
-    final project = investment.project;
-    
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        child: InkWell(
-          onTap: () => controller.goToPortfolioDetail(investment),
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Gambar Proyek
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    width: 80, height: 80,
-                    color: AppColors.greyLight,
-                    child: (project.projectImageUrl != null && project.projectImageUrl!.isNotEmpty)
-                        ? Image.network(
-                            project.projectImageUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (c, e, s) => const Center(child: Icon(Icons.image, color: Colors.grey)),
-                          )
-                        : const Center(child: FaIcon(FontAwesomeIcons.image, color: Colors.grey, size: 24)),
+            const SizedBox(width: 16),
+            
+            // Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    project.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
-                ),
-                const SizedBox(width: 16),
-                
-                // Detail
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 4),
+                  Row(
                     children: [
-                      // Judul & Status
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              project.title,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textDark),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          _buildStatusBadge(project.status),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      
-                      // Nilai Investasi
-                      const Text(
-                        "Nilai Investasi",
-                        style: TextStyle(fontSize: 11, color: AppColors.textLight),
-                      ),
-                      const SizedBox(height: 2),
+                      const Text("Investasi: ", style: TextStyle(fontSize: 12, color: Colors.grey)),
                       Text(
                         rupiahFormatter.format(investment.amountInvested),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.primary),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            
+            // Status Badge
+            _buildStatusBadge(project.status),
+          ],
         ),
       ),
     );
   }
 
-  /// Badge Status Kecil
   Widget _buildStatusBadge(ProjectStatus status) {
+    String text;
     Color color;
-    IconData icon;
     
     switch (status) {
-      case ProjectStatus.PUBLISHED: color = AppColors.primary; icon = FontAwesomeIcons.bullhorn; break;
-      case ProjectStatus.FUNDED: color = Colors.blue; icon = FontAwesomeIcons.personRunning; break; // Berjalan
-      case ProjectStatus.COMPLETED: color = Colors.green; icon = FontAwesomeIcons.check; break;
-      default: color = Colors.orange; icon = FontAwesomeIcons.clock; break;
+      case ProjectStatus.PUBLISHED:
+      case ProjectStatus.FUNDED:
+        text = "Berjalan";
+        color = Colors.blue;
+        break;
+      case ProjectStatus.COMPLETED:
+        text = "Selesai";
+        color = Colors.green;
+        break;
+      default:
+        text = "Pending";
+        color = Colors.orange;
     }
 
     return Container(
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: FaIcon(icon, size: 10, color: color),
+      child: Text(
+        text,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 11),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FaIcon(FontAwesomeIcons.folderOpen, size: 60, color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+          Text("Belum ada portofolio investasi.", style: TextStyle(color: Colors.grey.shade500)),
+        ],
+      ),
     );
   }
 }

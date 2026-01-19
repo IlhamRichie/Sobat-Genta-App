@@ -66,6 +66,7 @@ abstract class Routes {
   static const PAYMENT_INSTRUCTIONS = _Paths.PAYMENT_INSTRUCTIONS;
   static const PAYMENT_SUCCESS = _Paths.PAYMENT_SUCCESS;
   static const CONSULTATION_HISTORY = _Paths.CONSULTATION_HISTORY;
+  static const COMMUNITY = _Paths.COMMUNITY;
 }
 
 abstract class _Paths {
@@ -131,4 +132,5 @@ abstract class _Paths {
   static const PAYMENT_INSTRUCTIONS = '/payment-instructions';
   static const PAYMENT_SUCCESS = '/payment-success';
   static const CONSULTATION_HISTORY = '/consultation-history';
+  static const COMMUNITY = '/community';
 }

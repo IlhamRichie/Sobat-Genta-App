@@ -1,10 +1,9 @@
-// lib/app/modules/investor_invest_form/controllers/investor_invest_form_controller.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
+// Hapus import top_snackbar_flutter karena kita ganti pakai Get.snackbar bawaan
+// import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+// import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 import '../../../../data/models/project_model.dart';
 import '../../../../data/models/wallet_model.dart';
@@ -27,20 +26,18 @@ class InvestorInvestFormController extends GetxController {
   late final ProjectModel project;
   final Rx<WalletModel?> myWallet = Rx<WalletModel?>(null);
 
-  // Helper untuk format
   final rupiahFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
-  // --- GETTERS (LOGIKA VALIDASI) ---
-  /// Sisa dana yang dibutuhkan proyek
+  // --- GETTERS ---
   double get remainingNeeded => project.targetFund - project.collectedFund;
-  /// Saldo dompet yang dimiliki investor
   double get availableBalance => myWallet.value?.balance ?? 0.0;
   
   @override
   void onInit() {
     super.onInit();
-    // Ambil objek proyek dari halaman detail
-    project = Get.arguments as ProjectModel;
+    if (Get.arguments != null) {
+       project = Get.arguments as ProjectModel;
+    }
     _loadWalletData();
   }
 
@@ -50,7 +47,6 @@ class InvestorInvestFormController extends GetxController {
     super.onClose();
   }
 
-  /// Ambil data dompet investor
   Future<void> _loadWalletData() async {
     isLoadingPage.value = true;
     try {
@@ -64,35 +60,30 @@ class InvestorInvestFormController extends GetxController {
 
   // --- AKSI FORM ---
 
-  /// Set jumlah investasi dari chip
   void setAmountFromChip(double amount) {
-    // Validasi cepat: jangan biarkan chip melebihi saldo/kebutuhan
     if (amount > remainingNeeded) {
       setMaxAmount();
       return;
     }
     if (amount > availableBalance) {
-      Get.snackbar("Info", "Saldo Anda tidak mencukupi untuk jumlah ini.");
+      Get.snackbar("Info", "Saldo Anda tidak mencukupi.", snackPosition: SnackPosition.BOTTOM);
       setMaxAmount();
       return;
     }
     amountC.text = amount.toStringAsFixed(0);
   }
 
-  /// Set ke jumlah maksimum yang diizinkan
   void setMaxAmount() {
-    // Ambil nilai terkecil antara saldo ATAU sisa kebutuhan
     double maxPossible = [remainingNeeded, availableBalance].reduce((a, b) => a < b ? a : b);
     amountC.text = maxPossible.toStringAsFixed(0);
   }
 
-  /// Aksi utama: Eksekusi Investasi (Langkah I6)
   Future<void> submitInvestment() async {
-    if (!formKey.currentState!.validate()) return;
+    // Pastikan formKey attached sebelum validate
+    if (formKey.currentState == null || !formKey.currentState!.validate()) return;
     
-    final double amount = double.tryParse(amountC.text) ?? 0.0;
+    final double amount = double.tryParse(amountC.text.replaceAll('.', '')) ?? 0.0; // Hapus titik jika ada format
 
-    // --- VALIDASI KRITIS ---
     if (amount <= 0) {
       _showError("Jumlah investasi harus lebih dari nol.");
       return;
@@ -108,18 +99,25 @@ class InvestorInvestFormController extends GetxController {
 
     isLoading.value = true;
     try {
-      // Panggil repository (transaksi palsu)
       await _projectRepo.investInProject(project.projectId, amount);
 
-      showTopSnackBar(
-        Overlay.of(Get.context!),
-        CustomSnackBar.success(
-          message: "Investasi senilai ${rupiahFormatter.format(amount)} berhasil!",
-          backgroundColor: Colors.green.shade700,
-        ),
+      // --- PERBAIKAN DI SINI ---
+      // Ganti showTopSnackBar dengan Get.snackbar
+      Get.snackbar(
+        "Berhasil!",
+        "Investasi senilai ${rupiahFormatter.format(amount)} berhasil!",
+        backgroundColor: Colors.green.shade700,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 10,
+        icon: const Icon(Icons.check_circle, color: Colors.white),
+        duration: const Duration(seconds: 3),
       );
 
-      // Selesai. Navigasi ke Portofolio (Langkah I7)
+      // Delay sedikit biar snackbar kebaca sebelum pindah (Opsional)
+      await Future.delayed(const Duration(seconds: 2));
+      
       Get.offNamed(Routes.INVESTOR_PORTFOLIO);
 
     } catch (e) {
@@ -130,9 +128,15 @@ class InvestorInvestFormController extends GetxController {
   }
   
   void _showError(String message) {
-     showTopSnackBar(
-      Overlay.of(Get.context!),
-      CustomSnackBar.error(message: message.replaceAll("Exception: ", "")),
+    Get.snackbar(
+      "Gagal",
+      message,
+      backgroundColor: Colors.red.shade600,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.TOP,
+      margin: const EdgeInsets.all(16),
+      borderRadius: 10,
+      icon: const Icon(Icons.error_outline, color: Colors.white),
     );
   }
 }

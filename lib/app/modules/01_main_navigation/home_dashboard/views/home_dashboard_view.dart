@@ -320,7 +320,7 @@ class HomeDashboardView extends GetView<HomeDashboardController> {
           icon: FontAwesomeIcons.users,
           label: "Komunitas",
           color: AppColors.primary,
-          onTap: () {}, // TODO: Add Community Route
+          onTap: controller.goToCommunity, // TODO: Add Community Route
         ),
       ],
     );

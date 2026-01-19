@@ -86,4 +86,8 @@ class HomeDashboardController extends GetxController {
   void goToKycForm() {
     Get.toNamed(Routes.KYC_FORM);
   }
+
+  void goToCommunity() {
+    Get.toNamed(Routes.COMMUNITY);
+  }
 }

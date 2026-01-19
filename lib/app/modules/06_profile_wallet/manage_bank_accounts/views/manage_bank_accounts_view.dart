@@ -1,5 +1,3 @@
-// lib/app/modules/manage_bank_accounts/views/manage_bank_accounts_view.dart
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -13,9 +11,21 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(),
-      floatingActionButton: _buildFloatingActionButton(context),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
+        title: const Text(
+          "Daftar Rekening",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+      ),
+      floatingActionButton: _buildExtendedFab(context),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -23,7 +33,7 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
         
         return Stack(
           children: [
-            // List Content / Empty State
+            // List Content
             if (controller.accountList.isEmpty)
               _buildEmptyState(context)
             else
@@ -34,11 +44,11 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
                 separatorBuilder: (ctx, i) => const SizedBox(height: 16),
                 itemBuilder: (context, index) {
                   final account = controller.accountList[index];
-                  return _buildAccountCard(account);
+                  return _buildBankCard(account);
                 },
               ),
 
-            // Loading Overlay (jika sedang proses simpan/hapus)
+            // Loading Overlay (saat simpan/hapus)
             if (controller.isProcessing.value)
               Container(
                 color: Colors.black.withOpacity(0.3),
@@ -52,101 +62,77 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
     );
   }
 
-  /// AppBar Kustom
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      centerTitle: true,
-      leading: IconButton(
-        icon: const FaIcon(FontAwesomeIcons.arrowLeft, color: AppColors.textDark),
-        onPressed: () => Get.back(),
-      ),
-      title: Text(
-        "Kelola Rekening",
-        style: Get.textTheme.headlineSmall?.copyWith(
-          color: AppColors.textDark,
-          fontWeight: FontWeight.w800,
-          fontSize: 20,
-        ),
-      ),
-    );
-  }
-
-  /// FAB Modern
-  Widget _buildFloatingActionButton(BuildContext context) {
+  /// FAB Lebar dengan Label
+  Widget _buildExtendedFab(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.4),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.only(bottom: 16),
       child: FloatingActionButton.extended(
         onPressed: () => _showAddAccountSheet(context),
-        icon: const FaIcon(FontAwesomeIcons.plus, size: 16),
-        label: const Text("Rekening Baru", style: TextStyle(fontWeight: FontWeight.bold)),
+        label: const Text(
+          "Tambah Rekening",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        icon: const Icon(Icons.add),
         backgroundColor: AppColors.primary,
-        elevation: 0,
-        highlightElevation: 0,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
 
-  /// Kartu Rekening (Bank Card Style)
-  Widget _buildAccountCard(BankAccountModel account) {
+  /// Kartu Bank Modern
+  Widget _buildBankCard(BankAccountModel account) {
     bool isPrimary = account.isPrimary;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: isPrimary ? Border.all(color: AppColors.primary, width: 1.5) : null,
+        border: isPrimary 
+            ? Border.all(color: AppColors.primary, width: 2) 
+            : Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: isPrimary ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.05),
+            color: isPrimary ? AppColors.primary.withOpacity(0.1) : Colors.black.withOpacity(0.03),
             blurRadius: 15,
-            offset: const Offset(0, 8),
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Bank Info & Primary Badge
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Logo Bank (Dummy Icon) & Nama
               Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.greyLight.withOpacity(0.5),
+                      color: const Color(0xFFF5F6F8),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const FaIcon(FontAwesomeIcons.buildingColumns, color: AppColors.textDark, size: 20),
+                    child: const FaIcon(FontAwesomeIcons.buildingColumns, size: 20, color: Color(0xFF2D3436)),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         account.bankName.toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textDark),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF2D3436)),
                       ),
                       Text(
                         account.accountHolderName,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                        style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
                       ),
                     ],
                   ),
                 ],
               ),
+              // Badge Utama
               if (isPrimary)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -164,38 +150,36 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
           
           const SizedBox(height: 20),
           
-          // Account Number (Monospace)
+          // Nomor Rekening Besar
           Text(
             account.accountNumber,
             style: const TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 2.0,
-              color: AppColors.textDark,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.5,
+              color: Color(0xFF2D3436),
+              fontFamily: 'monospace', // Biar kayak angka di kartu
             ),
           ),
           
           const SizedBox(height: 20),
-          const Divider(height: 1, color: AppColors.greyLight),
+          const Divider(height: 1, color: Color(0xFFEEEEEE)),
           const SizedBox(height: 8),
           
-          // Actions
+          // Action Buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
                 onPressed: () => controller.deleteAccount(account.accountId),
-                style: TextButton.styleFrom(foregroundColor: Colors.red.shade700),
+                style: TextButton.styleFrom(foregroundColor: Colors.red.shade400),
                 child: const Text("Hapus"),
               ),
-              if (!isPrimary) ...[
-                const SizedBox(width: 8),
+              if (!isPrimary)
                 TextButton(
                   onPressed: () => controller.setAsPrimary(account.accountId),
                   child: const Text("Jadikan Utama"),
                 ),
-              ]
             ],
           )
         ],
@@ -207,38 +191,39 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: AppColors.greyLight.withOpacity(0.5),
+                color: const Color(0xFFF5F6F8),
                 shape: BoxShape.circle,
               ),
-              child: const FaIcon(FontAwesomeIcons.creditCard, size: 48, color: Colors.grey),
+              child: Icon(Icons.credit_card_off, size: 50, color: Colors.grey.shade400),
             ),
             const SizedBox(height: 24),
             const Text(
               "Belum Ada Rekening",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2D3436)),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "Tambahkan rekening bank untuk mempermudah proses pencairan dana (withdraw).",
+            Text(
+              "Tambahkan rekening bank Anda untuk menerima pencairan dana dengan mudah.",
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textLight),
+              style: TextStyle(color: Colors.grey.shade500, height: 1.5),
             ),
             const SizedBox(height: 32),
             OutlinedButton.icon(
               onPressed: () => _showAddAccountSheet(context),
-              icon: const FaIcon(FontAwesomeIcons.plus, size: 14),
+              icon: const Icon(Icons.add, size: 18),
               label: const Text("Tambah Sekarang"),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 side: const BorderSide(color: AppColors.primary),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
           ],
@@ -247,7 +232,7 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
     );
   }
 
-  /// Bottom Sheet Form (Add Account)
+  /// Form Tambah Akun (Modal Sheet)
   void _showAddAccountSheet(BuildContext context) {
     controller.clearFormControllers();
     Get.bottomSheet(
@@ -258,49 +243,40 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: SafeArea(
-          child: SingleChildScrollView( // Agar tidak overflow saat keyboard muncul
+          child: SingleChildScrollView(
             child: Form(
               key: controller.formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: Container(
-                      width: 40, height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    "Tambah Rekening Baru",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textDark),
-                  ),
+                  const Text("Tambah Rekening Baru", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 24),
                   
-                  _buildInputField(
+                  _buildInputLabel("Nama Bank"),
+                  _buildTextField(
                     controller: controller.bankNameC,
-                    label: "Nama Bank",
-                    hint: "Contoh: BCA, Mandiri, BNI",
+                    hint: "Contoh: BCA, Mandiri, BRI",
                     icon: FontAwesomeIcons.buildingColumns,
                   ),
                   const SizedBox(height: 16),
                   
-                  _buildInputField(
+                  _buildInputLabel("Nama Pemilik"),
+                  _buildTextField(
                     controller: controller.holderNameC,
-                    label: "Nama Pemilik",
-                    hint: "Nama sesuai buku tabungan",
+                    hint: "Sesuai buku tabungan",
                     icon: FontAwesomeIcons.user,
                   ),
                   const SizedBox(height: 16),
                   
-                  _buildInputField(
+                  _buildInputLabel("Nomor Rekening"),
+                  _buildTextField(
                     controller: controller.accNumberC,
-                    label: "Nomor Rekening",
-                    hint: "Masukkan digit angka saja",
+                    hint: "Masukkan digit angka",
                     icon: FontAwesomeIcons.hashtag,
                     keyboardType: TextInputType.number,
                   ),
@@ -308,7 +284,7 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
                   
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 52,
                     child: Obx(() => ElevatedButton(
                       onPressed: controller.isProcessing.value ? null : controller.saveNewAccount,
                       style: ElevatedButton.styleFrom(
@@ -318,24 +294,34 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: controller.isProcessing.value
-                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                           : const Text("Simpan Rekening", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     )),
                   ),
-                  const SizedBox(height: 16), // Padding bawah
+                  // Keyboard spacer
+                  SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
                 ],
               ),
             ),
           ),
         ),
       ),
-      isScrollControlled: true, // Agar bottom sheet bisa full screen jika perlu
+      isScrollControlled: true,
     );
   }
 
-  Widget _buildInputField({
+  Widget _buildInputLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        label,
+        style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey.shade800, fontSize: 14),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
     required TextEditingController controller,
-    required String label,
     required String hint,
     required IconData icon,
     TextInputType? keyboardType,
@@ -343,29 +329,20 @@ class ManageBankAccountsView extends GetView<ManageBankAccountsController> {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      style: const TextStyle(color: AppColors.textDark),
+      style: const TextStyle(fontWeight: FontWeight.w600),
       decoration: InputDecoration(
-        labelText: label,
         hintText: hint,
-        hintStyle: TextStyle(color: AppColors.textLight.withOpacity(0.5), fontSize: 14),
-        prefixIcon: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: FaIcon(icon, size: 18, color: AppColors.textLight),
-        ),
-        prefixIconConstraints: const BoxConstraints(minWidth: 50),
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.normal),
         filled: true,
-        fillColor: AppColors.greyLight.withOpacity(0.3),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+        fillColor: const Color(0xFFF9F9F9),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.all(12),
+          child: FaIcon(icon, size: 18, color: Colors.grey.shade400),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      validator: (v) => (v == null || v.isEmpty) ? "$label tidak boleh kosong" : null,
+      validator: (v) => (v == null || v.isEmpty) ? "Wajib diisi" : null,
     );
   }
 }
